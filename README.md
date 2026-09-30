@@ -10,12 +10,11 @@ All data is stored locally on your device. It is never sent to the developer or 
 
 ## Screenshots
 
-![note1](https://github.com/user-attachments/assets/f0b0775d-0135-4a17-9204-2b5663d69b4e)
-![note2](https://github.com/user-attachments/assets/e0de2dbd-3c2c-4b9f-9919-aaf3f90e7885)
-![popup](https://github.com/user-attachments/assets/f9fd49f9-fae7-414b-bcbe-c17afa58cc29)
-![all_notes](https://github.com/user-attachments/assets/4eefd134-28ff-49a3-aae1-0b1a64e6c319)
-![note3](https://github.com/user-attachments/assets/5b06b660-c680-4c64-b3ea-356353bae08b)
-
+<img width="1400" height="875" alt="01-highlight-note-wikipedia" src="https://github.com/user-attachments/assets/730fb439-908c-4d47-a739-e6019f7055a6" />
+<img width="1488" height="930" alt="02-highlight-note-forbes" src="https://github.com/user-attachments/assets/bbb7cc32-ee30-480f-938a-cb5eb3c39270" />
+<img width="1816" height="1135" alt="03-highlight-in-article" src="https://github.com/user-attachments/assets/297d57bf-f108-4b0d-806e-c0ee0bc43322" />
+<img width="1776" height="1110" alt="04-extension-popup" src="https://github.com/user-attachments/assets/dd16b06c-659c-4886-bdec-b0c6812eb702" />
+<img width="2784" height="1740" alt="05-all-notes-dashboard" src="https://github.com/user-attachments/assets/8b261b81-68bd-4403-9128-396f10769d3d" />
 
 ---
 
