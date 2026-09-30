@@ -1,0 +1,265 @@
+{
+  "extName": {
+    "message": "Annotator"
+  },
+  "extDescription": {
+    "message": "Highlight text and add private notes on any website. Everything stays on your device."
+  },
+  "menuCreate": {
+    "message": "Highlight and add a note"
+  },
+  "toolbarAddNote": {
+    "message": "Note"
+  },
+  "notePlaceholder": {
+    "message": "Add a note…"
+  },
+  "noteLabel": {
+    "message": "Note"
+  },
+  "colorLabel": {
+    "message": "Highlight color"
+  },
+  "color_yellow": {
+    "message": "Yellow"
+  },
+  "color_green": {
+    "message": "Green"
+  },
+  "color_blue": {
+    "message": "Blue"
+  },
+  "color_red": {
+    "message": "Red"
+  },
+  "color_purple": {
+    "message": "Purple"
+  },
+  "actionDelete": {
+    "message": "Delete"
+  },
+  "actionDeleteConfirm": {
+    "message": "Sure?"
+  },
+  "actionClose": {
+    "message": "Close"
+  },
+  "actionSave": {
+    "message": "Save"
+  },
+  "actionCancel": {
+    "message": "Cancel"
+  },
+  "actionEdit": {
+    "message": "Edit"
+  },
+  "actionGoTo": {
+    "message": "Show on page"
+  },
+  "actionOpen": {
+    "message": "Open page"
+  },
+  "actionSelect": {
+    "message": "Select"
+  },
+  "actionSelectAll": {
+    "message": "Select all"
+  },
+  "actionOpenDashboard": {
+    "message": "All notes"
+  },
+  "actionBack": {
+    "message": "Back"
+  },
+  "actionClearSelection": {
+    "message": "Clear"
+  },
+  "actionDeleteSelected": {
+    "message": "Delete"
+  },
+  "metaEdited": {
+    "message": "Edited $VALUE$",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "metaCreated": {
+    "message": "Created $VALUE$",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "timeJustNow": {
+    "message": "just now"
+  },
+  "orphanBadge": {
+    "message": "Not found"
+  },
+  "orphanHint": {
+    "message": "This text is no longer on the page, or the page hasn't finished loading."
+  },
+  "tabPage": {
+    "message": "This page"
+  },
+  "tabRecent": {
+    "message": "Recent"
+  },
+  "tabSettings": {
+    "message": "Settings"
+  },
+  "searchLabel": {
+    "message": "Search notes"
+  },
+  "searchPagePlaceholder": {
+    "message": "Search this page's notes"
+  },
+  "searchAllPlaceholder": {
+    "message": "Search all notes"
+  },
+  "emptyUnsupportedTitle": {
+    "message": "Notes aren't available here"
+  },
+  "emptyUnsupportedText": {
+    "message": "Browser pages and extension stores can't be annotated. Open any website to start."
+  },
+  "emptyPageTitle": {
+    "message": "No notes on this page yet"
+  },
+  "emptyPageText": {
+    "message": "Select some text, click the small button at its end and pick a color, or right-click and choose “Highlight and add a note”."
+  },
+  "emptySearchTitle": {
+    "message": "Nothing found"
+  },
+  "emptySearchText": {
+    "message": "Try a different phrase or clear the filters."
+  },
+  "emptyAllTitle": {
+    "message": "Your notes will show up here"
+  },
+  "emptyAllText": {
+    "message": "Highlight text on any website to create your first note."
+  },
+  "emptyPageGoneTitle": {
+    "message": "No notes for this page"
+  },
+  "emptyPageGoneText": {
+    "message": "They may have been deleted. Go back to see your other pages."
+  },
+  "settingToolbar": {
+    "message": "Selection handle"
+  },
+  "settingToolbarHint": {
+    "message": "A small button at the end of selected text that opens the colours."
+  },
+  "settingStyle": {
+    "message": "Highlight style"
+  },
+  "settingStyleHint": {
+    "message": "How highlighted text looks on websites."
+  },
+  "styleBackground": {
+    "message": "Fill"
+  },
+  "styleUnderline": {
+    "message": "Underline"
+  },
+  "settingDefaultColor": {
+    "message": "Default colour"
+  },
+  "settingDefaultColorHint": {
+    "message": "Used for notes created from the menu."
+  },
+  "privacyTitle": {
+    "message": "Stored only on this device"
+  },
+  "privacyText": {
+    "message": "Your highlights and notes stay on-device and will never leave your browser."
+  },
+  "navAll": {
+    "message": "All notes"
+  },
+  "navAllSubtitle": {
+    "message": "Everything you've highlighted, newest first."
+  },
+  "navPages": {
+    "message": "Pages"
+  },
+  "navPagesSubtitle": {
+    "message": "Your notes grouped by website."
+  },
+  "navSettings": {
+    "message": "Settings"
+  },
+  "navSettingsSubtitle": {
+    "message": "Appearance and behaviour on websites."
+  },
+  "filterLabel": {
+    "message": "Filters"
+  },
+  "filterAllColors": {
+    "message": "All colours"
+  },
+  "filterWithNote": {
+    "message": "With a note"
+  },
+  "sortLabel": {
+    "message": "Sort"
+  },
+  "sortNewest": {
+    "message": "Newest"
+  },
+  "sortOldest": {
+    "message": "Oldest"
+  },
+  "bulkSelected": {
+    "message": "Selected: $VALUE$",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "bulkDeleteTitle": {
+    "message": "Delete $VALUE$ selected notes?",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "bulkDeleteText": {
+    "message": "The highlights will also disappear from the pages. This can't be undone."
+  },
+  "settingsAppearance": {
+    "message": "Appearance & behavior"
+  },
+  "aboutText": {
+    "message": "Open source, privacy-focused web annotations."
+  },
+  "aboutPrivacy": {
+    "message": "Privacy policy"
+  },
+  "handleLabel": {
+    "message": "Highlight or add a note"
+  },
+  "confirmDeleteTitle": {
+    "message": "Delete this note?"
+  },
+  "confirmDeleteText": {
+    "message": "The highlight will disappear from the page. This can't be undone."
+  },
+  "settingSite": {
+    "message": "Turn Annotator off on this site"
+  },
+  "settingSiteDisable": {
+    "message": "Turn Annotator off on this site"
+  },
+  "settingSiteAppHint": {
+    "message": "Annotator is off by default on web apps"
+  }
+}

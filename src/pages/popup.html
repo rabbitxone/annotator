@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Annotator</title>
+    <link rel="stylesheet" href="fonts/fonts.css" />
+    <link rel="stylesheet" href="styles/tokens.css" />
+    <link rel="stylesheet" href="styles/app.css" />
+    <link rel="stylesheet" href="styles/popup.css" />
+  </head>
+  <body>
+    <header class="popup-header">
+      <div class="brand">
+        <img src="icons/logo.svg" width="97" height="26" alt="Annotator" />
+      </div>
+      <button id="open-dashboard" class="btn btn-outline btn-sm" type="button">
+        <span data-icon="open" data-size="14"></span>
+        <span data-i18n="actionOpenDashboard"></span>
+      </button>
+    </header>
+
+    <div class="popup-controls">
+      <nav class="segmented" role="tablist">
+        <button type="button" role="tab" data-tab="page" aria-selected="true">
+          <span data-i18n="tabPage"></span>
+          <span class="badge" id="page-count">0</span>
+        </button>
+        <button type="button" role="tab" data-tab="recent" aria-selected="false">
+          <span data-i18n="tabRecent"></span>
+        </button>
+        <button type="button" role="tab" data-tab="settings" aria-selected="false">
+          <span data-i18n="tabSettings"></span>
+        </button>
+      </nav>
+
+      <label class="search" id="search-wrap">
+        <span data-icon="search"></span>
+        <span class="sr-only" data-i18n="searchLabel"></span>
+        <input id="search" class="input" type="search" autocomplete="off" data-i18n-placeholder="searchPagePlaceholder" />
+      </label>
+    </div>
+
+    <main id="view" class="popup-view" role="tabpanel"></main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

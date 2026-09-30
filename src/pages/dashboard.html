@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Annotator</title>
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+    <link rel="stylesheet" href="fonts/fonts.css" />
+    <link rel="stylesheet" href="styles/tokens.css" />
+    <link rel="stylesheet" href="styles/app.css" />
+    <link rel="stylesheet" href="styles/dashboard.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <a class="brand sidebar-brand" href="#all">
+          <img src="icons/logo.svg" width="119" height="32" alt="Annotator" />
+        </a>
+
+        <nav class="nav" aria-label="Annotator">
+          <a class="nav-item" href="#all" data-view="all">
+            <span data-icon="note"></span>
+            <span class="nav-label" data-i18n="navAll"></span>
+            <span class="badge" id="nav-count-all"></span>
+          </a>
+          <a class="nav-item" href="#pages" data-view="pages">
+            <span data-icon="globe"></span>
+            <span class="nav-label" data-i18n="navPages"></span>
+            <span class="badge" id="nav-count-pages"></span>
+          </a>
+          <a class="nav-item" href="#settings" data-view="settings">
+            <span data-icon="settings"></span>
+            <span class="nav-label" data-i18n="navSettings"></span>
+          </a>
+        </nav>
+
+        <div class="sidebar-foot" id="sidebar-privacy"></div>
+      </aside>
+
+      <main class="main">
+        <header class="main-header">
+          <div class="main-heading">
+            <button id="back" class="icon-btn" type="button" hidden data-i18n-aria-label="actionBack" data-i18n-title="actionBack">
+              <span data-icon="back" data-size="18"></span>
+            </button>
+            <div class="main-titles">
+              <h1 class="display main-title" id="view-title"></h1>
+              <p class="muted main-subtitle" id="view-subtitle"></p>
+            </div>
+          </div>
+          <label class="search main-search" id="search-wrap">
+            <span data-icon="search"></span>
+            <span class="sr-only" data-i18n="searchLabel"></span>
+            <input id="search" class="input" type="search" autocomplete="off" data-i18n-placeholder="searchAllPlaceholder" />
+          </label>
+        </header>
+
+        <div class="toolbar-row" id="filters"></div>
+        <section id="content" class="content"></section>
+      </main>
+    </div>
+
+    <div class="bulk-bar" id="bulk-bar" hidden inert>
+      <div class="bulk-box">
+        <span id="bulk-count"></span>
+        <div class="bulk-actions">
+          <button class="btn btn-ghost btn-sm" type="button" id="bulk-clear" data-i18n="actionClearSelection"></button>
+          <button class="btn btn-danger btn-sm" type="button" id="bulk-delete">
+            <span data-icon="delete" data-size="14"></span>
+            <span data-i18n="actionDeleteSelected"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+  </body>
+</html>

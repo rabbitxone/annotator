@@ -1,0 +1,485 @@
+:host {
+  all: initial;
+}
+
+.layer {
+  position: fixed;
+  z-index: 2147483647;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--on-surface);
+  -webkit-font-smoothing: antialiased;
+  text-align: left;
+  letter-spacing: normal;
+  text-transform: none;
+  box-sizing: border-box;
+}
+
+.layer *,
+.layer *::before,
+.layer *::after {
+  box-sizing: border-box;
+}
+
+.icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  margin: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: var(--shadow-lg);
+  transform-origin: 16px 0;
+  animation: frame-in 150ms ease-out;
+}
+
+.handle {
+  --blur: 4px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  color: var(--accent);
+  transform-origin: 8px 0;
+  animation: frame-in 120ms ease-out;
+  transition:
+    background-color var(--transition),
+    border-color var(--transition);
+}
+
+.handle:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.swatch-btn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  transition: background-color var(--transition);
+}
+
+.swatch-btn:hover {
+  background: var(--surface);
+}
+
+.swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--swatch);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  transition: transform var(--transition);
+}
+
+.swatch-btn:hover .swatch {
+  transform: scale(1.12);
+}
+
+.swatch-btn[aria-pressed='true'] .swatch {
+  box-shadow:
+    0 0 0 2px var(--surface-raised),
+    0 0 0 4px var(--swatch);
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--border);
+}
+
+.toolbar-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px 0 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color var(--transition);
+}
+
+.toolbar-note:hover {
+  background: var(--surface);
+}
+
+.popover {
+  --frame-gap: 2px;
+  width: 348px;
+  max-width: calc(100vw - 16px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 40px -8px rgba(0, 0, 0, 0.15);
+  transform-origin: var(--arrow-x, 50%) 0;
+  animation: frame-in 150ms ease-out;
+}
+
+.popover[data-side='above'] {
+  transform-origin: var(--arrow-x, 50%) 100%;
+}
+
+.popover-box {
+  position: relative;
+  margin: var(--frame-gap);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.arrow {
+  display: none;
+  position: absolute;
+  left: var(--arrow-x, 50%);
+  z-index: 1;
+  width: 16px;
+  height: 8px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.arrow svg {
+  display: none;
+  width: 16px;
+  height: 8px;
+}
+
+.arrow .fill {
+  fill: var(--surface);
+}
+
+.arrow .edge {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.popover[data-side='below'] .arrow {
+  display: block;
+  top: -8px;
+}
+
+.popover[data-side='below'] .arrow .up {
+  display: block;
+}
+
+.popover[data-side='above'] .arrow {
+  display: block;
+  bottom: -8px;
+}
+
+.popover[data-side='above'] .arrow .down {
+  display: block;
+}
+
+.popover-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 6px 6px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.swatches {
+  display: flex;
+  gap: 0;
+}
+
+.swatches .swatch-btn {
+  width: 28px;
+  height: 28px;
+}
+
+.swatches .swatch {
+  width: 14px;
+  height: 14px;
+}
+
+.head-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  transition:
+    background-color var(--transition),
+    color var(--transition);
+}
+
+.icon-btn:hover {
+  background: var(--surface);
+  color: var(--on-surface);
+}
+
+.icon-btn.danger:hover,
+.icon-btn[data-confirm] {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.quote {
+  margin: 10px 12px 0;
+  padding: 2px 0 2px 10px;
+  border-left: 3px solid var(--swatch);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 18px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  min-height: 76px;
+  max-height: 240px;
+  margin: 0;
+  padding: 10px 12px 12px;
+  border: 0;
+  outline: none;
+  resize: none;
+  background: transparent;
+  color: var(--on-surface);
+  font: inherit;
+  line-height: 20px;
+}
+
+textarea::placeholder {
+  color: var(--subtle);
+}
+
+.popover-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 8px 8px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.meta {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.foot-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+kbd {
+  font: inherit;
+  font-size: 11px;
+  color: var(--subtle);
+}
+
+.btn-primary {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color var(--transition);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(3px);
+  animation: fade-in 120ms ease-out;
+}
+
+.confirm-card {
+  width: min(260px, 100%);
+  padding: 14px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  animation: frame-in 150ms ease-out;
+}
+
+.confirm-title {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.confirm-text {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-outline,
+.btn-danger {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  transition:
+    background-color var(--transition),
+    border-color var(--transition);
+}
+
+.btn-outline {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+}
+
+.btn-outline:hover {
+  background: var(--surface);
+  border-color: var(--border-hover);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: var(--danger-hover);
+}
+
+@keyframes frame-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+    filter: blur(var(--blur, 8px));
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes frame-out {
+  from {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+    filter: blur(var(--blur, 8px));
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.layer[data-closing] {
+  animation: frame-out 100ms ease-in forwards;
+}
+
+.confirm[data-closing] {
+  animation: fade-out 100ms ease-in forwards;
+}
+
+.confirm[data-closing] .confirm-card {
+  animation: frame-out 100ms ease-in forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .toolbar,
+  .handle,
+  .popover,
+  .confirm,
+  .confirm-card {
+    animation: none;
+  }
+}

@@ -1,0 +1,265 @@
+{
+  "extName": {
+    "message": "Annotator"
+  },
+  "extDescription": {
+    "message": "Zaznaczaj tekst i dodawaj prywatne notatki na dowolnej stronie. Wszystko zostaje na Twoim urządzeniu."
+  },
+  "menuCreate": {
+    "message": "Zaznacz i dodaj notatkę"
+  },
+  "toolbarAddNote": {
+    "message": "Notatka"
+  },
+  "notePlaceholder": {
+    "message": "Dodaj notatkę…"
+  },
+  "noteLabel": {
+    "message": "Notatka"
+  },
+  "colorLabel": {
+    "message": "Kolor zaznaczenia"
+  },
+  "color_yellow": {
+    "message": "Żółty"
+  },
+  "color_green": {
+    "message": "Zielony"
+  },
+  "color_blue": {
+    "message": "Niebieski"
+  },
+  "color_red": {
+    "message": "Czerwony"
+  },
+  "color_purple": {
+    "message": "Fioletowy"
+  },
+  "actionDelete": {
+    "message": "Usuń"
+  },
+  "actionDeleteConfirm": {
+    "message": "Na pewno?"
+  },
+  "actionClose": {
+    "message": "Zamknij"
+  },
+  "actionSave": {
+    "message": "Zapisz"
+  },
+  "actionCancel": {
+    "message": "Anuluj"
+  },
+  "actionEdit": {
+    "message": "Edytuj"
+  },
+  "actionGoTo": {
+    "message": "Pokaż na stronie"
+  },
+  "actionOpen": {
+    "message": "Otwórz stronę"
+  },
+  "actionSelect": {
+    "message": "Zaznacz"
+  },
+  "actionSelectAll": {
+    "message": "Zaznacz wszystkie"
+  },
+  "actionOpenDashboard": {
+    "message": "Wszystkie"
+  },
+  "actionBack": {
+    "message": "Wstecz"
+  },
+  "actionClearSelection": {
+    "message": "Odznacz"
+  },
+  "actionDeleteSelected": {
+    "message": "Usuń"
+  },
+  "metaEdited": {
+    "message": "Edytowano $VALUE$",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "metaCreated": {
+    "message": "Utworzono $VALUE$",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "timeJustNow": {
+    "message": "przed chwilą"
+  },
+  "orphanBadge": {
+    "message": "Nie znaleziono"
+  },
+  "orphanHint": {
+    "message": "Tego tekstu nie ma już na stronie albo strona jeszcze się nie załadowała."
+  },
+  "tabPage": {
+    "message": "Ta strona"
+  },
+  "tabRecent": {
+    "message": "Ostatnie"
+  },
+  "tabSettings": {
+    "message": "Ustawienia"
+  },
+  "searchLabel": {
+    "message": "Szukaj w notatkach"
+  },
+  "searchPagePlaceholder": {
+    "message": "Szukaj w notatkach tej strony"
+  },
+  "searchAllPlaceholder": {
+    "message": "Szukaj we wszystkich notatkach"
+  },
+  "emptyUnsupportedTitle": {
+    "message": "Tutaj nie można robić notatek"
+  },
+  "emptyUnsupportedText": {
+    "message": "Stron przeglądarki i sklepów z rozszerzeniami nie da się oznaczać. Otwórz dowolną stronę, aby zacząć."
+  },
+  "emptyPageTitle": {
+    "message": "Brak notatek na tej stronie"
+  },
+  "emptyPageText": {
+    "message": "Zaznacz fragment tekstu, kliknij mały przycisk na jego końcu i wybierz kolor albo kliknij prawym przyciskiem i wybierz „Zaznacz i dodaj notatkę”."
+  },
+  "emptySearchTitle": {
+    "message": "Nic nie znaleziono"
+  },
+  "emptySearchText": {
+    "message": "Spróbuj innej frazy albo wyczyść filtry."
+  },
+  "emptyAllTitle": {
+    "message": "Tutaj pojawią się Twoje notatki"
+  },
+  "emptyAllText": {
+    "message": "Zaznacz tekst na dowolnej stronie, aby utworzyć pierwszą notatkę."
+  },
+  "emptyPageGoneTitle": {
+    "message": "Brak notatek dla tej strony"
+  },
+  "emptyPageGoneText": {
+    "message": "Mogły zostać usunięte. Wróć, aby zobaczyć pozostałe strony."
+  },
+  "settingToolbar": {
+    "message": "Uchwyt przy zaznaczeniu"
+  },
+  "settingToolbarHint": {
+    "message": "Mały przycisk na końcu zaznaczonego tekstu, który otwiera kolory."
+  },
+  "settingStyle": {
+    "message": "Styl zaznaczenia"
+  },
+  "settingStyleHint": {
+    "message": "Jak wygląda zaznaczony tekst na stronach."
+  },
+  "styleBackground": {
+    "message": "Tło"
+  },
+  "styleUnderline": {
+    "message": "Podkreślenie"
+  },
+  "settingDefaultColor": {
+    "message": "Domyślny kolor"
+  },
+  "settingDefaultColorHint": {
+    "message": "Używany dla notatek tworzonych z menu."
+  },
+  "privacyTitle": {
+    "message": "Zapisane tylko na tym urządzeniu"
+  },
+  "privacyText": {
+    "message": "Zaznaczenia i notatki zostają na Twoim urządzeniu i nie nigdy opuszczają przeglądarki."
+  },
+  "navAll": {
+    "message": "Wszystkie notatki"
+  },
+  "navAllSubtitle": {
+    "message": "Wszystkie zaznaczenia, od najnowszych."
+  },
+  "navPages": {
+    "message": "Strony"
+  },
+  "navPagesSubtitle": {
+    "message": "Notatki pogrupowane według stron."
+  },
+  "navSettings": {
+    "message": "Ustawienia"
+  },
+  "navSettingsSubtitle": {
+    "message": "Wygląd i działanie na stronach."
+  },
+  "filterLabel": {
+    "message": "Filtry"
+  },
+  "filterAllColors": {
+    "message": "Wszystkie kolory"
+  },
+  "filterWithNote": {
+    "message": "Z notatką"
+  },
+  "sortLabel": {
+    "message": "Sortowanie"
+  },
+  "sortNewest": {
+    "message": "Najnowsze"
+  },
+  "sortOldest": {
+    "message": "Najstarsze"
+  },
+  "bulkSelected": {
+    "message": "Zaznaczono: $VALUE$",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "bulkDeleteTitle": {
+    "message": "Usunąć zaznaczone notatki ($VALUE$)?",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "bulkDeleteText": {
+    "message": "Zaznaczenia znikną też ze stron. Tej operacji nie można cofnąć."
+  },
+  "settingsAppearance": {
+    "message": "Wygląd i działanie"
+  },
+  "aboutText": {
+    "message": "Otwartoźródłowe, prywatne notatki na stronach."
+  },
+  "aboutPrivacy": {
+    "message": "Polityka prywatności"
+  },
+  "handleLabel": {
+    "message": "Zakreśl lub dodaj notatkę"
+  },
+  "confirmDeleteTitle": {
+    "message": "Usunąć tę notatkę?"
+  },
+  "confirmDeleteText": {
+    "message": "Zaznaczenie zniknie ze strony. Tej operacji nie można cofnąć."
+  },
+  "settingSite": {
+    "message": "Wyłącz Annotatora na tej stronie"
+  },
+  "settingSiteDisable": {
+    "message": "Wyłącz Annotatora na tej stronie"
+  },
+  "settingSiteAppHint": {
+    "message": "W aplikacjach webowych Annotator jest domyślnie wyłączony"
+  }
+}

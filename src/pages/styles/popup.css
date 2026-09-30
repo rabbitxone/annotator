@@ -1,0 +1,73 @@
+body {
+  width: 380px;
+  min-height: 260px;
+  max-height: 580px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface-raised);
+  border-bottom: 1px solid var(--border);
+}
+
+.popup-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px 4px;
+}
+
+.popup-controls .segmented .badge {
+  height: 18px;
+  min-width: 18px;
+  padding: 0 5px;
+  background: var(--surface-raised);
+  color: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.popup-controls .segmented button[aria-selected='true'] .badge {
+  background: var(--accent-soft);
+  color: var(--accent-on-soft);
+}
+
+.popup-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  padding: 8px 14px 14px;
+  overflow-y: auto;
+  animation: fade-in 160ms ease-out;
+}
+
+.popup-view .empty {
+  padding: 28px 16px 20px;
+}
+
+.section-label {
+  margin: 6px 2px 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.popup-footer-note {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding: 0 2px;
+  color: var(--subtle);
+  font-size: 11px;
+}
