@@ -23,8 +23,16 @@ api.tabs.onUpdated.addListener((tabId, change) => {
   syncMenuFor(tabId);
 });
 
+async function injectIntoOpenTabs() {
+  const tabs = await api.tabs.query({ url: ['http://*/*', 'https://*/*'] });
+  await Promise.allSettled(
+    tabs.map((tab) => api.scripting.executeScript({ target: { tabId: tab.id }, files: ['content.js'] })),
+  );
+}
+
 api.runtime.onInstalled.addListener(() => {
   createMenus();
+  injectIntoOpenTabs().catch(() => { });
   ensureMigrated().catch((err) => console.error('Annotator: migration failed', err));
 });
 api.runtime.onStartup.addListener(createMenus);
