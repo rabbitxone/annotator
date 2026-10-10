@@ -1,3 +1,4 @@
+import { api } from '../../shared/api.js';
 import { h } from '../../shared/dom.js';
 import { t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
@@ -106,6 +107,89 @@ export function settingsPanel(settings, { compact = false, site = null, siteAppL
       t('settingDefaultColor'),
       compact ? null : t('settingDefaultColorHint'),
       swatchPicker(settings.defaultColor, (defaultColor) => save({ defaultColor })),
+    ),
+  );
+}
+
+const COMMANDS = ['highlight', 'highlight-note', 'toggle-panel'];
+
+function openShortcutSettings() {
+  if (api.commands?.openShortcutSettings) api.commands.openShortcutSettings();
+  else api.tabs.create({ url: 'chrome://extensions/shortcuts' });
+}
+
+const KEY_NAMES = { Period: '.', Comma: ',', Space: '␣' };
+const prettyShortcut = (shortcut) => shortcut.replace(/\b(Period|Comma|Space)\b/g, (name) => KEY_NAMES[name]);
+
+export function shortcutsPanel() {
+  const rows = h('div');
+  const panel = h(
+    'div',
+    { class: 'settings-panel' },
+    rows,
+    settingItem(
+      'highlighter',
+      t('shortcutToolbarKeys'),
+      t('shortcutToolbarKeysHint'),
+      h('span', { class: 'kbd-group' }, h('kbd', { class: 'kbd' }, '1–5'), h('kbd', { class: 'kbd' }, 'N')),
+    ),
+    h(
+      'div',
+      { class: 'setting-item setting-actions' },
+      h('p', { class: 'setting-sublabel' }, t('shortcutChangeHint')),
+      h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: openShortcutSettings }, icon('keyboard', { size: 14 }), t('shortcutChange')),
+    ),
+  );
+
+  Promise.resolve(api.commands?.getAll?.())
+    .then((commands = []) => {
+      const known = new Map(commands.map((c) => [c.name, c.shortcut]));
+      rows.replaceChildren(
+        ...COMMANDS.map((name) => {
+          const shortcut = known.get(name);
+          return settingItem(
+            name === 'toggle-panel' ? 'panel' : name === 'highlight' ? 'highlighter' : 'noteEdit',
+            t(`cmd_${name.replace(/-/g, '_')}`),
+            null,
+            h('kbd', { class: ['kbd', !shortcut && 'kbd-empty'] }, shortcut ? prettyShortcut(shortcut) : t('shortcutNone')),
+          );
+        }),
+      );
+    })
+    .catch(() => { });
+  return panel;
+}
+
+export function dataPanel({ onExportBackup, onExportMarkdown, onImport }) {
+  const file = h('input', {
+    type: 'file',
+    accept: '.json,application/json',
+    hidden: true,
+    onchange: () => {
+      if (file.files[0]) onImport(file.files[0]);
+      file.value = '';
+    },
+  });
+  return h(
+    'div',
+    { class: 'settings-panel' },
+    settingItem(
+      'download',
+      t('dataBackup'),
+      t('dataBackupHint'),
+      h(
+        'div',
+        { class: 'setting-buttons' },
+        h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: onExportBackup }, icon('download', { size: 14 }), t('dataExport')),
+        h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: () => file.click() }, icon('upload', { size: 14 }), t('dataImport')),
+        file,
+      ),
+    ),
+    settingItem(
+      'note',
+      t('dataMarkdown'),
+      t('dataMarkdownHint'),
+      h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: onExportMarkdown }, icon('download', { size: 14 }), t('dataExportMarkdown')),
     ),
   );
 }

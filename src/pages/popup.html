@@ -14,10 +14,16 @@
       <div class="brand">
         <img src="icons/logo.svg" width="97" height="26" alt="Annotator" />
       </div>
-      <button id="open-dashboard" class="btn btn-outline btn-sm" type="button">
-        <span data-icon="open" data-size="14"></span>
-        <span data-i18n="actionOpenDashboard"></span>
-      </button>
+      <div class="popup-header-actions">
+        <button id="open-panel" class="btn btn-outline btn-sm" type="button" hidden data-i18n-title="panelOpenHint">
+          <span data-icon="panel" data-size="14"></span>
+          <span data-i18n="actionOpenPanel"></span>
+        </button>
+        <button id="open-dashboard" class="btn btn-outline btn-sm" type="button">
+          <span data-icon="open" data-size="14"></span>
+          <span data-i18n="actionOpenDashboard"></span>
+        </button>
+      </div>
     </header>
 
     <div class="popup-controls">

@@ -33,7 +33,7 @@ export function migrateLegacy(legacy, existing = {}) {
 
     for (const old of list) {
       if (!old || !old.id || !old.text) continue;
-      if (page.annotations.some((a) => a.id === old.id)) continue;
+      if (page.annotations.some((a) => a.id === String(old.id))) continue;
 
       const createdAt = Number(old.timestamp) || Date.now();
       const updatedAt = Number(old.lastEdited) || createdAt;

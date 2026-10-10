@@ -196,7 +196,7 @@
     "message": "Settings"
   },
   "navSettingsSubtitle": {
-    "message": "Appearance and behaviour on websites."
+    "message": "Appearance, shortcuts and backups."
   },
   "filterLabel": {
     "message": "Filters"
@@ -224,17 +224,6 @@
       }
     }
   },
-  "bulkDeleteTitle": {
-    "message": "Delete $VALUE$ selected notes?",
-    "placeholders": {
-      "value": {
-        "content": "$1"
-      }
-    }
-  },
-  "bulkDeleteText": {
-    "message": "The highlights will also disappear from the pages. This can't be undone."
-  },
   "settingsAppearance": {
     "message": "Appearance & behavior"
   },
@@ -261,5 +250,187 @@
   },
   "settingSiteAppHint": {
     "message": "Annotator is off by default on web apps"
+  },
+  "cmd_highlight": {
+    "message": "Highlight the selection"
+  },
+  "cmd_highlight_note": {
+    "message": "Highlight the selection and add a note"
+  },
+  "cmd_toggle_panel": {
+    "message": "Show or hide the notes panel"
+  },
+  "actionCopy": {
+    "message": "Copy"
+  },
+  "actionCopyQuote": {
+    "message": "Copy quote with link"
+  },
+  "actionUndo": {
+    "message": "Undo"
+  },
+  "actionReanchor": {
+    "message": "Pin to selection"
+  },
+  "actionReanchorHint": {
+    "message": "Select the new text on the page first, then click to pin this note to it"
+  },
+  "actionOpenPanel": {
+    "message": "Panel"
+  },
+  "panelOpenHint": {
+    "message": "Show the notes panel on this page"
+  },
+  "panelTitle": {
+    "message": "Notes on this page"
+  },
+  "panelSaved": {
+    "message": "Saved"
+  },
+  "panelCopyAll": {
+    "message": "Copy all as Markdown"
+  },
+  "panelEmpty": {
+    "message": "No highlights here yet. Select some text to create one."
+  },
+  "panelOrphansTitle": {
+    "message": "Not found on the page ($V1$)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "panelOrphansHint": {
+    "message": "The text may have changed. Select its new version on the page and click “Pin to selection”."
+  },
+  "pageNoteLabel": {
+    "message": "Page note"
+  },
+  "pageNotePlaceholder": {
+    "message": "Notes about the whole page…"
+  },
+  "pageNoteAdd": {
+    "message": "Add a note about the whole page"
+  },
+  "markdownHint": {
+    "message": "Supports **bold**, *italics*, `code`, lists and links."
+  },
+  "toastCopied": {
+    "message": "Copied to clipboard"
+  },
+  "toastCopyFailed": {
+    "message": "Couldn't copy to the clipboard"
+  },
+  "toastDeleted": {
+    "message": "Deleted notes: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastRecolored": {
+    "message": "Changed colour of notes: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastImported": {
+    "message": "Imported. New: $V1$, updated: $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "toastImportedNothing": {
+    "message": "Nothing new in this file — everything is already here"
+  },
+  "toastImportInvalid": {
+    "message": "This isn't an Annotator backup file"
+  },
+  "toastImportFailed": {
+    "message": "Import failed. Try again."
+  },
+  "toastReanchored": {
+    "message": "Note pinned to the new text"
+  },
+  "toastReanchorNoSelection": {
+    "message": "Select the new text on the page first"
+  },
+  "exportTitle": {
+    "message": "Annotator notes"
+  },
+  "filterLost": {
+    "message": "Not found"
+  },
+  "sortPosition": {
+    "message": "In text order"
+  },
+  "groupLabel": {
+    "message": "Grouping"
+  },
+  "groupRecent": {
+    "message": "Recent"
+  },
+  "groupDomain": {
+    "message": "By site"
+  },
+  "settingsShortcuts": {
+    "message": "Keyboard shortcuts"
+  },
+  "settingsData": {
+    "message": "Data"
+  },
+  "shortcutNone": {
+    "message": "Not set"
+  },
+  "shortcutToolbarKeys": {
+    "message": "In the colour bar"
+  },
+  "shortcutToolbarKeysHint": {
+    "message": "1–5 picks a colour, N adds a note."
+  },
+  "shortcutChangeHint": {
+    "message": "Shortcuts are set in the browser's extension settings."
+  },
+  "shortcutChange": {
+    "message": "Change shortcuts"
+  },
+  "dataBackup": {
+    "message": "Backup"
+  },
+  "dataBackupHint": {
+    "message": "Save all notes to a file, or bring them back on another device. Importing merges and never deletes."
+  },
+  "dataExport": {
+    "message": "Export"
+  },
+  "dataImport": {
+    "message": "Import"
+  },
+  "dataMarkdown": {
+    "message": "Markdown"
+  },
+  "dataMarkdownHint": {
+    "message": "All notes as a readable document, grouped by page."
+  },
+  "dataExportMarkdown": {
+    "message": "Download .md"
+  },
+  "bulkRecolor": {
+    "message": "Change colour"
+  },
+  "bulkCopyHint": {
+    "message": "Copy selected notes as Markdown"
+  },
+  "bulkMarkdownHint": {
+    "message": "Download selected notes as a Markdown file"
   }
 }

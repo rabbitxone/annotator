@@ -37,9 +37,16 @@ function manifestFor(target) {
       default_icon: { 16: 'icons/icon-16.png', 32: 'icons/icon-32.png', 48: 'icons/icon-48.png' },
     },
     content_scripts: [{ matches: ['<all_urls>'], js: ['content.js'], run_at: 'document_idle' }],
+    commands: {
+      highlight: { suggested_key: { default: 'Ctrl+Shift+L' }, description: '__MSG_cmd_highlight__' },
+      'highlight-note': { suggested_key: { default: 'Ctrl+Shift+Period' }, description: '__MSG_cmd_highlight_note__' },
+      'toggle-panel': { suggested_key: { default: 'Ctrl+Shift+Comma' }, description: '__MSG_cmd_toggle_panel__' },
+    },
   };
 
   if (target === 'chrome') {
+    // Chrome caps storage.local at 10 MB without it; Firefox has no such cap and would prompt for it.
+    manifest.permissions.push('unlimitedStorage');
     manifest.background = { service_worker: 'background.js' };
   } else {
     manifest.background = { scripts: ['background.js'] };

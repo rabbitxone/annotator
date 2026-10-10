@@ -2,6 +2,7 @@ import { COLORS, colorById } from '../../shared/constants.js';
 import { h } from '../../shared/dom.js';
 import { formatDate, relativeTime, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
+import { highlightHits, renderMarkdown } from '../../shared/markdown.js';
 import { hostnameOf } from '../../shared/url.js';
 import { armOnce } from './confirm.js';
 
@@ -56,10 +57,13 @@ export function annotationCard(annotation, page, options) {
     showSource = false,
     goLabel = t('actionGoTo'),
     goIcon = 'target',
-    orphan = false,
+    orphan = !!annotation.lostAt,
     selectable = false,
     selected = false,
+    query = '',
     onGo,
+    onCopy,
+    onReanchor,
     onSave,
     onDelete,
     onSelect,
@@ -76,7 +80,30 @@ export function annotationCard(annotation, page, options) {
   if (isSelected) card.dataset.selected = '';
 
   const fill = (...children) => card.replaceChildren(...children.filter(Boolean));
-  const quote = () => h('p', { class: 'card-quote' }, h('mark', null, annotation.quote?.exact ?? ''));
+  const withHits = (el) => {
+    highlightHits(el, query);
+    return el;
+  };
+  const quote = () => withHits(h('p', { class: 'card-quote' }, h('mark', null, annotation.quote?.exact ?? '')));
+
+  function copyButton() {
+    const button = h(
+      'button',
+      {
+        class: 'icon-btn',
+        type: 'button',
+        title: t('actionCopyQuote'),
+        'aria-label': t('actionCopyQuote'),
+        onclick: async () => {
+          if (!(await onCopy())) return;
+          button.replaceChildren(icon('tick'));
+          setTimeout(() => button.replaceChildren(icon('copy')), 1500);
+        },
+      },
+      icon('copy'),
+    );
+    return button;
+  }
 
   function renderView() {
     const deleteBtn = h(
@@ -95,7 +122,7 @@ export function annotationCard(annotation, page, options) {
         'div',
         { class: 'card-source', title: page.url },
         siteAvatar(page.url, 18),
-        h('span', null, page.title || hostnameOf(page.url)),
+        withHits(h('span', null, page.title || hostnameOf(page.url))),
       ),
       selectable &&
       h('input', {
@@ -111,7 +138,7 @@ export function annotationCard(annotation, page, options) {
         },
       }),
       quote(),
-      annotation.note && h('p', { class: 'card-note' }, annotation.note),
+      annotation.note?.trim() && withHits(h('div', { class: 'card-note md' }, renderMarkdown(annotation.note))),
       h(
         'div',
         { class: 'card-foot' },
@@ -126,8 +153,16 @@ export function annotationCard(annotation, page, options) {
         h(
           'div',
           { class: 'card-actions' },
+          orphan &&
+          onReanchor &&
+          h(
+            'button',
+            { class: 'icon-btn', type: 'button', title: t('actionReanchorHint'), 'aria-label': t('actionReanchor'), onclick: onReanchor },
+            icon('pin'),
+          ),
           onGo &&
           h('button', { class: 'icon-btn', type: 'button', title: goLabel, 'aria-label': goLabel, onclick: onGo }, icon(goIcon)),
+          onCopy && copyButton(),
           h(
             'button',
             { class: 'icon-btn', type: 'button', title: t('actionEdit'), 'aria-label': t('actionEdit'), onclick: renderEdit },
@@ -147,6 +182,7 @@ export function annotationCard(annotation, page, options) {
       value: annotation.note || '',
       placeholder: t('notePlaceholder'),
       'aria-label': t('noteLabel'),
+      title: t('markdownHint'),
       rows: 3,
     });
 
@@ -180,6 +216,7 @@ export function annotationCard(annotation, page, options) {
         'div',
         { class: 'card-edit' },
         textarea,
+        h('p', { class: 'field-hint' }, t('markdownHint')),
         h(
           'div',
           { class: 'card-edit-row' },

@@ -17,6 +17,19 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
+.popup-header-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.popup-view .page-note {
+  flex-shrink: 0;
+}
+
+.popup-view .card {
+  flex-shrink: 0;
+}
+
 .popup-controls {
   display: flex;
   flex-direction: column;

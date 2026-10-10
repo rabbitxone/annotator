@@ -283,6 +283,36 @@ body {
   box-shadow: none;
 }
 
+.page-row-note {
+  display: flex;
+  color: var(--accent);
+}
+
+.page-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.page-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.page-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+  font-weight: 600;
+}
+
+.page-group-title .avatar {
+  font-size: 10px !important;
+  border-radius: var(--radius-xs);
+}
+
 .page-row-colors {
   display: flex;
   gap: 3px;
@@ -379,7 +409,23 @@ body {
 
 .bulk-actions {
   display: flex;
+  align-items: center;
   gap: 6px;
+}
+
+.bulk-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+}
+
+.bulk-box .swatch-btn {
+  width: 26px;
+  height: 26px;
+}
+
+.bulk-box .swatch-btn[aria-pressed='true'] .swatch {
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
 }
 
 @media (max-width: 720px) {

@@ -1,4 +1,7 @@
 import { api } from '../shared/api.js';
+import { copyText } from '../shared/clipboard.js';
+import { quoteSnippet, toMarkdown } from '../shared/exchange.js';
+import { t } from '../shared/i18n.js';
 import {
   addAnnotation,
   deleteAnnotations,
@@ -6,6 +9,9 @@ import {
   getPage,
   getSettings,
   onStoreChange,
+  reanchorAnnotation,
+  setLost,
+  setPageNote,
   updateAnnotation,
 } from '../shared/store.js';
 import { hostnameOf, normalizeUrl } from '../shared/url.js';
@@ -24,6 +30,7 @@ import {
   unwrap,
   wrapRange,
 } from './highlighter.js';
+import { createPanel } from './panel.js';
 import { createUi } from './ui.js';
 
 function alive() {
@@ -44,6 +51,7 @@ function main() {
   unwrap(Array.from(document.querySelectorAll(MARK_TAG)));
 
   let pageUrl = null;
+  let pageNote = '';
   let annotations = [];
   let settings = null;
   const anchors = new Map();
@@ -64,11 +72,17 @@ function main() {
       const a = annotations.find((x) => x.id === id);
       if (a) a.color = color;
       updateAnnotation(pageUrl, id, { color });
+      refreshPanel();
     },
     onNoteSave: (id, note) => {
       const a = annotations.find((x) => x.id === id);
       if (a) a.note = note;
       updateAnnotation(pageUrl, id, { note });
+      refreshPanel();
+    },
+    onCopy: (id) => {
+      const a = annotations.find((x) => x.id === id);
+      return a ? copyText(quoteSnippet(a, currentPage()), ui.shadowRoot()) : false;
     },
     onDelete: (id) => {
       removeLocal([id]);
@@ -76,6 +90,51 @@ function main() {
     },
     onPopoverClose: (id) => setActive(anchors.get(id) ?? [], false),
   });
+
+  const panel = createPanel({
+    shadowRoot: () => ui.shadowRoot(),
+    handlers: {
+      onGo: (id) => {
+        const marks = anchors.get(id);
+        if (!marks?.[0]?.isConnected) return;
+        marks[0].scrollIntoView({ block: 'center', behavior: 'smooth' });
+        flash(marks);
+        openEditor(id, { focus: false });
+      },
+      onReanchor: (id) => reanchor(id),
+      onPageNoteSave: (note) => {
+        if (!pageUrl) return;
+        pageNote = note;
+        setPageNote(pageUrl, document.title, note);
+      },
+      onCopyAll: () =>
+        copyText(
+          toMarkdown([{ page: { ...currentPage(), note: pageNote }, annotations }], { pageNote: t('pageNoteLabel') }),
+          ui.shadowRoot(),
+        ),
+    },
+  });
+
+  const currentPage = () => ({ url: pageUrl, title: document.title });
+
+  function panelModel() {
+    const head = (a) => anchors.get(a.id)?.[0];
+    const items = annotations
+      .filter((a) => head(a)?.isConnected)
+      .sort((a, b) => (head(a).compareDocumentPosition(head(b)) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
+    const placed = new Set(items);
+    return { items, orphans: annotations.filter((a) => !placed.has(a)), pageNote };
+  }
+
+  function refreshPanel() {
+    if (panel.isOpen) panel.update(panelModel());
+  }
+
+  function togglePanel() {
+    if (!pageUrl) return;
+    panel.update(panelModel());
+    panel.toggle();
+  }
 
   let observer = null;
   function withoutObserver(fn) {
@@ -129,6 +188,28 @@ function main() {
       refreshTones(allMarks());
     });
     reportCount();
+    syncLost();
+    refreshPanel();
+  }
+
+  // Remember on disk which notes could not be found, so the dashboard can show them.
+  let lostTimer = null;
+  let loadedAt = Date.now();
+  function syncLost() {
+    const url = pageUrl;
+    const found = annotations.filter((a) => a.lostAt && anchors.get(a.id)?.length).map((a) => a.id);
+    if (found.length) setLost(url, found, false).catch(() => { });
+
+    clearTimeout(lostTimer);
+    if (!annotations.some((a) => !a.lostAt && orphans.has(a.id))) return;
+    lostTimer = setTimeout(
+      () => {
+        if (!checkAlive() || pageUrl !== url) return;
+        const lost = annotations.filter((a) => !a.lostAt && orphans.has(a.id) && !unsaved.has(a.id)).map((a) => a.id);
+        if (lost.length) setLost(url, lost, true).catch(() => { });
+      },
+      Math.max(4000, loadedAt + 10000 - Date.now()),
+    );
   }
 
   function removeLocal(ids) {
@@ -143,6 +224,7 @@ function main() {
     if (drop.has(ui.openAnnotationId)) ui.close();
     annotations = annotations.filter((a) => !drop.has(a.id));
     reportCount();
+    refreshPanel();
   }
 
   function reportCount() {
@@ -159,22 +241,32 @@ function main() {
     observer?.disconnect();
     themeObserver?.disconnect();
     clearInterval(urlTimer);
+    clearTimeout(lostTimer);
     ui.close();
+    panel.close();
     return false;
   }
 
   async function loadPage() {
     pageUrl = normalizeUrl(location.href);
     orphanRetries = 0;
-    if (!pageUrl) return;
+    loadedAt = Date.now();
+    if (!pageUrl) {
+      panel.close();
+      return;
+    }
     const page = await getPage(pageUrl);
     annotations = page?.annotations ?? [];
+    pageNote = page?.note ?? '';
     anchorPending();
     reportCount();
+    refreshPanel();
   }
 
   function teardown() {
     ui.close();
+    clearTimeout(lostTimer);
+    pageNote = '';
     withoutObserver(() => {
       for (const marks of anchors.values()) unwrap(marks);
     });
@@ -228,7 +320,40 @@ function main() {
     unsaved.add(created.id);
     addAnnotation(pageUrl, document.title, created).finally(() => unsaved.delete(created.id));
     reportCount();
+    refreshPanel();
     if (withNote) openEditor(created.id, { focus: true });
+  }
+
+  function reanchor(id) {
+    const annotation = annotations.find((a) => a.id === id);
+    const range = selectionRange();
+    if (!annotation || !pageUrl) return { ok: false, reason: 'missing' };
+    if (!range) return { ok: false, reason: 'no-selection' };
+
+    let selector = null;
+    withoutObserver(() => {
+      const index = buildIndex();
+      const described = describeRange(index, range);
+      if (!described) return;
+      unwrap(anchors.get(id) ?? []);
+      anchors.delete(id);
+      const marks = wrapRange(described.rawStart, described.rawEnd, annotation);
+      if (marks.length === 0) return;
+      refreshTones(marks);
+      anchors.set(id, marks);
+      orphans.delete(id);
+      selector = described.selector;
+      Object.assign(annotation, selector);
+      delete annotation.lostAt;
+      flash(marks);
+    });
+    if (!selector) return { ok: false, reason: 'no-selection' };
+
+    window.getSelection()?.removeAllRanges();
+    ui.close();
+    reanchorAnnotation(pageUrl, id, selector);
+    refreshPanel();
+    return { ok: true };
   }
 
   function openEditor(id, options) {
@@ -318,13 +443,21 @@ function main() {
   api.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     switch (message?.type) {
       case 'create-from-selection':
-        createFromSelection(defaultColor(), true);
+        if (!message.fromCommand || siteRule() !== 'never') createFromSelection(defaultColor(), message.withNote !== false);
+        sendResponse(true);
+        return false;
+      case 'toggle-panel':
+        togglePanel();
+        sendResponse(panel.isOpen);
+        return false;
+      case 'reanchor':
+        sendResponse(reanchor(message.id));
         return false;
       case 'go-to':
         goTo(message.id).then(sendResponse);
         return true;
       case 'status':
-        sendResponse({ url: pageUrl, orphans: [...orphans], appLike: pageLooksLikeAnApp() });
+        sendResponse({ url: pageUrl, orphans: [...orphans], appLike: pageLooksLikeAnApp(), panelOpen: panel.isOpen });
         return false;
       default:
         return false;
@@ -340,6 +473,7 @@ function main() {
     }
     if (!pageUrl || !pages.has(pageUrl)) return;
 
+    pageNote = pages.get(pageUrl)?.note ?? '';
     const next = pages.get(pageUrl)?.annotations ?? [];
     const nextIds = new Set(next.map((a) => a.id));
     const removed = annotations.filter((a) => !nextIds.has(a.id) && !unsaved.has(a.id)).map((a) => a.id);
@@ -351,6 +485,7 @@ function main() {
     }
     annotations = [...next, ...annotations.filter((a) => unsaved.has(a.id) && !nextIds.has(a.id))];
     anchorPending();
+    refreshPanel();
   });
 
   let mutationTimer = null;

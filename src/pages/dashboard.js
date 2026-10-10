@@ -1,21 +1,34 @@
 import { api } from '../shared/api.js';
+import { copyText } from '../shared/clipboard.js';
 import { COLORS, colorById } from '../shared/constants.js';
 import { h } from '../shared/dom.js';
+import {
+  BackupError,
+  byTextPosition,
+  createBackup,
+  groupItems,
+  parseBackup,
+  quoteSnippet,
+  toMarkdown,
+} from '../shared/exchange.js';
 import { applyI18n, formatNumber, relativeTime, t } from '../shared/i18n.js';
 import { hydrateIcons, icon } from '../shared/icons.js';
 import {
-  deleteAnnotations,
-  deleteMany,
   ensureMigrated,
   getSettings,
+  importPages,
   listPages,
   onStoreChange,
+  setPageNote,
   updateAnnotation,
+  updateMany,
 } from '../shared/store.js';
 import { hostnameOf } from '../shared/url.js';
-import { annotationCard, siteAvatar } from './components/card.js';
-import { confirmDialog } from './components/confirm.js';
-import { privacyNote, settingsPanel } from './components/settings.js';
+import { deleteWithUndo } from './components/actions.js';
+import { annotationCard, siteAvatar, swatchPicker } from './components/card.js';
+import { pageNoteBox } from './components/page-note.js';
+import { dataPanel, privacyNote, settingsPanel, shortcutsPanel } from './components/settings.js';
+import { toast } from './components/toast.js';
 
 const REPO_URL = 'https://github.com/RabbitXOne/annotator';
 
@@ -27,7 +40,9 @@ const state = {
   query: '',
   color: null,
   withNoteOnly: false,
+  lostOnly: false,
   sort: 'newest',
+  grouping: 'recent',
   selected: new Set(),
   editing: false,
   dirty: false,
@@ -71,9 +86,56 @@ function filteredItems() {
   const items = scopeItems()
     .filter(matchesQuery)
     .filter(({ annotation }) => !state.color || annotation.color === state.color)
-    .filter(({ annotation }) => !state.withNoteOnly || annotation.note?.trim());
+    .filter(({ annotation }) => !state.withNoteOnly || annotation.note?.trim())
+    .filter(({ annotation }) => !state.lostOnly || annotation.lostAt);
+  if (state.sort === 'position') {
+    const order = new Map([...state.pages].sort((a, b) => b.updatedAt - a.updatedAt).map((page, i) => [page.url, i]));
+    return items.sort((a, b) => order.get(a.page.url) - order.get(b.page.url) || byTextPosition(a.annotation, b.annotation));
+  }
   const dir = state.sort === 'oldest' ? 1 : -1;
   return items.sort((a, b) => dir * (a.annotation.createdAt - b.annotation.createdAt));
+}
+
+const isFiltered = () => !!(state.query || state.color || state.withNoteOnly || state.lostOnly);
+
+function selectedItems() {
+  return allItems().filter(({ annotation, page }) => state.selected.has(selectionKey(page.url, annotation.id)));
+}
+
+const dateStamp = () => new Date().toISOString().slice(0, 10);
+
+function download(name, text, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const link = h('a', { href: url, download: name, hidden: true });
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+const markdownOf = (groups) => toMarkdown(groups, { title: t('exportTitle'), pageNote: t('pageNoteLabel') });
+
+function exportMarkdown(groups) {
+  download(`annotator-${dateStamp()}.md`, markdownOf(groups), 'text/markdown');
+}
+
+function exportBackup() {
+  download(`annotator-backup-${dateStamp()}.json`, JSON.stringify(createBackup(state.pages), null, 2), 'application/json');
+}
+
+async function importBackup(file) {
+  try {
+    const { added, updated } = await importPages(parseBackup(await file.text()));
+    toast(added || updated ? t('toastImported', [formatNumber(added), formatNumber(updated)]) : t('toastImportedNothing'));
+  } catch (err) {
+    if (!(err instanceof BackupError)) console.error('Annotator: import failed', err);
+    toast(t(err instanceof BackupError ? 'toastImportInvalid' : 'toastImportFailed'));
+  }
+}
+
+function setEditing(editing) {
+  state.editing = editing;
+  if (!editing && state.dirty) render();
 }
 
 function pill(label, pressed, onClick, lead, count) {
@@ -89,7 +151,11 @@ function pill(label, pressed, onClick, lead, count) {
 function renderFilters(visible) {
   const scope = scopeItems();
   const counts = Object.fromEntries(COLORS.map((c) => [c.id, 0]));
-  for (const { annotation } of scope) counts[annotation.color] = (counts[annotation.color] ?? 0) + 1;
+  let lostCount = 0;
+  for (const { annotation } of scope) {
+    counts[annotation.color] = (counts[annotation.color] ?? 0) + 1;
+    if (annotation.lostAt) lostCount++;
+  }
 
   const pills = h(
     'div',
@@ -105,6 +171,8 @@ function renderFilters(visible) {
       ),
     ),
     pill(t('filterWithNote'), state.withNoteOnly, () => setFilter({ withNoteOnly: !state.withNoteOnly }), icon('note', { size: 14 })),
+    (lostCount > 0 || state.lostOnly) &&
+    pill(t('filterLost'), state.lostOnly, () => setFilter({ lostOnly: !state.lostOnly }), icon('alert', { size: 14 }), lostCount),
   );
 
   const visibleKeys = visible.map(({ annotation, page }) => selectionKey(page.url, annotation.id));
@@ -134,17 +202,37 @@ function renderFilters(visible) {
     h(
       'div',
       { class: 'segmented', role: 'group', 'aria-label': t('sortLabel') },
-      ['newest', 'oldest'].map((sort) =>
-        h(
-          'button',
-          { type: 'button', 'aria-pressed': String(state.sort === sort), onclick: () => setFilter({ sort }) },
-          t(sort === 'newest' ? 'sortNewest' : 'sortOldest'),
-        ),
+      [
+        ['newest', 'sortNewest'],
+        ['oldest', 'sortOldest'],
+        ['position', 'sortPosition'],
+      ].map(([sort, label]) =>
+        h('button', { type: 'button', 'aria-pressed': String(state.sort === sort), onclick: () => setFilter({ sort }) }, t(label)),
       ),
     ),
   );
 
   $('filters').replaceChildren(pills, right);
+}
+
+function renderPagesFilters() {
+  $('filters').replaceChildren(
+    h('span'),
+    h(
+      'div',
+      { class: 'toolbar-right' },
+      h(
+        'div',
+        { class: 'segmented', role: 'group', 'aria-label': t('groupLabel') },
+        [
+          ['recent', 'groupRecent'],
+          ['domain', 'groupDomain'],
+        ].map(([grouping, label]) =>
+          h('button', { type: 'button', 'aria-pressed': String(state.grouping === grouping), onclick: () => setFilter({ grouping }) }, t(label)),
+        ),
+      ),
+    ),
+  );
 }
 
 function setFilter(patch) {
@@ -174,61 +262,84 @@ function renderCards(items, { showSource }) {
         goIcon: 'open',
         selectable: true,
         selected: state.selected.has(key),
+        query: state.query,
         onGo: () => api.runtime.sendMessage({ type: 'open-and-go', url: page.url, id: annotation.id }).catch(() => { }),
+        onCopy: () => copyText(quoteSnippet(annotation, page)),
         onSave: (patch) => updateAnnotation(page.url, annotation.id, patch),
-        onDelete: () => deleteAnnotations(page.url, [annotation.id]),
+        onDelete: () => deleteWithUndo([{ annotation, page }]),
         onSelect: (checked) => {
           if (checked) state.selected.add(key);
           else state.selected.delete(key);
           renderBulkBar();
           renderFilters(filteredItems());
         },
-        onEditingChange: (editing) => {
-          state.editing = editing;
-          if (!editing && state.dirty) render();
-        },
+        onEditingChange: setEditing,
       });
     }),
   );
 }
 
+function pageRow(page) {
+  const colors = [...new Set(page.annotations.map((a) => a.color))];
+  return h(
+    'a',
+    { class: 'page-row', href: pageHref(page.url) },
+    siteAvatar(page.url, 36),
+    h(
+      'div',
+      { class: 'page-row-text' },
+      h('p', { class: 'page-row-title' }, page.title || hostnameOf(page.url)),
+      h('p', { class: 'page-row-sub' }, page.url),
+    ),
+    h(
+      'div',
+      { class: 'page-row-meta' },
+      page.note?.trim() && h('span', { class: 'page-row-note', title: t('pageNoteLabel') }, icon('pageNote', { size: 14 })),
+      h(
+        'span',
+        { class: 'page-row-colors' },
+        colors.map((c) => h('span', { class: 'swatch', style: { '--swatch': colorById(c).swatch } })),
+      ),
+      h('span', { class: 'badge' }, page.annotations.length ? formatNumber(page.annotations.length) : ''),
+      h('span', null, relativeTime(page.updatedAt)),
+    ),
+  );
+}
+
 function renderPagesList() {
   const pages = state.pages
-    .filter((page) => !state.query || [page.title, page.url].some((v) => v?.toLowerCase().includes(state.query)) || page.annotations.some((a) => matchesQuery({ annotation: a, page })))
+    .filter((page) => !state.query || [page.title, page.url, page.note].some((v) => v?.toLowerCase().includes(state.query)) || page.annotations.some((a) => matchesQuery({ annotation: a, page })))
     .sort((a, b) => b.updatedAt - a.updatedAt);
 
   if (pages.length === 0) {
     return state.query ? emptyPanel('search', t('emptySearchTitle'), t('emptySearchText')) : emptyPanel('globe', t('emptyAllTitle'), t('emptyAllText'));
   }
 
+  if (state.grouping !== 'domain') return h('div', { class: 'page-list' }, pages.map(pageRow));
+
+  const groups = new Map();
+  for (const page of pages) {
+    const host = hostnameOf(page.url);
+    if (!groups.has(host)) groups.set(host, []);
+    groups.get(host).push(page);
+  }
   return h(
     'div',
-    { class: 'page-list' },
-    pages.map((page) => {
-      const colors = [...new Set(page.annotations.map((a) => a.color))];
-      return h(
-        'a',
-        { class: 'page-row', href: pageHref(page.url) },
-        siteAvatar(page.url, 36),
+    { class: 'page-groups' },
+    [...groups].map(([host, list]) =>
+      h(
+        'section',
+        { class: 'page-group' },
         h(
-          'div',
-          { class: 'page-row-text' },
-          h('p', { class: 'page-row-title' }, page.title || hostnameOf(page.url)),
-          h('p', { class: 'page-row-sub' }, page.url),
+          'p',
+          { class: 'page-group-title' },
+          siteAvatar(list[0].url, 20),
+          h('span', null, host),
+          h('span', { class: 'badge' }, formatNumber(list.length)),
         ),
-        h(
-          'div',
-          { class: 'page-row-meta' },
-          h(
-            'span',
-            { class: 'page-row-colors' },
-            colors.map((c) => h('span', { class: 'swatch', style: { '--swatch': colorById(c).swatch } })),
-          ),
-          h('span', { class: 'badge' }, formatNumber(page.annotations.length)),
-          h('span', null, relativeTime(page.updatedAt)),
-        ),
-      );
-    }),
+        h('div', { class: 'page-list' }, list.map(pageRow)),
+      ),
+    ),
   );
 }
 
@@ -238,6 +349,14 @@ function renderSettings() {
     { class: 'settings-layout' },
     h('p', { class: 'settings-section-title' }, t('settingsAppearance')),
     settingsPanel(state.settings),
+    h('p', { class: 'settings-section-title' }, t('settingsShortcuts')),
+    shortcutsPanel(),
+    h('p', { class: 'settings-section-title' }, t('settingsData')),
+    dataPanel({
+      onExportBackup: exportBackup,
+      onExportMarkdown: () => exportMarkdown([...state.pages].sort((a, b) => b.updatedAt - a.updatedAt).map((page) => ({ page, annotations: page.annotations }))),
+      onImport: importBackup,
+    }),
     privacyNote(),
     h(
       'div',
@@ -309,27 +428,39 @@ function render() {
   renderHeader();
 
   const content = $('content');
-  const listView = state.view === 'all' || state.view === 'page';
-  $('filters').hidden = !listView;
+  $('filters').hidden = state.view === 'settings';
 
   if (state.view === 'settings') {
     content.replaceChildren(renderSettings());
   } else if (state.view === 'pages') {
+    renderPagesFilters();
     content.replaceChildren(renderPagesList());
   } else {
     const items = filteredItems();
     renderFilters(items);
-    if (state.view === 'page' && scopeItems().length === 0) {
+    const page = state.view === 'page' ? state.pages.find((p) => p.url === state.pageUrl) : null;
+    const noteBox =
+      page &&
+      pageNoteBox(page.note, {
+        query: state.query,
+        onSave: (note) => setPageNote(page.url, page.title, note),
+        onEditingChange: setEditing,
+      });
+    if (state.view === 'page' && !page) {
       content.replaceChildren(emptyPanel('globe', t('emptyPageGoneTitle'), t('emptyPageGoneText')));
     } else if (items.length === 0) {
-      const filtered = state.query || state.color || state.withNoteOnly;
       content.replaceChildren(
-        filtered
-          ? emptyPanel('search', t('emptySearchTitle'), t('emptySearchText'))
-          : emptyPanel('highlighter', t('emptyAllTitle'), t('emptyAllText')),
+        ...[
+          noteBox,
+          isFiltered()
+            ? emptyPanel('search', t('emptySearchTitle'), t('emptySearchText'))
+            : page
+              ? emptyPanel('highlighter', t('emptyPageTitle'), t('emptyPageText'))
+              : emptyPanel('highlighter', t('emptyAllTitle'), t('emptyAllText')),
+        ].filter(Boolean),
       );
     } else {
-      content.replaceChildren(renderCards(items, { showSource: state.view === 'all' }));
+      content.replaceChildren(...[noteBox, renderCards(items, { showSource: state.view === 'all' })].filter(Boolean));
     }
   }
 
@@ -373,20 +504,25 @@ async function init() {
     render();
   });
   $('bulk-delete').addEventListener('click', async () => {
-    const count = state.selected.size;
-    const ok = await confirmDialog({
-      title: t('bulkDeleteTitle', formatNumber(count)),
-      text: t('bulkDeleteText'),
-      confirmLabel: t('actionDelete'),
-    });
-    if (!ok) return;
-    const items = [...state.selected].map((key) => {
-      const [url, id] = key.split('\n');
-      return { url, id };
-    });
+    const items = selectedItems();
     state.selected.clear();
-    await deleteMany(items);
+    await deleteWithUndo(items);
   });
+  $('bulk-colors').append(
+    swatchPicker(null, async (color) => {
+      const items = selectedItems();
+      await updateMany(
+        items.map(({ annotation, page }) => ({ url: page.url, id: annotation.id })),
+        { color },
+      );
+      toast(t('toastRecolored', formatNumber(items.length)));
+    }),
+  );
+  $('bulk-copy').addEventListener('click', async () => {
+    const ok = await copyText(markdownOf(groupItems(selectedItems())));
+    toast(t(ok ? 'toastCopied' : 'toastCopyFailed'));
+  });
+  $('bulk-markdown').addEventListener('click', () => exportMarkdown(groupItems(selectedItems())));
 
   onStoreChange(({ settings }) => {
     if (settings) {

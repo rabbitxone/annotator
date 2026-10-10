@@ -53,6 +53,22 @@ api.contextMenus.onClicked.addListener((info, tab) => {
   });
 });
 
+const COMMAND_MESSAGES = {
+  highlight: { type: 'create-from-selection', withNote: false, fromCommand: true },
+  'highlight-note': { type: 'create-from-selection', withNote: true, fromCommand: true },
+  'toggle-panel': { type: 'toggle-panel' },
+};
+
+api.commands?.onCommand.addListener(async (command, tab) => {
+  const message = COMMAND_MESSAGES[command];
+  if (!message) return;
+  const target = tab ?? (await api.tabs.query({ active: true, currentWindow: true }))[0];
+  if (target?.id == null) return;
+  sendToTab(target.id, message).catch(() => {
+    // Restricted page
+  });
+});
+
 async function openAndGo(url, id) {
   const tab = await api.tabs.create({ url });
   const deadline = Date.now() + 20000;
@@ -92,6 +108,12 @@ api.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (sender.tab.active) syncMenuFor(sender.tab.id);
       }
       return false;
+    case 'tab-command':
+      sendToTab(message.tabId, message.message).then(
+        (response) => sendResponse(response ?? true),
+        () => sendResponse(false),
+      );
+      return true;
     case 'open-and-go':
       openAndGo(message.url, message.id).then(
         () => sendResponse(true),

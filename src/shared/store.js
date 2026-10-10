@@ -1,5 +1,6 @@
 import { api } from './api.js';
 import { DEFAULT_SETTINGS, PAGE_KEY_PREFIX, SCHEMA_VERSION } from './constants.js';
+import { mergePage } from './exchange.js';
 import { migrateLegacy } from './migrate.js';
 
 const storage = () => api.storage.local;
@@ -44,21 +45,25 @@ export async function listPages() {
   return Object.entries(all)
     .filter(([key]) => key.startsWith(PAGE_KEY_PREFIX))
     .map(([, page]) => page)
-    .filter((page) => page && Array.isArray(page.annotations) && page.annotations.length > 0);
+    .filter((page) => page && Array.isArray(page.annotations) && !isEmpty(page));
 }
+
+const isEmpty = (page) => page.annotations.length === 0 && !page.note?.trim();
 
 const locks = new Map();
 
-function mutatePage(url, mutate) {
+// `mutate` returns the changed page, or null when nothing changed (no write).
+function mutatePage(url, mutate, { touch = true } = {}) {
   const previous = locks.get(url) ?? Promise.resolve();
   const next = previous.then(async () => {
     const key = pageKey(url);
     const current = (await storage().get(key))[key] ?? { url, title: '', updatedAt: 0, annotations: [] };
-    const page = mutate(structuredClone(current)) ?? current;
-    if (page.annotations.length === 0) {
+    const page = mutate(structuredClone(current));
+    if (!page) return current;
+    if (isEmpty(page)) {
       await storage().remove(key);
     } else {
-      page.updatedAt = Date.now();
+      if (touch) page.updatedAt = Date.now();
       await storage().set({ [key]: page });
     }
     return page;
@@ -94,13 +99,103 @@ export function deleteAnnotations(url, ids) {
   });
 }
 
-export async function deleteMany(items) {
+function idsByUrl(items) {
   const byUrl = new Map();
   for (const { url, id } of items) {
     if (!byUrl.has(url)) byUrl.set(url, []);
     byUrl.get(url).push(id);
   }
-  await Promise.all([...byUrl].map(([url, ids]) => deleteAnnotations(url, ids)));
+  return byUrl;
+}
+
+export async function deleteMany(items) {
+  await Promise.all([...idsByUrl(items)].map(([url, ids]) => deleteAnnotations(url, ids)));
+}
+
+export async function updateMany(items, patch) {
+  const now = Date.now();
+  await Promise.all(
+    [...idsByUrl(items)].map(([url, ids]) =>
+      mutatePage(url, (page) => {
+        for (const a of page.annotations) if (ids.includes(a.id)) Object.assign(a, patch, { updatedAt: now });
+        return page;
+      }),
+    ),
+  );
+}
+
+export function restoreAnnotations(url, title, annotations) {
+  return mutatePage(url, (page) => {
+    if (!page.title && title) page.title = title;
+    const known = new Set(page.annotations.map((a) => a.id));
+    page.annotations.push(...annotations.filter((a) => !known.has(a.id)));
+    return page;
+  });
+}
+
+export function reanchorAnnotation(url, id, selector) {
+  return mutatePage(url, (page) => {
+    const target = page.annotations.find((a) => a.id === id);
+    if (!target) return null;
+    target.quote = selector.quote;
+    target.position = selector.position;
+    target.updatedAt = Date.now();
+    delete target.lostAt;
+    return page;
+  });
+}
+
+export function setLost(url, ids, lost) {
+  const wanted = new Set(ids);
+  return mutatePage(
+    url,
+    (page) => {
+      let changed = false;
+      for (const a of page.annotations) {
+        if (!wanted.has(a.id) || !!a.lostAt === lost) continue;
+        if (lost) a.lostAt = Date.now();
+        else delete a.lostAt;
+        changed = true;
+      }
+      return changed ? page : null;
+    },
+    { touch: false },
+  );
+}
+
+export function setPageNote(url, title, note) {
+  return mutatePage(url, (page) => {
+    if ((page.note ?? '') === note) return null;
+    if (title && !page.title) page.title = title;
+    if (note.trim()) {
+      page.note = note;
+      page.noteUpdatedAt = Date.now();
+    } else {
+      delete page.note;
+      delete page.noteUpdatedAt;
+    }
+    return page;
+  });
+}
+
+export async function importPages(pages) {
+  let added = 0;
+  let updated = 0;
+  await Promise.all(
+    pages.map((incoming) =>
+      mutatePage(
+        incoming.url,
+        (current) => {
+          const result = mergePage(current, incoming);
+          added += result.added;
+          updated += result.updated;
+          return result.changed ? result.page : null;
+        },
+        { touch: false },
+      ),
+    ),
+  );
+  return { added, updated };
 }
 
 function withDefaults(stored) {

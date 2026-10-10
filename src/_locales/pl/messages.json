@@ -178,7 +178,7 @@
     "message": "Zapisane tylko na tym urządzeniu"
   },
   "privacyText": {
-    "message": "Zaznaczenia i notatki zostają na Twoim urządzeniu i nie nigdy opuszczają przeglądarki."
+    "message": "Zaznaczenia i notatki zostają na Twoim urządzeniu i nigdy nie opuszczają przeglądarki."
   },
   "navAll": {
     "message": "Wszystkie notatki"
@@ -196,7 +196,7 @@
     "message": "Ustawienia"
   },
   "navSettingsSubtitle": {
-    "message": "Wygląd i działanie na stronach."
+    "message": "Wygląd, skróty i kopie zapasowe."
   },
   "filterLabel": {
     "message": "Filtry"
@@ -224,17 +224,6 @@
       }
     }
   },
-  "bulkDeleteTitle": {
-    "message": "Usunąć zaznaczone notatki ($VALUE$)?",
-    "placeholders": {
-      "value": {
-        "content": "$1"
-      }
-    }
-  },
-  "bulkDeleteText": {
-    "message": "Zaznaczenia znikną też ze stron. Tej operacji nie można cofnąć."
-  },
   "settingsAppearance": {
     "message": "Wygląd i działanie"
   },
@@ -261,5 +250,187 @@
   },
   "settingSiteAppHint": {
     "message": "W aplikacjach webowych Annotator jest domyślnie wyłączony"
+  },
+  "cmd_highlight": {
+    "message": "Zakreśl zaznaczony tekst"
+  },
+  "cmd_highlight_note": {
+    "message": "Zakreśl i dodaj notatkę"
+  },
+  "cmd_toggle_panel": {
+    "message": "Pokaż lub ukryj panel notatek"
+  },
+  "actionCopy": {
+    "message": "Kopiuj"
+  },
+  "actionCopyQuote": {
+    "message": "Kopiuj cytat z linkiem"
+  },
+  "actionUndo": {
+    "message": "Cofnij"
+  },
+  "actionReanchor": {
+    "message": "Przypnij do zaznaczenia"
+  },
+  "actionReanchorHint": {
+    "message": "Najpierw zaznacz nowy fragment na stronie, potem kliknij, aby przypiąć do niego tę notatkę"
+  },
+  "actionOpenPanel": {
+    "message": "Panel"
+  },
+  "panelOpenHint": {
+    "message": "Pokaż panel notatek na tej stronie"
+  },
+  "panelTitle": {
+    "message": "Notatki na tej stronie"
+  },
+  "panelSaved": {
+    "message": "Zapisano"
+  },
+  "panelCopyAll": {
+    "message": "Kopiuj wszystko jako Markdown"
+  },
+  "panelEmpty": {
+    "message": "Na tej stronie nie ma jeszcze zaznaczeń. Zaznacz tekst, aby utworzyć pierwsze."
+  },
+  "panelOrphansTitle": {
+    "message": "Nie znaleziono na stronie ($V1$)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "panelOrphansHint": {
+    "message": "Tekst mógł się zmienić. Zaznacz jego nową wersję na stronie i kliknij „Przypnij do zaznaczenia”."
+  },
+  "pageNoteLabel": {
+    "message": "Notatka do strony"
+  },
+  "pageNotePlaceholder": {
+    "message": "Notatka do całej strony…"
+  },
+  "pageNoteAdd": {
+    "message": "Dodaj notatkę do całej strony"
+  },
+  "markdownHint": {
+    "message": "Obsługuje **pogrubienie**, *kursywę*, `kod`, listy i linki."
+  },
+  "toastCopied": {
+    "message": "Skopiowano do schowka"
+  },
+  "toastCopyFailed": {
+    "message": "Nie udało się skopiować do schowka"
+  },
+  "toastDeleted": {
+    "message": "Usunięte notatki: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastRecolored": {
+    "message": "Zmieniono kolor notatek: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastImported": {
+    "message": "Zaimportowano. Nowe: $V1$, zaktualizowane: $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "toastImportedNothing": {
+    "message": "W tym pliku nie ma nic nowego — wszystko już tu jest"
+  },
+  "toastImportInvalid": {
+    "message": "To nie jest plik kopii zapasowej Annotatora"
+  },
+  "toastImportFailed": {
+    "message": "Import się nie udał. Spróbuj ponownie."
+  },
+  "toastReanchored": {
+    "message": "Notatka przypięta do nowego tekstu"
+  },
+  "toastReanchorNoSelection": {
+    "message": "Najpierw zaznacz nowy fragment tekstu na stronie"
+  },
+  "exportTitle": {
+    "message": "Notatki z Annotatora"
+  },
+  "filterLost": {
+    "message": "Nieodnalezione"
+  },
+  "sortPosition": {
+    "message": "Kolejność w tekście"
+  },
+  "groupLabel": {
+    "message": "Grupowanie"
+  },
+  "groupRecent": {
+    "message": "Ostatnie"
+  },
+  "groupDomain": {
+    "message": "Według witryny"
+  },
+  "settingsShortcuts": {
+    "message": "Skróty klawiszowe"
+  },
+  "settingsData": {
+    "message": "Dane"
+  },
+  "shortcutNone": {
+    "message": "Nie ustawiono"
+  },
+  "shortcutToolbarKeys": {
+    "message": "W pasku kolorów"
+  },
+  "shortcutToolbarKeysHint": {
+    "message": "1–5 wybiera kolor, N dodaje notatkę."
+  },
+  "shortcutChangeHint": {
+    "message": "Skróty ustawia się w ustawieniach rozszerzeń przeglądarki."
+  },
+  "shortcutChange": {
+    "message": "Zmień skróty"
+  },
+  "dataBackup": {
+    "message": "Kopia zapasowa"
+  },
+  "dataBackupHint": {
+    "message": "Zapisz wszystkie notatki do pliku albo przywróć je na innym urządzeniu. Import łączy dane i niczego nie usuwa."
+  },
+  "dataExport": {
+    "message": "Eksportuj"
+  },
+  "dataImport": {
+    "message": "Importuj"
+  },
+  "dataMarkdown": {
+    "message": "Markdown"
+  },
+  "dataMarkdownHint": {
+    "message": "Wszystkie notatki jako czytelny dokument, pogrupowany według stron."
+  },
+  "dataExportMarkdown": {
+    "message": "Pobierz .md"
+  },
+  "bulkRecolor": {
+    "message": "Zmień kolor"
+  },
+  "bulkCopyHint": {
+    "message": "Kopiuj zaznaczone notatki jako Markdown"
+  },
+  "bulkMarkdownHint": {
+    "message": "Pobierz zaznaczone notatki jako plik Markdown"
   }
 }

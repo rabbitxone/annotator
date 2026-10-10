@@ -138,13 +138,13 @@ export function createUi(handlers) {
     return !!host && event.composedPath().includes(host);
   }
 
-  function swatchButton(color, pressed, onPick) {
+  function swatchButton(color, pressed, onPick, hint) {
     return h(
       'button',
       {
         class: 'swatch-btn',
         type: 'button',
-        title: t(`color_${color.id}`),
+        title: hint ? `${t(`color_${color.id}`)} (${hint})` : t(`color_${color.id}`),
         'aria-label': t(`color_${color.id}`),
         'aria-pressed': String(pressed),
         dataset: { color: color.id },
@@ -182,13 +182,14 @@ export function createUi(handlers) {
     const el = h(
       'div',
       { class: 'layer toolbar', role: 'toolbar', 'aria-label': t('extName') },
-      COLORS.map((color) => swatchButton(color, false, (id) => handlers.onHighlight(id))),
+      COLORS.map((color, i) => swatchButton(color, false, (id) => handlers.onHighlight(id), String(i + 1))),
       h('span', { class: 'divider' }),
       h(
         'button',
         {
           class: 'toolbar-note',
           type: 'button',
+          title: `${t('toolbarAddNote')} (N)`,
           onclick: () => handlers.onHighlightWithNote(),
         },
         icon('noteEdit', { size: 16 }),
@@ -240,6 +241,26 @@ export function createUi(handlers) {
       icon('delete', { size: 16 }),
     );
 
+    const copyBtn = h(
+      'button',
+      {
+        class: 'icon-btn',
+        type: 'button',
+        title: t('actionCopyQuote'),
+        'aria-label': t('actionCopyQuote'),
+        onclick: async () => {
+          if (!(await handlers.onCopy(annotation.id))) return;
+          copyBtn.replaceChildren(icon('tick', { size: 16 }));
+          copyBtn.title = t('toastCopied');
+          setTimeout(() => {
+            copyBtn.replaceChildren(icon('copy', { size: 16 }));
+            copyBtn.title = t('actionCopyQuote');
+          }, 1500);
+        },
+      },
+      icon('copy', { size: 16 }),
+    );
+
     const quote = h(
       'div',
       { class: 'quote', style: { '--swatch': colorById(color).swatch } },
@@ -257,6 +278,7 @@ export function createUi(handlers) {
         h(
           'div',
           { class: 'head-actions' },
+          copyBtn,
           deleteBtn,
           h(
             'button',
@@ -382,6 +404,20 @@ export function createUi(handlers) {
   }
 
   document.addEventListener(
+    'keydown',
+    (e) => {
+      if (current?.kind !== 'toolbar' || e.ctrlKey || e.metaKey || e.altKey) return;
+      const index = Number(e.key) - 1;
+      if (Number.isInteger(index) && COLORS[index]) handlers.onHighlight(COLORS[index].id);
+      else if (e.key === 'n' || e.key === 'N') handlers.onHighlightWithNote();
+      else return;
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    true,
+  );
+
+  document.addEventListener(
     'mousedown',
     (e) => {
       if (current && !isInside(e)) close({ save: current.kind === 'popover' });
@@ -389,7 +425,13 @@ export function createUi(handlers) {
     true,
   );
 
+  function shadowRoot() {
+    ensureHost();
+    return shadow;
+  }
+
   return {
+    shadowRoot,
     showHandle,
     showToolbar,
     openPopover,

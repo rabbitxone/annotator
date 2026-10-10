@@ -8,6 +8,24 @@ The popup menu displays all annotations on the current page. You'll find a butto
 
 All data is stored locally on your device. It is never sent to the developer or any other person or company.
 
+## Features
+
+- **Side panel on the page** – all highlights in reading order, a note for the whole page, and notes the extension could no longer find (open it from the popup or with a shortcut).
+- **Keyboard shortcuts** – `Ctrl+Shift+L` highlights the selection, `Ctrl+Shift+.` highlights and opens the note, `Ctrl+Shift+,` toggles the side panel. In the colour bar, `1`–`5` picks a colour and `N` adds a note. Shortcuts can be changed in the browser's extension settings.
+- **Formatting in notes** – `**bold**`, `*italics*`, `` `code` ``, lists and links.
+- **Notes that lost their text** – when a page changes, select the new wording and click *Pin to selection*. The dashboard can filter notes that were not found.
+- **Copy quote with link** – copies the quote, your note and a link that scrolls straight to the text (text fragment), even for people without the extension.
+- **Backup and Markdown export** – export everything to a JSON file and import it on another device (importing merges and never deletes), or download notes as a Markdown document.
+- **Dashboard tools** – sort by text order, group pages by site, recolour, copy or export a selection, and undo deletions.
+
+## Development
+
+```sh
+npm install
+npm run build   # dist/chrome and dist/firefox
+npm test        # unit tests
+```
+
 ## Screenshots
 
 <img width="1400" height="875" alt="01-highlight-note-wikipedia" src="https://github.com/user-attachments/assets/730fb439-908c-4d47-a739-e6019f7055a6" />

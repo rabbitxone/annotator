@@ -1,19 +1,24 @@
 import { api } from '../shared/api.js';
+import { copyText } from '../shared/clipboard.js';
 import { h } from '../shared/dom.js';
+import { quoteSnippet } from '../shared/exchange.js';
 import { applyI18n, t } from '../shared/i18n.js';
 import { hydrateIcons, icon } from '../shared/icons.js';
 import {
-  deleteAnnotations,
   ensureMigrated,
   getPage,
   getSettings,
   listPages,
   onStoreChange,
+  setPageNote,
   updateAnnotation,
 } from '../shared/store.js';
 import { hostnameOf, normalizeUrl } from '../shared/url.js';
+import { deleteWithUndo } from './components/actions.js';
 import { annotationCard } from './components/card.js';
+import { pageNoteBox } from './components/page-note.js';
 import { privacyNote, settingsPanel } from './components/settings.js';
+import { toast } from './components/toast.js';
 
 const RECENT_LIMIT = 30;
 
@@ -21,6 +26,7 @@ const state = {
   tab: 'page',
   query: '',
   tabId: null,
+  tabTitle: '',
   pageUrl: null,
   page: null,
   pages: [],
@@ -51,16 +57,36 @@ function emptyState(iconName, title, text) {
   );
 }
 
+function setEditing(editing) {
+  state.editing = editing;
+  if (!editing && state.dirty) render();
+}
+
 function card(annotation, page, extra) {
   return annotationCard(annotation, page, {
+    query: state.query,
     onSave: (patch) => updateAnnotation(page.url, annotation.id, patch),
-    onDelete: () => deleteAnnotations(page.url, [annotation.id]),
-    onEditingChange: (editing) => {
-      state.editing = editing;
-      if (!editing && state.dirty) render();
-    },
+    onDelete: () => deleteWithUndo([{ annotation, page }]),
+    onCopy: () => copyText(quoteSnippet(annotation, page)),
+    onEditingChange: setEditing,
     ...extra,
   });
+}
+
+async function reanchor(id) {
+  let result = null;
+  try {
+    result = await api.tabs.sendMessage(state.tabId, { type: 'reanchor', id }, { frameId: 0 });
+  } catch {
+    // Content script gone
+  }
+  if (!result?.ok) {
+    toast(t('toastReanchorNoSelection'));
+    return;
+  }
+  toast(t('toastReanchored'));
+  state.orphans.delete(id);
+  render();
 }
 
 async function goToOnThisPage(id) {
@@ -81,18 +107,28 @@ function renderPageTab() {
   if (!state.pageUrl) {
     return [emptyState('alert', t('emptyUnsupportedTitle'), t('emptyUnsupportedText'))];
   }
-  const annotations = [...(state.page?.annotations ?? [])].sort((a, b) => b.createdAt - a.createdAt);
+  const page = state.page ?? { url: state.pageUrl, title: state.tabTitle, annotations: [] };
+  const noteBox = pageNoteBox(page.note, {
+    query: state.query,
+    onSave: (note) => setPageNote(page.url, page.title || state.tabTitle, note),
+    onEditingChange: setEditing,
+  });
+  const annotations = [...page.annotations].sort((a, b) => b.createdAt - a.createdAt);
   if (annotations.length === 0) {
-    return [emptyState('highlighter', t('emptyPageTitle'), t('emptyPageText'))];
+    return [noteBox, emptyState('highlighter', t('emptyPageTitle'), t('emptyPageText'))];
   }
-  const visible = annotations.filter((a) => matches(a, state.page));
-  if (visible.length === 0) return [emptyState('search', t('emptySearchTitle'), t('emptySearchText'))];
-  return visible.map((a) =>
-    card(a, state.page, {
-      orphan: state.orphans.has(a.id),
-      onGo: state.orphans.has(a.id) ? null : () => goToOnThisPage(a.id),
-    }),
-  );
+  const visible = annotations.filter((a) => matches(a, page));
+  if (visible.length === 0) return [noteBox, emptyState('search', t('emptySearchTitle'), t('emptySearchText'))];
+  return [
+    noteBox,
+    ...visible.map((a) =>
+      card(a, page, {
+        orphan: state.orphans.has(a.id),
+        onGo: state.orphans.has(a.id) ? null : () => goToOnThisPage(a.id),
+        onReanchor: () => reanchor(a.id),
+      }),
+    ),
+  ];
 }
 
 function renderRecentTab() {
@@ -181,7 +217,9 @@ async function init() {
 
   const [tab] = await api.tabs.query({ active: true, currentWindow: true });
   state.tabId = tab?.id ?? null;
+  state.tabTitle = tab?.title ?? '';
   state.pageUrl = tab?.url ? normalizeUrl(tab.url) : null;
+  document.getElementById('open-panel').hidden = !state.pageUrl;
   await refresh();
   loadOrphans();
 
@@ -194,6 +232,12 @@ async function init() {
   search.addEventListener('input', () => {
     state.query = search.value.trim().toLowerCase();
     render();
+  });
+  document.getElementById('open-panel').addEventListener('click', async () => {
+    await api.runtime
+      .sendMessage({ type: 'tab-command', tabId: state.tabId, message: { type: 'toggle-panel' } })
+      .catch(() => { });
+    window.close();
   });
   document.getElementById('open-dashboard').addEventListener('click', () => {
     api.tabs.create({ url: api.runtime.getURL('dashboard.html') });

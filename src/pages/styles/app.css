@@ -412,8 +412,185 @@ textarea.input {
   background: var(--surface);
   font-size: 13px;
   line-height: 19px;
-  white-space: pre-wrap;
   word-break: break-word;
+}
+
+.md p,
+.md ul,
+.md ol {
+  margin: 0;
+}
+
+.md > * + * {
+  margin-top: 6px;
+}
+
+.md ul,
+.md ol {
+  padding-left: 20px;
+}
+
+.md a {
+  color: var(--accent-hover);
+}
+
+.md code {
+  padding: 1px 4px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-sunken);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+.hit {
+  border-radius: 2px;
+  background: rgba(1, 173, 53, 0.22);
+  box-shadow: 0 0 0 1px rgba(1, 173, 53, 0.35);
+}
+
+.field-hint {
+  color: var(--subtle);
+  font-size: 11px;
+  line-height: 15px;
+}
+
+.page-note {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  font-size: 13px;
+  line-height: 19px;
+  word-break: break-word;
+}
+
+.page-note[data-empty] {
+  padding: 0;
+  border-style: dashed;
+  background: none;
+}
+
+.page-note-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 24px;
+  margin: -2px -4px -4px 0;
+}
+
+.page-note-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.page-note-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background-color var(--transition),
+    color var(--transition);
+}
+
+.page-note-add:hover {
+  background: var(--surface-raised);
+  color: var(--on-surface);
+}
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: var(--radius-xs);
+  background: var(--surface);
+  color: var(--on-surface);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.kbd-empty {
+  color: var(--subtle);
+  font-family: inherit;
+}
+
+.kbd-group {
+  display: flex;
+  gap: 4px;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100vw - 24px);
+  padding: 6px 6px 6px 14px;
+  border-radius: var(--radius-md);
+  background: var(--on-surface);
+  color: var(--surface-raised);
+  box-shadow: var(--shadow-lg);
+  font-size: 13px;
+  font-weight: 500;
+  transform: translateX(-50%);
+  animation: toast-in 160ms ease-out;
+}
+
+.toast:not(:has(.toast-action)) {
+  padding-right: 14px;
+  min-height: 40px;
+}
+
+.toast[data-closing] {
+  opacity: 0;
+  transition: opacity 150ms ease-in;
+}
+
+.toast-action {
+  color: #6ee7a0;
+}
+
+.toast-action:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body:has(.bulk-bar[data-open]) .toast {
+  bottom: 84px;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%);
+  }
 }
 
 .card-foot {
@@ -575,6 +752,18 @@ textarea.input {
   line-height: 16px;
 }
 
+.setting-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.setting-actions .setting-sublabel {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
 .setting-item .segmented {
   flex-shrink: 0;
 }
@@ -697,61 +886,6 @@ textarea.input {
   font-weight: 700;
   font-size: 14px;
   text-transform: uppercase;
-}
-
-.dialog {
-  width: min(420px, calc(100vw - 32px));
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--surface-raised);
-  color: var(--on-surface);
-  box-shadow: var(--shadow-lg);
-}
-
-.dialog::backdrop {
-  background: rgba(17, 24, 39, 0.45);
-  backdrop-filter: blur(2px);
-}
-
-.dialog-body {
-  padding: 20px 20px 8px;
-}
-
-.dialog-title {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 19px;
-  margin-bottom: 6px;
-}
-
-.dialog-text {
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 19px;
-}
-
-.dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 16px 20px 20px;
-}
-
-.dialog[open] {
-  animation: slide-up 180ms ease-out;
-}
-
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: none;
-  }
 }
 
 @keyframes fade-in {
