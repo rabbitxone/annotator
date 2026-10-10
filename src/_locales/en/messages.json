@@ -154,7 +154,7 @@
     "message": "Selection handle"
   },
   "settingToolbarHint": {
-    "message": "A small button at the end of selected text that opens the colours."
+    "message": "A small button at the end of selected text that opens the colors."
   },
   "settingStyle": {
     "message": "Highlight style"
@@ -169,7 +169,7 @@
     "message": "Underline"
   },
   "settingDefaultColor": {
-    "message": "Default colour"
+    "message": "Default color"
   },
   "settingDefaultColorHint": {
     "message": "Used for notes created from the menu."
@@ -184,7 +184,7 @@
     "message": "All notes"
   },
   "navAllSubtitle": {
-    "message": "Everything you've highlighted, newest first."
+    "message": "Everything you've highlighted, across all websites."
   },
   "navPages": {
     "message": "Pages"
@@ -202,7 +202,7 @@
     "message": "Filters"
   },
   "filterAllColors": {
-    "message": "All colours"
+    "message": "All colors"
   },
   "filterWithNote": {
     "message": "With a note"
@@ -331,7 +331,7 @@
     }
   },
   "toastRecolored": {
-    "message": "Changed colour of notes: $V1$",
+    "message": "Changed color of notes: $V1$",
     "placeholders": {
       "v1": {
         "content": "$1"
@@ -392,10 +392,10 @@
     "message": "Not set"
   },
   "shortcutToolbarKeys": {
-    "message": "In the colour bar"
+    "message": "In the color bar"
   },
   "shortcutToolbarKeysHint": {
-    "message": "1–5 picks a colour, N adds a note."
+    "message": "1–5 picks a color, N adds a note."
   },
   "shortcutChangeHint": {
     "message": "Shortcuts are set in the browser's extension settings."
@@ -425,7 +425,7 @@
     "message": "Download .md"
   },
   "bulkRecolor": {
-    "message": "Change colour"
+    "message": "Change color"
   },
   "bulkCopyHint": {
     "message": "Copy selected notes as Markdown"
