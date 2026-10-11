@@ -60,6 +60,20 @@ function absolute(el, value) {
   }
 }
 
+const HINT_MAX = 200;
+
+function copyHints(el, copy) {
+  for (const name of ['id', 'class']) {
+    const value = el.getAttribute(name);
+    if (value) copy.setAttribute(name, value.slice(0, HINT_MAX));
+  }
+}
+
+function rendersAsBlock(el) {
+  const display = getComputedStyle(el).display;
+  return display !== 'contents' && !display.startsWith('inline');
+}
+
 function hidden(el, capture) {
   if (el.hidden || el.getAttribute('aria-hidden') === 'true') return true;
   if (DROP_ROLES.has(el.getAttribute('role'))) return true;
@@ -68,9 +82,10 @@ function hidden(el, capture) {
 
 /**
  * Copies `source`'s children into a fragment of `target` (an inert document), keeping
- * only whitelisted structure. `capture` reads live properties (resolved URLs, visibility).
+ * only whitelisted structure. `capture` reads live properties (resolved URLs, visibility,
+ * block layout); `keepHints` keeps id/class and section tag names for Readability to score.
  */
-export function cleanTree(source, target, { capture = false } = {}) {
+export function cleanTree(source, target, { capture = false, keepHints = false } = {}) {
   let budget = MAX_ELEMENTS;
   const fragment = target.createDocumentFragment();
 
@@ -95,12 +110,15 @@ export function cleanTree(source, target, { capture = false } = {}) {
       if (!attrs) return;
       const copy = target.createElement(tag);
       for (const [name, value] of Object.entries(attrs)) copy.setAttribute(name, value);
+      if (keepHints) copyHints(el, copy);
       to.append(copy);
       copyChildren(el, copy);
       if (tag === 'a' && !copy.hasChildNodes()) copy.remove();
-    } else if (AS_DIV.has(tag)) {
-      const copy = target.createElement('div');
+    } else if (AS_DIV.has(tag) || (capture && rendersAsBlock(el))) {
+      const copy = target.createElement(keepHints && AS_DIV.has(tag) ? tag : 'div');
+      if (keepHints) copyHints(el, copy);
       copyChildren(el, copy);
+      if (capture && el.shadowRoot) copyChildren(el.shadowRoot, copy);
       if (copy.hasChildNodes()) to.append(copy);
     } else {
       // Unknown or presentational (span, font, custom elements, our own marks): keep the content only.

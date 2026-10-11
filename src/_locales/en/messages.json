@@ -566,5 +566,43 @@
         "content": "$1"
       }
     }
+  },
+  "whatsNewTitle": {
+    "message": "New in Annotator $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "whatsNewShort": {
+    "message": "Side panel, keyboard shortcuts, backups and page snapshots."
+  },
+  "whatsNewPanel": {
+    "message": "A side panel on every page with your highlights, a page note and notes whose text has moved."
+  },
+  "whatsNewShortcuts": {
+    "message": "Keyboard shortcuts, formatting in notes, and copying quotes with a link."
+  },
+  "whatsNewBackup": {
+    "message": "Backups you can import on another device, and Markdown export."
+  },
+  "whatsNewSnapshots": {
+    "message": "Page snapshots: a readable copy of pages you highlight, in case they change or disappear."
+  },
+  "whatsNewSnapshotsOff": {
+    "message": "Automatic page snapshots are off for you, so nothing changes until you decide. They stay on this device only."
+  },
+  "whatsNewEnableSnapshots": {
+    "message": "Turn on page snapshots"
+  },
+  "whatsNewSnapshotsOn": {
+    "message": "Page snapshots are on"
+  },
+  "whatsNewDismiss": {
+    "message": "Got it"
+  },
+  "readerViewHint": {
+    "message": "You're in Reader View. Highlights show and can be added on the original page."
   }
 }

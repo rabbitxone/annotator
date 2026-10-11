@@ -38,6 +38,7 @@ import { pageNoteBox } from './components/page-note.js';
 import { snapshotBar } from './components/snapshot-bar.js';
 import { dataPanel, privacyNote, settingsPanel, shortcutsPanel } from './components/settings.js';
 import { toast } from './components/toast.js';
+import { whatsNewBanner } from './components/whats-new.js';
 
 const REPO_URL = 'https://github.com/RabbitXOne/annotator';
 
@@ -546,6 +547,7 @@ async function init() {
   state.settings = await getSettings();
   readRoute();
   await refresh();
+  whatsNewBanner(state.settings).then((banner) => banner && $('whats-new').append(banner));
 
   window.addEventListener('hashchange', () => {
     readRoute();

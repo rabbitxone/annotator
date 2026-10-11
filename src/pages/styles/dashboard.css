@@ -129,6 +129,10 @@ body {
   width: min(340px, 100%);
 }
 
+#whats-new:empty {
+  display: none;
+}
+
 .toolbar-row {
   display: flex;
   align-items: center;

@@ -566,5 +566,43 @@
         "content": "$1"
       }
     }
+  },
+  "whatsNewTitle": {
+    "message": "Nowości w Annotatorze $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "whatsNewShort": {
+    "message": "Panel boczny, skróty klawiszowe, kopie zapasowe i kopie stron."
+  },
+  "whatsNewPanel": {
+    "message": "Panel boczny na każdej stronie: zakreślenia, notatka do strony i notatki, których tekst się przesunął."
+  },
+  "whatsNewShortcuts": {
+    "message": "Skróty klawiszowe, formatowanie w notatkach i kopiowanie cytatów z linkiem."
+  },
+  "whatsNewBackup": {
+    "message": "Kopie zapasowe do przeniesienia na inne urządzenie i eksport do Markdown."
+  },
+  "whatsNewSnapshots": {
+    "message": "Kopie stron: czytelna kopia zakreślanych stron na wypadek, gdyby się zmieniły lub zniknęły."
+  },
+  "whatsNewSnapshotsOff": {
+    "message": "Automatyczne kopie stron są u Ciebie wyłączone, więc nic się nie zmienia, dopóki nie zdecydujesz. Zostają tylko na tym urządzeniu."
+  },
+  "whatsNewEnableSnapshots": {
+    "message": "Włącz kopie stron"
+  },
+  "whatsNewSnapshotsOn": {
+    "message": "Kopie stron włączone"
+  },
+  "whatsNewDismiss": {
+    "message": "Rozumiem"
+  },
+  "readerViewHint": {
+    "message": "Jesteś w trybie czytania. Zakreślenia widać i można dodawać na oryginalnej stronie."
   }
 }

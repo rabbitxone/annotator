@@ -1,3 +1,5 @@
+import isProbablyReaderable from '@mozilla/readability/Readability-readerable.js';
+
 const WIDGET_SELECTOR = [
   'input',
   'textarea',
@@ -40,9 +42,23 @@ export function isSelectionAnnotatable(range) {
 export const APP_THRESHOLD = 3;
 
 export function scoreAppLikeness(signals) {
-  const { hasAppRole, bigCanvas, bigVideo, bigEditable, controls, textChars, isFeed, innerScroller, composer, shell } =
-    signals;
+  const {
+    hasAppRole,
+    bigCanvas,
+    bigVideo,
+    bigEditable,
+    controls,
+    textChars,
+    isFeed,
+    innerScroller,
+    composer,
+    shell,
+    readerable,
+    declaresArticle,
+  } = signals;
   let score = 0;
+  if (readerable) score -= 4; // Firefox would offer Reader View here (same Readability check)
+  if (declaresArticle) score -= 2; // og:type=article or schema.org Article/BlogPosting/NewsArticle
   if (hasAppRole) score += 3; // the page says so itself
   if (bigCanvas) score += 3; // maps, design tools, canvas-rendered documents, games
   if (isFeed) score += 3; // role=feed / role=log, or a stream of role=article items
@@ -105,6 +121,37 @@ function hasComposerInView(vw, vh) {
     });
 }
 
+const ARTICLE_TYPES = /^(Article|NewsArticle|BlogPosting|Report|ScholarlyArticle|TechArticle|AnalysisNewsArticle|OpinionNewsArticle|ReportageNewsArticle|LiveBlogPosting)$/;
+
+function typesIn(node, out = []) {
+  if (Array.isArray(node)) for (const item of node) typesIn(item, out);
+  else if (node && typeof node === 'object') {
+    for (const type of [node['@type']].flat()) if (typeof type === 'string') out.push(type);
+    if (node['@graph']) typesIn(node['@graph'], out);
+  }
+  return out;
+}
+
+export function declaresArticle(doc = document) {
+  if (doc.querySelector('meta[property="og:type"][content="article" i]')) return true;
+  for (const script of Array.from(doc.querySelectorAll('script[type="application/ld+json"]')).slice(0, 6)) {
+    try {
+      if (typesIn(JSON.parse(script.textContent)).some((type) => ARTICLE_TYPES.test(type))) return true;
+    } catch {
+      // Malformed JSON-LD is common; ignore it
+    }
+  }
+  return !!doc.querySelector('[itemtype*="schema.org/Article" i], [itemtype*="schema.org/NewsArticle" i], [itemtype*="schema.org/BlogPosting" i]');
+}
+
+function readerable() {
+  try {
+    return isProbablyReaderable(document);
+  } catch {
+    return false;
+  }
+}
+
 export function collectSignals() {
   const viewportArea = Math.max(1, window.innerWidth * window.innerHeight);
   const isBig = (el) => {
@@ -119,6 +166,8 @@ export function collectSignals() {
 
   return {
     ...layout,
+    readerable: readerable(),
+    declaresArticle: declaresArticle(),
     isFeed: !!document.querySelector('[role="feed"], [role="log"]') || document.querySelectorAll('[role="article"]').length >= 3,
     composer: hasComposerInView(vw, vh),
     hasAppRole: !!document.querySelector('[role="application"]'),

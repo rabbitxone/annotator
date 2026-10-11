@@ -146,7 +146,10 @@ function main() {
     snapshotBusy = true;
     try {
       const url = pageUrl;
-      const snapshot = captureSnapshot(url);
+      const snapshot = await captureSnapshot(
+        url,
+        annotations.map((a) => a.quote?.exact),
+      );
       if (!snapshot) return { ok: false, reason: 'empty' };
       if (snapshotInfo?.latest?.hash === snapshot.hash) return { ok: true, unchanged: true };
       const info = await api.runtime.sendMessage({ type: 'save-snapshot', snapshot: { ...snapshot, auto } }).catch(() => null);

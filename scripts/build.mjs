@@ -17,6 +17,7 @@ const outName = (target) => (E2E ? `${target}-e2e` : target);
 const ENTRIES = {
   background: 'background/index.js',
   content: 'content/index.js',
+  reader: 'content/reader.js',
   popup: 'pages/popup.js',
   dashboard: 'pages/dashboard.js',
   snapshot: 'pages/snapshot.js',
@@ -98,6 +99,8 @@ async function copyStatic(out) {
     await cp(join(src, `icons/icon-${size}.png`), join(out, `icons/icon-${size}.png`));
   }
   await cp(join(src, 'icons/icon.svg'), join(out, 'icons/icon.svg'));
+  await mkdir(join(out, 'licenses'), { recursive: true });
+  await cp(join(root, 'node_modules/@mozilla/readability/LICENSE.md'), join(out, 'licenses/readability-LICENSE.md'));
   await cp(join(src, 'icons/logo.svg'), join(out, 'icons/logo.svg'));
   for (const page of ['popup.html', 'dashboard.html', 'snapshot.html']) await cp(join(src, 'pages', page), join(out, page));
   await mkdir(join(out, 'styles'), { recursive: true });

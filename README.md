@@ -19,6 +19,8 @@ All data is stored locally on your device. It is never sent to the developer or 
 - **Backup and Markdown export** – export everything to a JSON file and import it on another device (importing merges and never deletes), or download notes as a Markdown document.
 - **Dashboard tools** – sort by text order, group pages by site, recolor, copy or export a selection, and undo deletions.
 
+Annotator stays out of the way in web apps (mail, chat, editors) and turns on for articles. To tell them apart it uses the same check Firefox uses to offer Reader View ([Mozilla Readability](https://github.com/mozilla/readability), Apache-2.0), together with the page's own `og:type`/schema.org article markup. Readability also picks the article text for page snapshots.
+
 ## Development
 
 ```sh

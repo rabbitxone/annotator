@@ -1,6 +1,7 @@
 import { api } from '../shared/api.js';
 import { t } from '../shared/i18n.js';
-import { ensureMigrated } from '../shared/store.js';
+import { rolloutOnInstall } from '../shared/rollout.js';
+import { ensureMigrated, updateSettings } from '../shared/store.js';
 import { listSnapshots, saveSnapshot, snapshotPageUrl } from '../shared/snapshots.js';
 import { normalizeUrl } from '../shared/url.js';
 
@@ -32,10 +33,20 @@ async function injectIntoOpenTabs() {
   );
 }
 
-api.runtime.onInstalled.addListener(() => {
+async function applyRollout(details) {
+  const { settings } = await api.storage.local.get('settings');
+  const plan = rolloutOnInstall({ ...details, storedSettings: settings });
+  if (!plan) return;
+  if (plan.settings) await updateSettings(plan.settings);
+  await api.storage.local.set({ whatsNew: plan.whatsNew });
+}
+
+api.runtime.onInstalled.addListener(async (details) => {
   createMenus();
-  injectIntoOpenTabs().catch(() => { });
   ensureMigrated().catch((err) => console.error('Annotator: migration failed', err));
+  // Settings for existing users must be in place before content scripts read them.
+  await applyRollout(details).catch((err) => console.error('Annotator: rollout failed', err));
+  injectIntoOpenTabs().catch(() => { });
 });
 api.runtime.onStartup.addListener(createMenus);
 
@@ -139,6 +150,15 @@ api.runtime.onMessage.addListener((message, sender, sendResponse) => {
         (list) => sendResponse(snapshotSummary(list)),
         () => sendResponse(null),
       );
+      return true;
+    case 'load-reader':
+      if (sender.tab?.id == null) return false;
+      api.scripting
+        .executeScript({ target: { tabId: sender.tab.id, frameIds: [sender.frameId ?? 0] }, files: ['reader.js'] })
+        .then(
+          () => sendResponse(true),
+          () => sendResponse(false),
+        );
       return true;
     case 'snapshot-meta':
       listSnapshots(message.url).then(

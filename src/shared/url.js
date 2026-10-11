@@ -66,6 +66,16 @@ export function normalizeUrl(input) {
   return url.toString();
 }
 
+// Firefox shows Reader View at about:reader?url=<page>; notes belong to that page.
+export function unwrapReaderUrl(input) {
+  if (typeof input !== 'string' || !input.startsWith('about:reader?')) return input;
+  try {
+    return new URL(input).searchParams.get('url') || input;
+  } catch {
+    return input;
+  }
+}
+
 export function hostnameOf(url) {
   try {
     return new URL(url).hostname.replace(/^www\./, '') || url;
