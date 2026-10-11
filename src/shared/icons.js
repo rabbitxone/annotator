@@ -1,5 +1,8 @@
 import {
   Alert02Icon,
+  Archive02Icon,
+  Camera01Icon,
+  Image01Icon,
   ArrowLeft01Icon,
   Cancel01Icon,
   CheckmarkCircle02Icon,
@@ -31,6 +34,9 @@ import {
 
 const ICONS = {
   alert: Alert02Icon,
+  archive: Archive02Icon,
+  camera: Camera01Icon,
+  image: Image01Icon,
   back: ArrowLeft01Icon,
   close: Cancel01Icon,
   check: CheckmarkCircle02Icon,

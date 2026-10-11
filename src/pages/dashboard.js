@@ -14,6 +14,14 @@ import {
 import { applyI18n, formatNumber, relativeTime, t } from '../shared/i18n.js';
 import { hydrateIcons, icon } from '../shared/icons.js';
 import {
+  allSnapshotMeta,
+  deleteSnapshots,
+  exportSnapshots,
+  importSnapshots,
+  onSnapshotsChange,
+  snapshotPageUrl,
+} from '../shared/snapshots.js';
+import {
   ensureMigrated,
   getSettings,
   importPages,
@@ -27,6 +35,7 @@ import { hostnameOf } from '../shared/url.js';
 import { deleteWithUndo } from './components/actions.js';
 import { annotationCard, siteAvatar, swatchPicker } from './components/card.js';
 import { pageNoteBox } from './components/page-note.js';
+import { snapshotBar } from './components/snapshot-bar.js';
 import { dataPanel, privacyNote, settingsPanel, shortcutsPanel } from './components/settings.js';
 import { toast } from './components/toast.js';
 
@@ -36,6 +45,7 @@ const state = {
   view: 'all',
   pageUrl: null,
   pages: [],
+  snapshots: new Map(),
   settings: null,
   query: '',
   color: null,
@@ -119,14 +129,21 @@ function exportMarkdown(groups) {
   download(`annotator-${dateStamp()}.md`, markdownOf(groups), 'text/markdown');
 }
 
-function exportBackup() {
-  download(`annotator-backup-${dateStamp()}.json`, JSON.stringify(createBackup(state.pages), null, 2), 'application/json');
+async function exportBackup() {
+  const snapshots = await exportSnapshots().catch(() => []);
+  download(`annotator-backup-${dateStamp()}.json`, JSON.stringify(createBackup(state.pages, { snapshots }), null, 2), 'application/json');
 }
 
 async function importBackup(file) {
   try {
-    const { added, updated } = await importPages(parseBackup(await file.text()));
-    toast(added || updated ? t('toastImported', [formatNumber(added), formatNumber(updated)]) : t('toastImportedNothing'));
+    const { pages, snapshots } = parseBackup(await file.text());
+    const { added, updated } = await importPages(pages);
+    const snapshotsAdded = await importSnapshots(snapshots);
+    toast(
+      added || updated || snapshotsAdded
+        ? t('toastImported', [formatNumber(added), formatNumber(updated), formatNumber(snapshotsAdded)])
+        : t('toastImportedNothing'),
+    );
   } catch (err) {
     if (!(err instanceof BackupError)) console.error('Annotator: import failed', err);
     toast(t(err instanceof BackupError ? 'toastImportInvalid' : 'toastImportFailed'));
@@ -265,6 +282,7 @@ function renderCards(items, { showSource }) {
         query: state.query,
         onGo: () => api.runtime.sendMessage({ type: 'open-and-go', url: page.url, id: annotation.id }).catch(() => { }),
         onCopy: () => copyText(quoteSnippet(annotation, page)),
+        onSnapshot: state.snapshots.has(page.url) ? () => openSnapshot(page.url, annotation.id) : null,
         onSave: (patch) => updateAnnotation(page.url, annotation.id, patch),
         onDelete: () => deleteWithUndo([{ annotation, page }]),
         onSelect: (checked) => {
@@ -277,6 +295,25 @@ function renderCards(items, { showSource }) {
       });
     }),
   );
+}
+
+function openSnapshot(url, annotationId) {
+  api.tabs.create({ url: snapshotPageUrl({ url, annotationId }) });
+}
+
+function snapshotStats() {
+  const urls = new Set(state.pages.map((p) => p.url));
+  let count = 0;
+  let bytes = 0;
+  const unused = [];
+  for (const [url, list] of state.snapshots) {
+    for (const s of list) {
+      count++;
+      bytes += s.size || 0;
+      if (!urls.has(url)) unused.push(s.id);
+    }
+  }
+  return { count, bytes, unused };
 }
 
 function pageRow(page) {
@@ -295,6 +332,7 @@ function pageRow(page) {
       'div',
       { class: 'page-row-meta' },
       page.note?.trim() && h('span', { class: 'page-row-note', title: t('pageNoteLabel') }, icon('pageNote', { size: 14 })),
+      state.snapshots.has(page.url) && h('span', { class: 'page-row-note', title: t('snapshotLabel') }, icon('archive', { size: 14 })),
       h(
         'span',
         { class: 'page-row-colors' },
@@ -353,6 +391,13 @@ function renderSettings() {
     shortcutsPanel(),
     h('p', { class: 'settings-section-title' }, t('settingsData')),
     dataPanel({
+      settings: state.settings,
+      snapshots: { ...snapshotStats(), unused: snapshotStats().unused.length },
+      onCleanSnapshots: async () => {
+        const { unused } = snapshotStats();
+        await deleteSnapshots(unused);
+        toast(t('toastSnapshotsCleaned', formatNumber(unused.length)));
+      },
       onExportBackup: exportBackup,
       onExportMarkdown: () => exportMarkdown([...state.pages].sort((a, b) => b.updatedAt - a.updatedAt).map((page) => ({ page, annotations: page.annotations }))),
       onImport: importBackup,
@@ -441,11 +486,19 @@ function render() {
     const page = state.view === 'page' ? state.pages.find((p) => p.url === state.pageUrl) : null;
     const noteBox =
       page &&
-      pageNoteBox(page.note, {
-        query: state.query,
-        onSave: (note) => setPageNote(page.url, page.title, note),
-        onEditingChange: setEditing,
-      });
+      h(
+        'div',
+        { class: 'page-extras' },
+        pageNoteBox(page.note, {
+          query: state.query,
+          onSave: (note) => setPageNote(page.url, page.title, note),
+          onEditingChange: setEditing,
+        }),
+        snapshotBar(state.snapshots.get(page.url) ?? [], {
+          onOpen: () => openSnapshot(page.url),
+          emptyHint: t('snapshotNoneDashboard'),
+        }),
+      );
     if (state.view === 'page' && !page) {
       content.replaceChildren(emptyPanel('globe', t('emptyPageGoneTitle'), t('emptyPageGoneText')));
     } else if (items.length === 0) {
@@ -469,8 +522,17 @@ function render() {
   renderBulkBar();
 }
 
+async function loadSnapshots() {
+  const grouped = new Map();
+  for (const meta of await allSnapshotMeta().catch(() => [])) {
+    if (!grouped.has(meta.url)) grouped.set(meta.url, []);
+    grouped.get(meta.url).push(meta);
+  }
+  state.snapshots = grouped;
+}
+
 async function refresh() {
-  state.pages = await listPages();
+  [state.pages] = await Promise.all([listPages(), loadSnapshots()]);
   if (state.editing) state.dirty = true;
   else render();
 }
@@ -531,6 +593,7 @@ async function init() {
     }
     refresh();
   });
+  onSnapshotsChange(refresh);
 }
 
 init();

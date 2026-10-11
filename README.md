@@ -15,6 +15,7 @@ All data is stored locally on your device. It is never sent to the developer or 
 - **Formatting in notes** – `**bold**`, `*italics*`, `` `code` ``, lists and links.
 - **Notes that lost their text** – when a page changes, select the new wording and click *Pin to selection*. The dashboard can filter notes that were not found.
 - **Copy quote with link** – copies the quote, your note and a link that scrolls straight to the text (text fragment), even for people without the extension.
+- **Page snapshots** – when you first highlight a page, a readable copy of its text is saved, so your notes keep their context if the page is edited or taken down. Open it from the panel, popup or dashboard: your highlights are shown on the saved copy, images load only on request, and you can download it as an HTML file. Up to 5 versions per page (the original is always kept).
 - **Backup and Markdown export** – export everything to a JSON file and import it on another device (importing merges and never deletes), or download notes as a Markdown document.
 - **Dashboard tools** – sort by text order, group pages by site, recolor, copy or export a selection, and undo deletions.
 

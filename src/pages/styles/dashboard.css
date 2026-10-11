@@ -288,6 +288,19 @@ body {
   color: var(--accent);
 }
 
+.page-extras {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .page-extras {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .page-groups {
   display: flex;
   flex-direction: column;

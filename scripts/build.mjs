@@ -19,6 +19,7 @@ const ENTRIES = {
   content: 'content/index.js',
   popup: 'pages/popup.js',
   dashboard: 'pages/dashboard.js',
+  snapshot: 'pages/snapshot.js',
 };
 
 function manifestFor(target) {
@@ -98,10 +99,10 @@ async function copyStatic(out) {
   }
   await cp(join(src, 'icons/icon.svg'), join(out, 'icons/icon.svg'));
   await cp(join(src, 'icons/logo.svg'), join(out, 'icons/logo.svg'));
-  for (const page of ['popup.html', 'dashboard.html']) await cp(join(src, 'pages', page), join(out, page));
+  for (const page of ['popup.html', 'dashboard.html', 'snapshot.html']) await cp(join(src, 'pages', page), join(out, page));
   await mkdir(join(out, 'styles'), { recursive: true });
   await cp(join(src, 'shared/tokens.css'), join(out, 'styles/tokens.css'));
-  for (const sheet of ['app.css', 'popup.css', 'dashboard.css']) {
+  for (const sheet of ['app.css', 'popup.css', 'dashboard.css', 'snapshot.css']) {
     await cp(join(src, 'pages/styles', sheet), join(out, 'styles', sheet));
   }
 }

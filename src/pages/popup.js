@@ -14,9 +14,11 @@ import {
   updateAnnotation,
 } from '../shared/store.js';
 import { hostnameOf, normalizeUrl } from '../shared/url.js';
+import { listSnapshots, onSnapshotsChange, snapshotPageUrl } from '../shared/snapshots.js';
 import { deleteWithUndo } from './components/actions.js';
 import { annotationCard } from './components/card.js';
 import { pageNoteBox } from './components/page-note.js';
+import { snapshotBar } from './components/snapshot-bar.js';
 import { privacyNote, settingsPanel } from './components/settings.js';
 import { toast } from './components/toast.js';
 
@@ -31,6 +33,7 @@ const state = {
   page: null,
   pages: [],
   orphans: new Set(),
+  snapshots: [],
   appLike: false,
   settings: null,
   editing: false,
@@ -73,6 +76,17 @@ function card(annotation, page, extra) {
   });
 }
 
+function openSnapshot(annotationId) {
+  api.tabs.create({ url: snapshotPageUrl({ url: state.pageUrl, annotationId }) });
+  window.close();
+}
+
+async function loadSnapshots() {
+  if (!state.pageUrl) return;
+  state.snapshots = await listSnapshots(state.pageUrl).catch(() => []);
+  if (!state.editing) render();
+}
+
 async function reanchor(id) {
   let result = null;
   try {
@@ -113,19 +127,31 @@ function renderPageTab() {
     onSave: (note) => setPageNote(page.url, page.title || state.tabTitle, note),
     onEditingChange: setEditing,
   });
+  const snapshot = snapshotBar(state.snapshots, {
+    onOpen: () => openSnapshot(),
+    onSave: async () => {
+      const result = await api.runtime
+        .sendMessage({ type: 'tab-command', tabId: state.tabId, message: { type: 'save-snapshot-now' } })
+        .catch(() => null);
+      if (result?.ok) await loadSnapshots();
+      return result;
+    },
+  });
   const annotations = [...page.annotations].sort((a, b) => b.createdAt - a.createdAt);
   if (annotations.length === 0) {
-    return [noteBox, emptyState('highlighter', t('emptyPageTitle'), t('emptyPageText'))];
+    return [noteBox, snapshot, emptyState('highlighter', t('emptyPageTitle'), t('emptyPageText'))];
   }
   const visible = annotations.filter((a) => matches(a, page));
-  if (visible.length === 0) return [noteBox, emptyState('search', t('emptySearchTitle'), t('emptySearchText'))];
+  if (visible.length === 0) return [noteBox, snapshot, emptyState('search', t('emptySearchTitle'), t('emptySearchText'))];
   return [
     noteBox,
+    snapshot,
     ...visible.map((a) =>
       card(a, page, {
         orphan: state.orphans.has(a.id),
         onGo: state.orphans.has(a.id) ? null : () => goToOnThisPage(a.id),
         onReanchor: () => reanchor(a.id),
+        onSnapshot: state.snapshots.length ? () => openSnapshot(a.id) : null,
       }),
     ),
   ];
@@ -222,6 +248,8 @@ async function init() {
   document.getElementById('open-panel').hidden = !state.pageUrl;
   await refresh();
   loadOrphans();
+  loadSnapshots();
+  onSnapshotsChange(loadSnapshots);
 
   for (const btn of document.querySelectorAll('[role="tab"]')) {
     btn.addEventListener('click', () => {

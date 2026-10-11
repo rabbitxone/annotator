@@ -31,6 +31,7 @@ import {
   wrapRange,
 } from './highlighter.js';
 import { createPanel } from './panel.js';
+import { captureSnapshot } from './snapshot.js';
 import { createUi } from './ui.js';
 
 function alive() {
@@ -52,6 +53,7 @@ function main() {
 
   let pageUrl = null;
   let pageNote = '';
+  let snapshotInfo; // undefined until loaded, null when unknown
   let annotations = [];
   let settings = null;
   const anchors = new Map();
@@ -107,6 +109,8 @@ function main() {
         pageNote = note;
         setPageNote(pageUrl, document.title, note);
       },
+      onSaveSnapshot: () => takeSnapshot(false),
+      onOpenSnapshot: () => api.runtime.sendMessage({ type: 'open-snapshot', url: pageUrl }).catch(() => { }),
       onCopyAll: () =>
         copyText(
           toMarkdown([{ page: { ...currentPage(), note: pageNote }, annotations }], { pageNote: t('pageNoteLabel') }),
@@ -123,7 +127,48 @@ function main() {
       .filter((a) => head(a)?.isConnected)
       .sort((a, b) => (head(a).compareDocumentPosition(head(b)) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
     const placed = new Set(items);
-    return { items, orphans: annotations.filter((a) => !placed.has(a)), pageNote };
+    return { items, orphans: annotations.filter((a) => !placed.has(a)), pageNote, snapshot: snapshotInfo ?? null };
+  }
+
+  const AUTO_SNAPSHOT_INTERVAL = 24 * 3600 * 1000;
+  let snapshotBusy = false;
+
+  async function loadSnapshotInfo() {
+    const url = pageUrl;
+    const info = await api.runtime.sendMessage({ type: 'snapshot-meta', url }).catch(() => null);
+    if (url !== pageUrl) return;
+    snapshotInfo = info;
+    refreshPanel();
+  }
+
+  async function takeSnapshot(auto) {
+    if (!pageUrl || snapshotBusy || !checkAlive()) return { ok: false };
+    snapshotBusy = true;
+    try {
+      const url = pageUrl;
+      const snapshot = captureSnapshot(url);
+      if (!snapshot) return { ok: false, reason: 'empty' };
+      if (snapshotInfo?.latest?.hash === snapshot.hash) return { ok: true, unchanged: true };
+      const info = await api.runtime.sendMessage({ type: 'save-snapshot', snapshot: { ...snapshot, auto } }).catch(() => null);
+      if (!info) return { ok: false };
+      if (url === pageUrl) {
+        snapshotInfo = info;
+        refreshPanel();
+      }
+      return { ok: true };
+    } finally {
+      snapshotBusy = false;
+    }
+  }
+
+  // Keep a copy of what the page said when it was first highlighted, and a new one
+  // at most daily if the text has changed since.
+  async function maybeAutoSnapshot() {
+    if (!settings?.autoSnapshot) return;
+    if (snapshotInfo === undefined) await loadSnapshotInfo();
+    const latest = snapshotInfo?.latest;
+    if (latest && Date.now() - latest.capturedAt < AUTO_SNAPSHOT_INTERVAL) return;
+    setTimeout(() => takeSnapshot(true).catch(() => { }), 800);
   }
 
   function refreshPanel() {
@@ -134,6 +179,7 @@ function main() {
     if (!pageUrl) return;
     panel.update(panelModel());
     panel.toggle();
+    if (panel.isOpen && snapshotInfo === undefined) loadSnapshotInfo();
   }
 
   let observer = null;
@@ -261,12 +307,14 @@ function main() {
     anchorPending();
     reportCount();
     refreshPanel();
+    if (annotations.length > 0 || pageNote) loadSnapshotInfo();
   }
 
   function teardown() {
     ui.close();
     clearTimeout(lostTimer);
     pageNote = '';
+    snapshotInfo = undefined;
     withoutObserver(() => {
       for (const marks of anchors.values()) unwrap(marks);
     });
@@ -321,6 +369,7 @@ function main() {
     addAnnotation(pageUrl, document.title, created).finally(() => unsaved.delete(created.id));
     reportCount();
     refreshPanel();
+    maybeAutoSnapshot().catch(() => { });
     if (withNote) openEditor(created.id, { focus: true });
   }
 
@@ -453,6 +502,9 @@ function main() {
       case 'reanchor':
         sendResponse(reanchor(message.id));
         return false;
+      case 'save-snapshot-now':
+        takeSnapshot(false).then(sendResponse, () => sendResponse({ ok: false }));
+        return true;
       case 'go-to':
         goTo(message.id).then(sendResponse);
         return true;

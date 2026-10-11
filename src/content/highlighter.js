@@ -51,8 +51,8 @@ export function applyHighlightStyle(style) {
   el.textContent = highlightCss(style);
 }
 
-export function wrapRange(rawStart, rawEnd, annotation) {
-  const { nodes } = collectTextNodes();
+export function wrapRange(rawStart, rawEnd, annotation, root = document.body) {
+  const { nodes } = collectTextNodes(root);
   const marks = [];
 
   for (const { node, start } of nodes) {

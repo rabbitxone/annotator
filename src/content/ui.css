@@ -474,6 +474,7 @@ kbd {
   padding: 12px;
 }
 
+.panel-section + .panel-section,
 .panel-section + .panel-list-wrap,
 .panel-list-wrap .panel-section {
   margin-top: 14px;
@@ -522,6 +523,44 @@ kbd {
 .panel-note:focus {
   border-color: var(--accent);
   background: var(--surface-raised);
+}
+
+.panel-snapshot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 8px 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.panel-snapshot-text {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.panel-snapshot-text[data-status] {
+  color: var(--accent-hover);
+  font-weight: 600;
+}
+
+.panel-snapshot-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.panel-snapshot-actions [hidden] {
+  display: none;
+}
+
+.btn-xs:disabled {
+  opacity: 0.5;
+  cursor: progress;
 }
 
 .panel-list {

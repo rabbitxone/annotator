@@ -45,12 +45,32 @@ function stripLocal(page) {
   return { ...rest, annotations: annotations.map(({ lostAt, ...annotation }) => annotation) };
 }
 
-export function createBackup(pages, now = Date.now()) {
-  return {
+export function createBackup(pages, { now = Date.now(), snapshots = [] } = {}) {
+  const backup = {
     format: BACKUP_FORMAT,
     version: BACKUP_VERSION,
     exportedAt: new Date(now).toISOString(),
     pages: pages.map(stripLocal),
+  };
+  if (snapshots.length) backup.snapshots = snapshots;
+  return backup;
+}
+
+const MAX_SNAPSHOT_HTML = 8 * 1024 * 1024;
+
+function cleanSnapshot(raw) {
+  if (!raw || typeof raw !== 'object' || !raw.id || typeof raw.html !== 'string' || raw.html.length > MAX_SNAPSHOT_HTML) return null;
+  const url = normalizeUrl(str(raw.url));
+  if (!url || !Number.isFinite(raw.capturedAt)) return null;
+  return {
+    id: String(raw.id),
+    url,
+    title: str(raw.title),
+    capturedAt: raw.capturedAt,
+    hash: str(raw.hash),
+    size: raw.html.length,
+    auto: !!raw.auto,
+    html: raw.html,
   };
 }
 
@@ -77,7 +97,8 @@ export function parseBackup(text, now = Date.now()) {
     const known = byUrl.get(page.url);
     byUrl.set(page.url, known ? mergePage(known, page).page : page);
   }
-  return [...byUrl.values()];
+  const snapshots = (Array.isArray(data.snapshots) ? data.snapshots : []).map(cleanSnapshot).filter(Boolean);
+  return { pages: [...byUrl.values()], snapshots };
 }
 
 export function mergePage(existing, incoming) {

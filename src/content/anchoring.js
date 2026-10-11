@@ -24,8 +24,8 @@ export function collectTextNodes(root = document.body) {
   return { nodes, raw };
 }
 
-export function buildIndex() {
-  const { nodes, raw } = collectTextNodes();
+export function buildIndex(root = document.body) {
+  const { nodes, raw } = collectTextNodes(root);
   const { text, map } = normalizeWithMap(raw);
   return { nodes, raw, text, map };
 }

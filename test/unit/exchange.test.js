@@ -23,7 +23,8 @@ const page = (url, annotations, extra = {}) => ({ url, title: 'Title', updatedAt
 
 test('backup round-trips and drops device-local fields', () => {
   const pages = [page('https://a.com/', [annotation('1', { lostAt: 9, position: { start: 0, end: 7 } })], { note: 'n', noteUpdatedAt: 3 })];
-  const parsed = parseBackup(JSON.stringify(createBackup(pages, 0)));
+  const { pages: parsed, snapshots } = parseBackup(JSON.stringify(createBackup(pages, { now: 0 })));
+  assert.deepEqual(snapshots, []);
   assert.equal(parsed.length, 1);
   assert.equal(parsed[0].annotations[0].lostAt, undefined);
   assert.deepEqual(parsed[0].annotations[0].position, { start: 0, end: 7 });
@@ -33,7 +34,7 @@ test('backup round-trips and drops device-local fields', () => {
 test('rejects foreign files and sanitizes entries', () => {
   assert.throws(() => parseBackup('nope'), (e) => e instanceof BackupError && e.code === 'invalid-json');
   assert.throws(() => parseBackup('{"pages":[]}'), (e) => e.code === 'invalid-format');
-  const parsed = parseBackup(
+  const { pages: parsed } = parseBackup(
     JSON.stringify({
       format: 'annotator-backup',
       version: 1,
@@ -47,6 +48,13 @@ test('rejects foreign files and sanitizes entries', () => {
   assert.equal(parsed[0].url, 'https://b.com/');
   assert.equal(parsed[0].annotations.length, 1);
   assert.equal(parsed[0].annotations[0].color, 'yellow');
+});
+
+test('backup carries snapshots and drops broken ones', () => {
+  const good = { id: 's1', url: 'https://a.com/?utm_source=x', title: 'A', capturedAt: 5, hash: 'ab', html: '<p>hi</p>' };
+  const backup = createBackup([], { now: 0, snapshots: [good, { id: 's2', url: 'https://a.com/', html: 1 }, { ...good, id: 's3', url: 'ftp://x' }] });
+  const { snapshots } = parseBackup(JSON.stringify(backup));
+  assert.deepEqual(snapshots, [{ id: 's1', url: 'https://a.com/', title: 'A', capturedAt: 5, hash: 'ab', size: 9, auto: false, html: '<p>hi</p>' }]);
 });
 
 test('merge adds new, keeps newer, and reports counts', () => {

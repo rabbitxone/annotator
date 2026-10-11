@@ -160,7 +160,10 @@ export function shortcutsPanel() {
   return panel;
 }
 
-export function dataPanel({ onExportBackup, onExportMarkdown, onImport }) {
+const formatBytes = (bytes) =>
+  bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+
+export function dataPanel({ settings, snapshots, onExportBackup, onExportMarkdown, onImport, onCleanSnapshots }) {
   const file = h('input', {
     type: 'file',
     accept: '.json,application/json',
@@ -183,6 +186,26 @@ export function dataPanel({ onExportBackup, onExportMarkdown, onImport }) {
         h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: onExportBackup }, icon('download', { size: 14 }), t('dataExport')),
         h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: () => file.click() }, icon('upload', { size: 14 }), t('dataImport')),
         file,
+      ),
+    ),
+    settingItem(
+      'camera',
+      t('settingAutoSnapshot'),
+      t('settingAutoSnapshotHint'),
+      toggle(settings.autoSnapshot, t('settingAutoSnapshot'), (autoSnapshot) => updateSettings({ autoSnapshot })),
+    ),
+    settingItem(
+      'archive',
+      t('dataSnapshots'),
+      snapshots.count
+        ? t('dataSnapshotsHint', [String(snapshots.count), formatBytes(snapshots.bytes)])
+        : t('dataSnapshotsNone'),
+      snapshots.unused > 0 &&
+      h(
+        'button',
+        { class: 'btn btn-outline btn-sm', type: 'button', onclick: onCleanSnapshots },
+        icon('delete', { size: 14 }),
+        t('dataSnapshotsClean', String(snapshots.unused)),
       ),
     ),
     settingItem(

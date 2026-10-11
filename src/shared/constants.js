@@ -51,6 +51,7 @@ export const DEFAULT_SETTINGS = {
   selectionToolbar: true,
   highlightStyle: 'background',
   defaultColor: 'yellow',
+  autoSnapshot: true,
   siteRules: {},
 };
 

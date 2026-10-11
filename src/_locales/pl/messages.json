@@ -339,13 +339,16 @@
     }
   },
   "toastImported": {
-    "message": "Zaimportowano. Nowe: $V1$, zaktualizowane: $V2$",
+    "message": "Zaimportowano. Nowe notatki: $V1$, zaktualizowane: $V2$, kopie stron: $V3$",
     "placeholders": {
       "v1": {
         "content": "$1"
       },
       "v2": {
         "content": "$2"
+      },
+      "v3": {
+        "content": "$3"
       }
     }
   },
@@ -407,7 +410,7 @@
     "message": "Kopia zapasowa"
   },
   "dataBackupHint": {
-    "message": "Zapisz wszystkie notatki do pliku albo przywróć je na innym urządzeniu. Import łączy dane i niczego nie usuwa."
+    "message": "Zapisz wszystkie notatki i kopie stron do pliku albo przywróć je na innym urządzeniu. Import łączy dane i niczego nie usuwa."
   },
   "dataExport": {
     "message": "Eksportuj"
@@ -432,5 +435,136 @@
   },
   "bulkMarkdownHint": {
     "message": "Pobierz zaznaczone notatki jako plik Markdown"
+  },
+  "snapshotLabel": {
+    "message": "Kopia strony"
+  },
+  "snapshotBadge": {
+    "message": "Kopia strony"
+  },
+  "snapshotSave": {
+    "message": "Zapisz kopię"
+  },
+  "snapshotOpen": {
+    "message": "Otwórz"
+  },
+  "snapshotOpenNote": {
+    "message": "Pokaż w zapisanej kopii"
+  },
+  "snapshotSummary": {
+    "message": "Zapisano $V1$ · wersje: $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "snapshotNone": {
+    "message": "Jeszcze nie zapisano"
+  },
+  "snapshotNoneDashboard": {
+    "message": "Brak kopii. Otwórz stronę i zapisz ją z panelu bocznego albo z okienka rozszerzenia."
+  },
+  "snapshotUnchanged": {
+    "message": "Bez zmian od ostatniej kopii"
+  },
+  "snapshotFailed": {
+    "message": "Nie udało się zapisać kopii"
+  },
+  "snapshotVersion": {
+    "message": "Wersja"
+  },
+  "snapshotDownload": {
+    "message": "Pobierz"
+  },
+  "snapshotDelete": {
+    "message": "Usuń tę wersję"
+  },
+  "snapshotSavedOn": {
+    "message": "Zapisano $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "snapshotOriginal": {
+    "message": "oryginał"
+  },
+  "snapshotLatest": {
+    "message": "najnowsza"
+  },
+  "snapshotShowImages": {
+    "message": "Pokaż obrazy ($V1$)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "snapshotEmptyTitle": {
+    "message": "Brak zapisanej kopii"
+  },
+  "snapshotEmptyText": {
+    "message": "Nie ma kopii tej strony albo została usunięta."
+  },
+  "snapshotNotesTitle": {
+    "message": "Notatki"
+  },
+  "snapshotNotesMissing": {
+    "message": "Brak w tej wersji: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "snapshotNoteMissing": {
+    "message": "Brak w tej wersji"
+  },
+  "snapshotNoNotes": {
+    "message": "Brak notatek dla tej strony."
+  },
+  "settingAutoSnapshot": {
+    "message": "Automatycznie zapisuj kopie stron"
+  },
+  "settingAutoSnapshotHint": {
+    "message": "Przy pierwszym zakreśleniu zapisuje czytelną kopię tekstu strony na wypadek, gdyby została zmieniona lub usunięta. Gdy tekst się zmieni, nowa wersja dochodzi najwyżej raz dziennie."
+  },
+  "dataSnapshots": {
+    "message": "Kopie stron"
+  },
+  "dataSnapshotsHint": {
+    "message": "Zapisane: $V1$, łącznie $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "dataSnapshotsNone": {
+    "message": "Jeszcze żadnej."
+  },
+  "dataSnapshotsClean": {
+    "message": "Usuń nieużywane ($V1$)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastSnapshotsCleaned": {
+    "message": "Usunięto kopie stron: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
   }
 }

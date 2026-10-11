@@ -1,6 +1,8 @@
 import { api } from '../shared/api.js';
 import { t } from '../shared/i18n.js';
 import { ensureMigrated } from '../shared/store.js';
+import { listSnapshots, saveSnapshot, snapshotPageUrl } from '../shared/snapshots.js';
+import { normalizeUrl } from '../shared/url.js';
 
 const MENU_ID = 'annotator-create';
 
@@ -89,6 +91,30 @@ async function openAndGo(url, id) {
   setTimeout(() => api.tabs.onUpdated.removeListener(onUpdated), 20000);
 }
 
+const MAX_SNAPSHOT_HTML = 8 * 1024 * 1024;
+
+function snapshotSummary(list) {
+  const strip = (s) => s && { id: s.id, capturedAt: s.capturedAt, hash: s.hash };
+  return { count: list.length, first: strip(list[0]), latest: strip(list.at(-1)) };
+}
+
+function storeSnapshot(snapshot, sender) {
+  const url = normalizeUrl(snapshot?.url ?? '');
+  if (!url || url !== normalizeUrl(sender.tab?.url ?? '') || typeof snapshot.html !== 'string' || snapshot.html.length > MAX_SNAPSHOT_HTML) {
+    return Promise.reject(new Error('invalid snapshot'));
+  }
+  return saveSnapshot({
+    id: String(snapshot.id),
+    url,
+    title: String(snapshot.title ?? ''),
+    capturedAt: Date.now(),
+    hash: String(snapshot.hash ?? ''),
+    size: snapshot.html.length,
+    auto: !!snapshot.auto,
+    html: snapshot.html,
+  });
+}
+
 function setBadge(tabId, count) {
   const text = count > 0 ? (count > 99 ? '99+' : String(count)) : '';
   api.action.setBadgeText({ tabId, text }).catch(() => { });
@@ -107,6 +133,21 @@ api.runtime.onMessage.addListener((message, sender, sendResponse) => {
         else disabledTabs.add(sender.tab.id);
         if (sender.tab.active) syncMenuFor(sender.tab.id);
       }
+      return false;
+    case 'save-snapshot':
+      storeSnapshot(message.snapshot, sender).then(
+        (list) => sendResponse(snapshotSummary(list)),
+        () => sendResponse(null),
+      );
+      return true;
+    case 'snapshot-meta':
+      listSnapshots(message.url).then(
+        (list) => sendResponse(snapshotSummary(list)),
+        () => sendResponse(null),
+      );
+      return true;
+    case 'open-snapshot':
+      api.tabs.create({ url: snapshotPageUrl(message) });
       return false;
     case 'tab-command':
       sendToTab(message.tabId, message.message).then(
