@@ -1,5 +1,5 @@
 import { COLORS, COLOR_IDS, colorById } from './constants.js';
-import { hostnameOf, normalizeUrl } from './url.js';
+import { normalizeUrl, pageName, siteLabel, sourceOf } from './url.js';
 
 export const BACKUP_FORMAT = 'annotator-backup';
 export const BACKUP_VERSION = 1;
@@ -205,7 +205,7 @@ export const DEFAULT_LABELS = {
   colorName: (id) => id.charAt(0).toUpperCase() + id.slice(1),
   summary: (notes, pages, date) => `Highlights: ${notes} · pages: ${pages} · exported ${date}`,
   pageSummary: (host, count) => `${host} · highlights: ${count}`,
-  csvHeaders: ['Page title', 'Page URL', 'Color', 'Color code', 'Highlighted text', 'Note', 'Page note', 'Created', 'Modified'],
+  csvHeaders: ['Page title', 'Page URL', 'File or site', 'Color', 'Color code', 'Highlighted text', 'Note', 'Page note', 'Created', 'Modified'],
 };
 
 function highlightItem(heading, annotation) {
@@ -260,7 +260,7 @@ export function toMarkdown(groups, labels = {}, { groupBy = 'page', now = Date.n
         `${level} ${color.emoji} ${escapeMarkdown(L.colorName(color.id))} · ${items.length}`,
         items
           .map(({ page, annotation }) =>
-            highlightItem(`**${mdLink(page.title || page.url, page.url)}** · ${localDate(annotation.createdAt)}`, annotation),
+            highlightItem(`**${mdLink(pageName(page), page.url)}** · ${localDate(annotation.createdAt)}`, annotation),
           )
           .join('\n\n'),
       );
@@ -269,14 +269,14 @@ export function toMarkdown(groups, labels = {}, { groupBy = 'page', now = Date.n
     if (noted.length) {
       out.push(
         `${level} 📝 ${escapeMarkdown(L.pageNotes)}`,
-        noted.map(({ page }) => `- **${mdLink(page.title || page.url, page.url)}**\n\n${indent(page.note.trim())}`).join('\n\n'),
+        noted.map(({ page }) => `- **${mdLink(pageName(page), page.url)}**\n\n${indent(page.note.trim())}`).join('\n\n'),
       );
     }
   } else {
     for (const { page, annotations, includePageNote = true } of groups) {
       const sections = [
-        `${level} ${mdLink(page.title || page.url, page.url)}`,
-        escapeMarkdown(L.pageSummary(hostnameOf(page.url), annotations.length)),
+        `${level} ${mdLink(pageName(page), page.url)}`,
+        escapeMarkdown(L.pageSummary(siteLabel(page.url), annotations.length)),
       ];
       if (includePageNote && page.note?.trim()) sections.push(pageNoteBlock(page.note, L.pageNote));
       if (annotations.length) {
@@ -292,7 +292,7 @@ export function toMarkdown(groups, labels = {}, { groupBy = 'page', now = Date.n
 export function quoteSnippet(annotation, page) {
   const parts = [blockquote(annotation.quote?.exact ?? '')];
   if (annotation.note?.trim()) parts.push(annotation.note.trim());
-  return `${parts.join('\n\n')}\n\n— ${mdLink(page.title || page.url, textFragmentUrl(page.url, annotation.quote?.exact))}\n`;
+  return `${parts.join('\n\n')}\n\n— ${mdLink(pageName(page), textFragmentUrl(page.url, annotation.quote?.exact))}\n`;
 }
 
 // ---- CSV -----------------------------------------------------------------------------------
@@ -314,9 +314,10 @@ export function toCsv(groups, { separator = ',', labels = {} } = {}) {
   const rows = [L.csvHeaders];
   for (const { page, annotations, includePageNote = true } of groups) {
     const pageNote = includePageNote ? (page.note ?? '').trim() : '';
-    const title = page.title || '';
+    const title = pageName(page);
+    const source = sourceOf(page.url);
     if (annotations.length === 0) {
-      if (pageNote) rows.push([title, page.url, '', '', '', '', pageNote, '', '']);
+      if (pageNote) rows.push([title, page.url, source, '', '', '', '', pageNote, '', '']);
       continue;
     }
     for (const a of [...annotations].sort(byTextPosition)) {
@@ -324,6 +325,7 @@ export function toCsv(groups, { separator = ',', labels = {} } = {}) {
       rows.push([
         title,
         page.url,
+        source,
         L.colorName(color.id),
         color.swatch,
         a.quote?.exact ?? '',

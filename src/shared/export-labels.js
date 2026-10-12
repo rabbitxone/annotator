@@ -12,6 +12,7 @@ export function exportLabels() {
     csvHeaders: [
       'csvPageTitle',
       'csvPageUrl',
+      'csvSource',
       'csvColor',
       'csvColorCode',
       'csvQuote',

@@ -8,7 +8,7 @@ import { renderMarkdown } from '../shared/markdown.js';
 import { cleanTree } from '../shared/sanitize.js';
 import { deleteSnapshots, getSnapshot, listSnapshots, onSnapshotsChange } from '../shared/snapshots.js';
 import { ensureMigrated, getPage, getSettings, onStoreChange } from '../shared/store.js';
-import { hostnameOf } from '../shared/url.js';
+import { displayAddress, fileSafeName, pageName } from '../shared/url.js';
 import { armOnce } from './components/confirm.js';
 
 const state = { url: '', id: null, focusId: null, versions: [], snapshot: null, page: null, settings: null };
@@ -122,10 +122,10 @@ function renderNotes() {
 
 function renderHeader() {
   const { snapshot, versions } = state;
-  const title = snapshot?.title || state.page?.title || hostnameOf(state.url);
+  const title = pageName({ title: snapshot?.title || state.page?.title, url: state.url });
   $('snap-title').textContent = title;
   document.title = `${title} · ${t('snapshotBadge')}`;
-  $('snap-source').textContent = state.url;
+  $('snap-source').textContent = displayAddress(state.url);
   $('snap-source').href = /^https?:/i.test(state.url) ? state.url : '#';
   $('back').href = `dashboard.html#page=${encodeURIComponent(state.url)}`;
   $('snap-date').textContent = snapshot ? t('snapshotSavedOn', formatDate(snapshot.capturedAt)) : '';
@@ -207,7 +207,7 @@ function downloadHtml() {
 </head><body><header><p>${escapeHtml(t('snapshotSavedOn', formatDate(snapshot.capturedAt)))} · Annotator</p><p><a href="${escapeHtml(state.url)}">${escapeHtml(state.url)}</a></p></header>
 <main>${clone.innerHTML}</main></body></html>`;
   const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
-  const name = `${hostnameOf(state.url).replace(/[^\w.-]+/g, '_')}-${new Date(snapshot.capturedAt).toISOString().slice(0, 10)}.html`;
+  const name = `${fileSafeName(state.url)}-${new Date(snapshot.capturedAt).toISOString().slice(0, 10)}.html`;
   const link = h('a', { href: url, download: name, hidden: true });
   document.body.append(link);
   link.click();

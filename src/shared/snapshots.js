@@ -104,6 +104,27 @@ export async function importSnapshots(snapshots) {
   return fresh.length;
 }
 
+/** Keeps snapshots with their pages when notes are moved to new addresses ([{ from, to }]). */
+export async function relocateSnapshots(moves) {
+  const target = new Map(moves.map(({ from, to }) => [from, to]));
+  const tx = (await db()).transaction(META, 'readwrite');
+  const store = tx.objectStore(META);
+  const all = await result(store.getAll());
+  const touched = new Set();
+  for (const meta of all) {
+    const to = target.get(meta.url);
+    if (!to) continue;
+    store.put({ ...meta, url: to });
+    touched.add(to);
+  }
+  await finished(tx);
+  for (const url of touched) {
+    const drop = versionsToDrop(await listSnapshots(url));
+    if (drop.length) await write([], drop);
+  }
+  if (touched.size) notify();
+}
+
 export async function deleteSnapshots(ids) {
   if (ids.length === 0) return;
   await write([], ids);

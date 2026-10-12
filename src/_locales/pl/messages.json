@@ -517,7 +517,7 @@
     "message": "Automatycznie zapisuj kopie stron"
   },
   "settingAutoSnapshotHint": {
-    "message": "Przy pierwszym zakreśleniu zapisuje czytelną kopię tekstu strony na wypadek, gdyby została zmieniona lub usunięta. Gdy tekst się zmieni, nowa wersja dochodzi najwyżej raz dziennie."
+    "message": "Przy pierwszym zakreśleniu zapisuje czytelną kopię tekstu strony na wypadek, gdyby została zmieniona lub usunięta. Gdy tekst się zmieni, nowa wersja dochodzi najwyżej raz dziennie. Pliki lokalne są pomijane, bo i tak zostają na Twoim komputerze; kopię można nadal zapisać ręcznie."
   },
   "dataSnapshots": {
     "message": "Kopie stron"
@@ -764,5 +764,120 @@
   },
   "csvModified": {
     "message": "Zmieniono"
+  },
+  "fileAccessTitle": {
+    "message": "Czy to plik z Twojego komputera?"
+  },
+  "fileAccessBadge": {
+    "message": "Annotator: pliki lokalne wymagają jeszcze jednego ustawienia. Kliknij, by zobaczyć jakiego."
+  },
+  "fileAccessText": {
+    "message": "Chrome nie wpuszcza rozszerzeń na strony zapisane na komputerze, dopóki tego nie dozwolisz. Otwórz ustawienia Annotatora, włącz „Zezwalaj na dostęp do adresów URL plików”, a potem odśwież stronę."
+  },
+  "fileAccessOpen": {
+    "message": "Otwórz ustawienia"
+  },
+  "settingFileAccess": {
+    "message": "Pliki lokalne"
+  },
+  "settingFileAccessOn": {
+    "message": "Annotator działa na plikach HTML zapisanych na komputerze."
+  },
+  "settingFileAccessOff": {
+    "message": "Chrome blokuje Annotatora na plikach zapisanych na komputerze. Włącz „Zezwalaj na dostęp do adresów URL plików” w ustawieniach rozszerzenia."
+  },
+  "settingFileAccessAllowed": {
+    "message": "Dozwolone"
+  },
+  "siteLocalFiles": {
+    "message": "Wszystkie pliki lokalne"
+  },
+  "csvSource": {
+    "message": "Plik lub witryna"
+  },
+  "dataRelocate": {
+    "message": "Przeniosłeś pliki?"
+  },
+  "dataRelocateHint": {
+    "message": "Notatki należą do adresu strony lub ścieżki pliku. Jeśli przeniosłeś pliki do innego folderu lub na inny dysk albo strona zmieniła adres, wskaż notatkom nowe miejsce."
+  },
+  "dataRelocateAction": {
+    "message": "Zmień lokalizację…"
+  },
+  "relocateTitle": {
+    "message": "Przenieś notatki w nowe miejsce"
+  },
+  "relocateIntro": {
+    "message": "Wpisz, gdzie strony były i gdzie są teraz. Może to być folder (C:\\papers), ścieżka sieciowa albo adres internetowy."
+  },
+  "relocateFrom": {
+    "message": "Dawna lokalizacja"
+  },
+  "relocateTo": {
+    "message": "Nowa lokalizacja"
+  },
+  "relocateHint": {
+    "message": "Notatki spod dawnej lokalizacji zostaną przeniesione do nowej."
+  },
+  "relocateInvalid": {
+    "message": "To nie wygląda na folder, plik ani adres internetowy."
+  },
+  "relocateNone": {
+    "message": "Nie znaleziono notatek w dawnej lokalizacji."
+  },
+  "relocateSame": {
+    "message": "Dawna i nowa lokalizacja są takie same."
+  },
+  "relocateCount": {
+    "message": "Strony do przeniesienia: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "relocateMerge": {
+    "message": "Dla $V1$ z nich w nowej lokalizacji są już notatki; zostaną połączone.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "relocateReminder": {
+    "message": "Twoje pliki pozostają nietknięte. Zmieniają się tylko adresy, pod którymi zapisane są notatki."
+  },
+  "relocateAction": {
+    "message": "Przenieś notatki"
+  },
+  "toastRelocated": {
+    "message": "Przeniesiono notatki z $V1$ stron",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastRelocateFailed": {
+    "message": "Nie udało się przenieść notatek. Spróbuj ponownie."
+  },
+  "listShowMore": {
+    "message": "Pokaż więcej (zostało: $V1$)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "listLoading": {
+    "message": "Wczytywanie…"
+  },
+  "actionSelectAllCount": {
+    "message": "Zaznacz wszystkie: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
   }
 }

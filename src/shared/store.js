@@ -178,6 +178,33 @@ export function setPageNote(url, title, note) {
   });
 }
 
+/**
+ * Points pages at new addresses ([{ from, to }], see planRelocation). A page that lands on one
+ * that already exists is merged into it. One write for all of them, so thousands stay fast.
+ */
+export async function relocatePages(moves) {
+  const all = await storage().get(null);
+  const writes = {};
+  const removes = new Set();
+  let moved = 0;
+  let merged = 0;
+  for (const { from, to } of moves) {
+    const page = all[pageKey(from)];
+    if (!page || !Array.isArray(page.annotations)) continue;
+    const incoming = { ...page, url: to };
+    const existing = writes[pageKey(to)] ?? all[pageKey(to)];
+    if (existing) merged++;
+    writes[pageKey(to)] = existing ? mergePage(existing, incoming).page : incoming;
+    removes.add(pageKey(from));
+    moved++;
+  }
+  for (const key of Object.keys(writes)) removes.delete(key);
+  if (moved === 0) return { moved, merged };
+  await storage().set(writes);
+  if (removes.size) await storage().remove([...removes]);
+  return { moved, merged };
+}
+
 export async function importPages(pages) {
   let added = 0;
   let updated = 0;

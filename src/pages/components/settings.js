@@ -3,6 +3,7 @@ import { h } from '../../shared/dom.js';
 import { formatBytes, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 import { setSiteRule, updateSettings } from '../../shared/store.js';
+import { openFileAccessSettings } from '../../shared/file-access.js';
 import { swatchPicker } from './card.js';
 
 function settingItem(iconName, label, sublabel, trailing, callout) {
@@ -67,7 +68,7 @@ function toggle(checked, label, onChange) {
   );
 }
 
-export function settingsPanel(settings, { compact = false, site = null, siteAppLike = false } = {}) {
+export function settingsPanel(settings, { compact = false, site = null, siteName = null, siteAppLike = false, fileAccess = null } = {}) {
   const save = (patch) => updateSettings(patch);
 
   return h(
@@ -83,11 +84,21 @@ export function settingsPanel(settings, { compact = false, site = null, siteAppL
     settingItem(
       'globe',
       t('settingSiteDisable'),
-      site,
+      siteName ?? site,
       siteAppLike
         ? toggle(settings.siteRules?.[site] !== 'always', t('settingSite'), (on) => setSiteRule(site, on ? 'auto' : 'always'))
         : toggle(settings.siteRules?.[site] === 'never', t('settingSite'), (on) => setSiteRule(site, on ? 'never' : 'auto')),
       siteAppLike ? t('settingSiteAppHint') : null,
+    ),
+    fileAccess !== null &&
+    !(compact && fileAccess) &&
+    settingItem(
+      'folder',
+      t('settingFileAccess'),
+      fileAccess ? t('settingFileAccessOn') : t('settingFileAccessOff'),
+      fileAccess
+        ? h('span', { class: 'badge badge-accent' }, icon('tick', { size: 12 }), t('settingFileAccessAllowed'))
+        : h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: () => openFileAccessSettings() }, icon('open', { size: 14 }), t('fileAccessOpen')),
     ),
     settingItem(
       'underline',
@@ -160,7 +171,7 @@ export function shortcutsPanel() {
   return panel;
 }
 
-export function dataPanel({ settings, snapshots, onExport, onImport, onCleanSnapshots }) {
+export function dataPanel({ settings, snapshots, onExport, onImport, onRelocate, onCleanSnapshots }) {
   const file = h('input', {
     type: 'file',
     accept: '.json,application/json',
@@ -184,6 +195,12 @@ export function dataPanel({ settings, snapshots, onExport, onImport, onCleanSnap
         h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: () => file.click() }, icon('upload', { size: 14 }), t('dataImport')),
         file,
       ),
+    ),
+    settingItem(
+      'folder',
+      t('dataRelocate'),
+      t('dataRelocateHint'),
+      h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: onRelocate }, t('dataRelocateAction')),
     ),
     settingItem(
       'camera',

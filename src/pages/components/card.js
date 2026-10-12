@@ -3,7 +3,7 @@ import { h } from '../../shared/dom.js';
 import { formatDate, relativeTime, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 import { highlightHits, renderMarkdown } from '../../shared/markdown.js';
-import { hostnameOf } from '../../shared/url.js';
+import { isFileUrl, pageName, siteLabel } from '../../shared/url.js';
 import { armOnce } from './confirm.js';
 
 function hueOf(text) {
@@ -13,7 +13,7 @@ function hueOf(text) {
 }
 
 export function siteAvatar(url, size = 32) {
-  const host = hostnameOf(url);
+  const host = siteLabel(url);
   return h(
     'span',
     {
@@ -21,7 +21,7 @@ export function siteAvatar(url, size = 32) {
       'aria-hidden': 'true',
       style: { '--hue': String(hueOf(host)), width: `${size}px`, height: `${size}px`, 'font-size': `${Math.round(size * 0.44)}px` },
     },
-    (host.match(/[\p{L}\p{N}]/u)?.[0] ?? '#').toUpperCase(),
+    isFileUrl(url) ? icon('folder', { size: Math.round(size * 0.5) }) : (host.match(/[\p{L}\p{N}]/u)?.[0] ?? '#').toUpperCase(),
   );
 }
 
@@ -123,7 +123,7 @@ export function annotationCard(annotation, page, options) {
         'div',
         { class: 'card-source', title: page.url },
         siteAvatar(page.url, 18),
-        withHits(h('span', null, page.title || hostnameOf(page.url))),
+        withHits(h('span', null, pageName(page))),
       ),
       selectable &&
       h('input', {

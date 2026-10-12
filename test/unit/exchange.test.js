@@ -176,17 +176,17 @@ test('csv has one row per highlight with color name and code, in text order', ()
   assert.equal(
     csv,
     [
-      'Page title,Page URL,Color,Color code,Highlighted text,Note,Page note,Created,Modified',
-      'A [b],https://a.com/x_(1),YELLOW,#FACC15,"l1\nl2 *x*",,context,2026-10-11 09:15:30,2026-10-11 09:15:30',
-      'A [b],https://a.com/x_(1),GREEN,#22C55E,quote 2,second,context,2026-10-12 09:15:30,2026-10-13 09:15:30',
-      'B,https://b.com/,YELLOW,#FACC15,quote 3,,,2026-10-10 09:15:30,2026-10-10 09:15:30',
+      'Page title,Page URL,File or site,Color,Color code,Highlighted text,Note,Page note,Created,Modified',
+      'A [b],https://a.com/x_(1),a.com,YELLOW,#FACC15,"l1\nl2 *x*",,context,2026-10-11 09:15:30,2026-10-11 09:15:30',
+      'A [b],https://a.com/x_(1),a.com,GREEN,#22C55E,quote 2,second,context,2026-10-12 09:15:30,2026-10-13 09:15:30',
+      'B,https://b.com/,b.com,YELLOW,#FACC15,quote 3,,,2026-10-10 09:15:30,2026-10-10 09:15:30',
     ].join('\r\n') + '\r\n',
   );
 });
 
 test('csv keeps a page that only has a page note, and honors the separator', () => {
   const groups = [{ page: page('https://c.com/', [], { title: 'C; D', note: 'only a note' }), annotations: [] }];
-  assert.equal(toCsv(groups, { separator: ';' }).split('\r\n')[1], '"C; D";https://c.com/;;;;;only a note;;');
+  assert.equal(toCsv(groups, { separator: ';' }).split('\r\n')[1], '"C; D";https://c.com/;c.com;;;;;only a note;;');
   assert.equal(toCsv([{ ...groups[0], includePageNote: false }]).split('\r\n').length, 2, 'only the header row and the final newline');
 });
 
@@ -208,4 +208,13 @@ test('csv export starts with a BOM so Excel reads UTF-8, markdown and csv are no
   assert.equal(buildExport('markdown', sampleGroups(), { labels, now: NOW }).importable, false);
   assert.throws(() => buildExport('xlsx', []), /Unknown export format/);
   assert.equal(localDate(NOW), '2026-10-12');
+});
+
+test('local files are named by file name, folder and full path in exports', () => {
+  const file = 'file:///C:/papers/trial%20A/study%20001.html';
+  const groups = [{ page: page(file, [], { title: '' }), annotations: [annotation('1', { createdAt: at(10), updatedAt: at(10) })] }];
+  const csv = toCsv(groups).split('\r\n');
+  assert.equal(csv[1], `study 001.html,${file},C:/papers/trial A/study 001.html,Yellow,#FACC15,quote 1,,,2026-10-10 09:15:30,2026-10-10 09:15:30`);
+  const md = toMarkdown(groups, {}, { now: NOW });
+  assert.ok(md.startsWith(`# [study 001.html](${file})\n\nC:/papers/trial A · highlights: 1`));
 });

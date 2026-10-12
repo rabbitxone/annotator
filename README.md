@@ -26,6 +26,16 @@ All data is stored locally on your device. It is never sent to the developer or 
 
 Annotator stays out of the way in web apps (mail, chat, editors) and turns on for articles. To tell them apart it uses the same check Firefox uses to offer Reader View ([Mozilla Readability](https://github.com/mozilla/readability), Apache-2.0), together with the page's own `og:type`/schema.org article markup. Readability also picks the article text for page snapshots.
 
+### Local files
+
+Annotator works on HTML files saved on your computer too (handy for collections of papers or saved articles):
+
+- **Chrome** keeps extensions out of local files until you turn on *Allow access to file URLs* in the extension's details (`chrome://extensions`). Annotator checks for this and shows where to switch it on: in the popup, in Settings, and on the icon when you try to highlight.
+- Local pages are named by their file name and grouped by folder; the CSV export has a *File or site* column with the full path. One *off on this site* rule covers all local files.
+- Notes are stored under the file's path. If you move the files (another folder, drive or computer), use *Settings → Moved your files? → Change location* to point the notes at the new place. It also works for websites that changed their address, and can be undone when no notes had to be combined.
+- Automatic page snapshots skip local files, since they already stay on your computer; you can still save one by hand.
+- Lists draw in batches, so the dashboard stays fast with tens of thousands of notes (tested with 100,000 highlights across 20,000 files).
+
 ## Development
 
 ```sh

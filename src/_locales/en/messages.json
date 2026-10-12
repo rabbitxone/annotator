@@ -517,7 +517,7 @@
     "message": "Save page snapshots automatically"
   },
   "settingAutoSnapshotHint": {
-    "message": "Keeps a readable copy of a page's text when you first highlight it, in case the page is edited or removed. If the text changes, a new version is added at most once a day."
+    "message": "Keeps a readable copy of a page's text when you first highlight it, in case the page is edited or removed. If the text changes, a new version is added at most once a day. Local files are skipped, since they already stay on your computer; you can still save one by hand."
   },
   "dataSnapshots": {
     "message": "Page snapshots"
@@ -764,5 +764,120 @@
   },
   "csvModified": {
     "message": "Modified"
+  },
+  "fileAccessTitle": {
+    "message": "Is this a file on your computer?"
+  },
+  "fileAccessBadge": {
+    "message": "Annotator: local files need one more setting. Click for details."
+  },
+  "fileAccessText": {
+    "message": "Chrome keeps extensions out of pages saved on your computer until you allow it. Open Annotator's settings, turn on “Allow access to file URLs”, then reload the page."
+  },
+  "fileAccessOpen": {
+    "message": "Open settings"
+  },
+  "settingFileAccess": {
+    "message": "Local files"
+  },
+  "settingFileAccessOn": {
+    "message": "Annotator works on HTML files saved on your computer."
+  },
+  "settingFileAccessOff": {
+    "message": "Chrome blocks Annotator on files saved on your computer. Turn on “Allow access to file URLs” in the extension's settings."
+  },
+  "settingFileAccessAllowed": {
+    "message": "Allowed"
+  },
+  "siteLocalFiles": {
+    "message": "All local files"
+  },
+  "csvSource": {
+    "message": "File or site"
+  },
+  "dataRelocate": {
+    "message": "Moved your files?"
+  },
+  "dataRelocateHint": {
+    "message": "Notes belong to a page's address or file path. If you moved files to another folder or drive, or a site changed its address, point your notes at the new location."
+  },
+  "dataRelocateAction": {
+    "message": "Change location…"
+  },
+  "relocateTitle": {
+    "message": "Move notes to a new location"
+  },
+  "relocateIntro": {
+    "message": "Enter where the pages used to be and where they are now. A folder (C:\\papers), a network path or a web address all work."
+  },
+  "relocateFrom": {
+    "message": "Old location"
+  },
+  "relocateTo": {
+    "message": "New location"
+  },
+  "relocateHint": {
+    "message": "Notes under the old location will be moved to the new one."
+  },
+  "relocateInvalid": {
+    "message": "That doesn't look like a folder, file or web address."
+  },
+  "relocateNone": {
+    "message": "No notes found at the old location."
+  },
+  "relocateSame": {
+    "message": "The old and new locations are the same."
+  },
+  "relocateCount": {
+    "message": "Pages to move: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "relocateMerge": {
+    "message": "Notes already exist for $V1$ of them at the new location; those will be combined.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "relocateReminder": {
+    "message": "Your files are not touched. Only the addresses your notes are stored under change."
+  },
+  "relocateAction": {
+    "message": "Move notes"
+  },
+  "toastRelocated": {
+    "message": "Moved the notes of $V1$ pages",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastRelocateFailed": {
+    "message": "Couldn't move the notes. Try again."
+  },
+  "listShowMore": {
+    "message": "Show more ($V1$ left)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "listLoading": {
+    "message": "Loading…"
+  },
+  "actionSelectAllCount": {
+    "message": "Select all $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
   }
 }

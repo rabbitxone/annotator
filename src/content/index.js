@@ -14,7 +14,7 @@ import {
   setPageNote,
   updateAnnotation,
 } from '../shared/store.js';
-import { hostnameOf, normalizeUrl } from '../shared/url.js';
+import { isFileUrl, normalizeUrl, siteKey } from '../shared/url.js';
 import { uuid } from '../shared/uuid.js';
 import { buildIndex, describeRange, resolve, UI_HOST_TAG } from './anchoring.js';
 import { collectSignals, isAppLike, isSelectionAnnotatable } from './context.js';
@@ -167,7 +167,8 @@ function main() {
   // Keep a copy of what the page said when it was first highlighted, and a new one
   // at most daily if the text has changed since.
   async function maybeAutoSnapshot() {
-    if (!settings?.autoSnapshot) return;
+    // A file on disk is its own copy; a snapshot can still be saved by hand
+    if (!settings?.autoSnapshot || isFileUrl(pageUrl)) return;
     if (snapshotInfo === undefined) await loadSnapshotInfo();
     const latest = snapshotInfo?.latest;
     if (latest && Date.now() - latest.capturedAt < AUTO_SNAPSHOT_INTERVAL) return;
@@ -446,7 +447,7 @@ function main() {
   }
 
   function siteRule() {
-    return settings?.siteRules?.[hostnameOf(location.href)];
+    return settings?.siteRules?.[siteKey(location.href)];
   }
 
   function siteEnabled() {

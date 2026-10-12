@@ -139,6 +139,7 @@ body {
   height: 36px;
 }
 
+#notices:empty,
 #whats-new:empty {
   display: none;
 }
@@ -313,6 +314,16 @@ body {
   .page-extras {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+.list-more {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0 8px;
+}
+
+.list-more[hidden] {
+  display: none;
 }
 
 .page-groups {

@@ -22,6 +22,7 @@ import {
   exportSnapshots,
   importSnapshots,
   onSnapshotsChange,
+  relocateSnapshots,
   snapshotPageUrl,
 } from '../shared/snapshots.js';
 import {
@@ -30,14 +31,19 @@ import {
   importPages,
   listPages,
   onStoreChange,
+  relocatePages,
   setPageNote,
   updateAnnotation,
   updateMany,
 } from '../shared/store.js';
-import { hostnameOf } from '../shared/url.js';
+import { displayAddress, isFileUrl, pageName, siteLabel } from '../shared/url.js';
 import { deleteWithUndo } from './components/actions.js';
 import { annotationCard, siteAvatar, swatchPicker } from './components/card.js';
 import { exportDialog } from './components/export-dialog.js';
+import { relocateDialog } from './components/relocate-dialog.js';
+import { reverseMoves } from '../shared/relocate.js';
+import { fileAccessNotice } from './components/file-access.js';
+import { fileAccessAllowed } from '../shared/file-access.js';
 import { pageNoteBox } from './components/page-note.js';
 import { snapshotBar } from './components/snapshot-bar.js';
 import { dataPanel, privacyNote, settingsPanel, shortcutsPanel } from './components/settings.js';
@@ -46,11 +52,18 @@ import { whatsNewBanner } from './components/whats-new.js';
 
 const REPO_URL = 'https://github.com/RabbitXOne/annotator';
 
+// Lists with thousands of notes are drawn in batches; the rest loads as you scroll.
+const PAGE_SIZE = 60;
+const PAGES_PAGE_SIZE = 200;
+
 const state = {
+  limit: PAGE_SIZE,
+  pagesLimit: PAGES_PAGE_SIZE,
   view: 'all',
   pageUrl: null,
   pages: [],
   snapshots: new Map(),
+  fileAccess: null,
   settings: null,
   query: '',
   color: null,
@@ -94,7 +107,7 @@ function scopeItems() {
 
 function matchesQuery({ annotation, page }) {
   if (!state.query) return true;
-  return [annotation.quote?.exact, annotation.note, page.title, page.url].some((v) => v?.toLowerCase().includes(state.query));
+  return [annotation.quote?.exact, annotation.note, page.title, displayAddress(page.url)].some((v) => v?.toLowerCase().includes(state.query));
 }
 
 function filteredItems() {
@@ -224,6 +237,28 @@ async function openExport(preferred) {
   }
 }
 
+async function applyMoves(moves) {
+  const result = await relocatePages(moves);
+  await relocateSnapshots(moves).catch(() => { });
+  return result;
+}
+
+async function openRelocate() {
+  const plan = await relocateDialog({ urls: state.pages.map((p) => p.url) });
+  if (!plan) return;
+  try {
+    const { moved, merged } = await applyMoves(plan.moves);
+    toast(
+      t('toastRelocated', formatNumber(moved)),
+      // Notes that were combined with existing ones can't be pulled apart again
+      merged === 0 ? { actionLabel: t('actionUndo'), onAction: () => applyMoves(reverseMoves(plan.moves)) } : {},
+    );
+  } catch (err) {
+    console.error('Annotator: relocation failed', err);
+    toast(t('toastRelocateFailed'));
+  }
+}
+
 async function importBackup(file) {
   try {
     const { pages, snapshots } = parseBackup(await file.text());
@@ -238,6 +273,11 @@ async function importBackup(file) {
     if (!(err instanceof BackupError)) console.error('Annotator: import failed', err);
     toast(t(err instanceof BackupError ? 'toastImportInvalid' : 'toastImportFailed'));
   }
+}
+
+function renderNotices() {
+  const blocked = state.fileAccess === false && state.pages.some((p) => isFileUrl(p.url));
+  $('notices').replaceChildren(...(blocked ? [fileAccessNotice()] : []));
 }
 
 function setEditing(editing) {
@@ -304,7 +344,7 @@ function renderFilters(visible) {
           render();
         },
       }),
-      t('actionSelectAll'),
+      visible.length > state.limit ? t('actionSelectAllCount', formatNumber(visible.length)) : t('actionSelectAll'),
     ),
     h(
       'div',
@@ -342,8 +382,14 @@ function renderPagesFilters() {
   );
 }
 
+function resetLimits() {
+  state.limit = PAGE_SIZE;
+  state.pagesLimit = PAGES_PAGE_SIZE;
+}
+
 function setFilter(patch) {
   Object.assign(state, patch);
+  resetLimits();
   render();
 }
 
@@ -357,34 +403,65 @@ function emptyPanel(iconName, title, text) {
   );
 }
 
-function renderCards(items, { showSource }) {
+let moreObserver = null;
+
+function moreButton(remaining, onClick) {
   return h(
-    'div',
-    { class: 'grid' },
-    items.map(({ annotation, page }) => {
-      const key = selectionKey(page.url, annotation.id);
-      return annotationCard(annotation, page, {
-        showSource,
-        goLabel: t('actionOpen'),
-        goIcon: 'open',
-        selectable: true,
-        selected: state.selected.has(key),
-        query: state.query,
-        onGo: () => api.runtime.sendMessage({ type: 'open-and-go', url: page.url, id: annotation.id }).catch(() => { }),
-        onCopy: () => copyText(quoteSnippet(annotation, page)),
-        onSnapshot: state.snapshots.has(page.url) ? () => openSnapshot(page.url, annotation.id) : null,
-        onSave: (patch) => updateAnnotation(page.url, annotation.id, patch),
-        onDelete: () => deleteWithUndo([{ annotation, page }]),
-        onSelect: (checked) => {
-          if (checked) state.selected.add(key);
-          else state.selected.delete(key);
-          renderBulkBar();
-          renderFilters(filteredItems());
-        },
-        onEditingChange: setEditing,
-      });
-    }),
+    'button',
+    { class: 'btn btn-outline list-more-button', type: 'button', onclick: onClick },
+    t('listShowMore', formatNumber(remaining)),
   );
+}
+
+function renderCards(items, { showSource }) {
+  const grid = h('div', { class: 'grid' });
+  const footer = h('div', { class: 'list-more' });
+  let shown = 0;
+
+  function showNext() {
+    const next = items.slice(shown, shown + (shown === 0 ? state.limit : PAGE_SIZE));
+    grid.append(...next.map((item) => cardFor(item, showSource)));
+    shown += next.length;
+    state.limit = Math.max(PAGE_SIZE, shown);
+    const remaining = items.length - shown;
+    footer.hidden = remaining <= 0;
+    footer.replaceChildren(...(remaining > 0 ? [moreButton(remaining, showNext)] : []));
+    if (remaining > 0 && shown > next.length) {
+      // still on screen after loading: ask the observer again
+      moreObserver?.unobserve(footer);
+      moreObserver?.observe(footer);
+    }
+  }
+
+  moreObserver?.disconnect();
+  moreObserver = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && showNext(), { rootMargin: '900px' });
+  showNext();
+  if (!footer.hidden) moreObserver.observe(footer);
+  return [grid, footer];
+}
+
+function cardFor({ annotation, page }, showSource) {
+  const key = selectionKey(page.url, annotation.id);
+  return annotationCard(annotation, page, {
+    showSource,
+    goLabel: t('actionOpen'),
+    goIcon: 'open',
+    selectable: true,
+    selected: state.selected.has(key),
+    query: state.query,
+    onGo: () => api.runtime.sendMessage({ type: 'open-and-go', url: page.url, id: annotation.id }).catch(() => { }),
+    onCopy: () => copyText(quoteSnippet(annotation, page)),
+    onSnapshot: state.snapshots.has(page.url) ? () => openSnapshot(page.url, annotation.id) : null,
+    onSave: (patch) => updateAnnotation(page.url, annotation.id, patch),
+    onDelete: () => deleteWithUndo([{ annotation, page }]),
+    onSelect: (checked) => {
+      if (checked) state.selected.add(key);
+      else state.selected.delete(key);
+      renderBulkBar();
+      renderFilters(filteredItems());
+    },
+    onEditingChange: setEditing,
+  });
 }
 
 function openSnapshot(url, annotationId) {
@@ -415,8 +492,8 @@ function pageRow(page) {
     h(
       'div',
       { class: 'page-row-text' },
-      h('p', { class: 'page-row-title' }, page.title || hostnameOf(page.url)),
-      h('p', { class: 'page-row-sub' }, page.url),
+      h('p', { class: 'page-row-title' }, pageName(page)),
+      h('p', { class: 'page-row-sub', title: page.url }, displayAddress(page.url)),
     ),
     h(
       'div',
@@ -435,23 +512,25 @@ function pageRow(page) {
 }
 
 function renderPagesList() {
-  const pages = state.pages
-    .filter((page) => !state.query || [page.title, page.url, page.note].some((v) => v?.toLowerCase().includes(state.query)) || page.annotations.some((a) => matchesQuery({ annotation: a, page })))
+  const matching = state.pages
+    .filter((page) => !state.query || [page.title, displayAddress(page.url), page.note].some((v) => v?.toLowerCase().includes(state.query)) || page.annotations.some((a) => matchesQuery({ annotation: a, page })))
     .sort((a, b) => b.updatedAt - a.updatedAt);
 
-  if (pages.length === 0) {
+  if (matching.length === 0) {
     return state.query ? emptyPanel('search', t('emptySearchTitle'), t('emptySearchText')) : emptyPanel('globe', t('emptyAllTitle'), t('emptyAllText'));
   }
 
-  if (state.grouping !== 'domain') return h('div', { class: 'page-list' }, pages.map(pageRow));
+  const pages = matching.slice(0, state.pagesLimit);
+  const footer = matching.length > pages.length ? pagesFooter(matching.length - pages.length) : null;
+  if (state.grouping !== 'domain') return [h('div', { class: 'page-list' }, pages.map(pageRow)), footer].filter(Boolean);
 
   const groups = new Map();
   for (const page of pages) {
-    const host = hostnameOf(page.url);
+    const host = siteLabel(page.url);
     if (!groups.has(host)) groups.set(host, []);
     groups.get(host).push(page);
   }
-  return h(
+  return [h(
     'div',
     { class: 'page-groups' },
     [...groups].map(([host, list]) =>
@@ -468,7 +547,21 @@ function renderPagesList() {
         h('div', { class: 'page-list' }, list.map(pageRow)),
       ),
     ),
-  );
+  ), footer].filter(Boolean);
+}
+
+function pagesFooter(remaining) {
+  const footer = h('div', { class: 'list-more' }, moreButton(remaining, () => loadMorePages()));
+  moreObserver?.disconnect();
+  moreObserver = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && loadMorePages(), { rootMargin: '900px' });
+  moreObserver.observe(footer);
+  return footer;
+}
+
+function loadMorePages() {
+  moreObserver?.disconnect();
+  state.pagesLimit += PAGES_PAGE_SIZE;
+  render();
 }
 
 function renderSettings() {
@@ -476,7 +569,7 @@ function renderSettings() {
     'div',
     { class: 'settings-layout' },
     h('p', { class: 'settings-section-title' }, t('settingsAppearance')),
-    settingsPanel(state.settings),
+    settingsPanel(state.settings, { fileAccess: state.fileAccess }),
     h('p', { class: 'settings-section-title' }, t('settingsShortcuts')),
     shortcutsPanel(),
     h('p', { class: 'settings-section-title' }, t('settingsData')),
@@ -490,6 +583,7 @@ function renderSettings() {
         toast(t('toastSnapshotsCleaned', formatNumber(unused.length)));
       },
       onImport: importBackup,
+      onRelocate: openRelocate,
     }),
     privacyNote(),
     h(
@@ -538,8 +632,8 @@ function renderHeader() {
 
   if (state.view === 'page') {
     const page = state.pages.find((p) => p.url === state.pageUrl);
-    title.textContent = page?.title || hostnameOf(state.pageUrl);
-    subtitle.replaceChildren(h('a', { href: state.pageUrl, target: '_blank', rel: 'noopener' }, state.pageUrl));
+    title.textContent = pageName(page ?? { url: state.pageUrl });
+    subtitle.replaceChildren(h('a', { href: state.pageUrl, target: '_blank', rel: 'noopener', title: state.pageUrl }, displayAddress(state.pageUrl)));
     document.title = `${title.textContent} · Annotator`;
   } else {
     const key = { all: 'navAll', pages: 'navPages', settings: 'navSettings' }[state.view];
@@ -569,7 +663,7 @@ function render() {
     content.replaceChildren(renderSettings());
   } else if (state.view === 'pages') {
     renderPagesFilters();
-    content.replaceChildren(renderPagesList());
+    content.replaceChildren(...[].concat(renderPagesList()));
   } else {
     const items = filteredItems();
     renderFilters(items);
@@ -603,7 +697,7 @@ function render() {
         ].filter(Boolean),
       );
     } else {
-      content.replaceChildren(...[noteBox, renderCards(items, { showSource: state.view === 'all' })].filter(Boolean));
+      content.replaceChildren(...[noteBox, ...renderCards(items, { showSource: state.view === 'all' })].filter(Boolean));
     }
   }
 
@@ -619,6 +713,15 @@ async function loadSnapshots() {
     grouped.get(meta.url).push(meta);
   }
   state.snapshots = grouped;
+}
+
+function applyPageChanges(changes) {
+  const byUrl = new Map(state.pages.map((p) => [p.url, p]));
+  for (const [url, page] of changes) {
+    if (page && Array.isArray(page.annotations) && (page.annotations.length > 0 || page.note?.trim())) byUrl.set(url, page);
+    else byUrl.delete(url);
+  }
+  state.pages = [...byUrl.values()];
 }
 
 async function refresh() {
@@ -637,17 +740,31 @@ async function init() {
   readRoute();
   await refresh();
   whatsNewBanner(state.settings).then((banner) => banner && $('whats-new').append(banner));
+  state.fileAccess = await fileAccessAllowed();
+  renderNotices();
+  // Back from Chrome's extension settings: pick up the change without a reload
+  window.addEventListener('focus', async () => {
+    const allowed = await fileAccessAllowed();
+    if (allowed === state.fileAccess) return;
+    state.fileAccess = allowed;
+    renderNotices();
+    if (state.view === 'settings' && !state.editing) render();
+  });
 
   window.addEventListener('hashchange', () => {
     readRoute();
+    resetLimits();
     state.editing = false;
     render();
     window.scrollTo({ top: 0 });
   });
 
+  let searchTimer = null;
   $('search').addEventListener('input', (e) => {
     state.query = e.target.value.trim().toLowerCase();
-    render();
+    resetLimits();
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(render, 150);
   });
   $('back').addEventListener('click', () => {
     location.hash = 'pages';
@@ -678,14 +795,22 @@ async function init() {
   $('bulk-export').addEventListener('click', () => openExport('selected'));
   $('export').addEventListener('click', () => openExport());
 
-  onStoreChange(({ settings }) => {
-    if (settings) {
-      state.settings = settings;
-      if (state.view === 'settings') return;
+  // Apply what changed instead of reading every page again, and draw once for a burst of changes
+  let renderTimer = null;
+  const redraw = () => {
+    if (state.editing) {
+      state.dirty = true;
+      return;
     }
-    refresh();
+    clearTimeout(renderTimer);
+    renderTimer = setTimeout(render, 60);
+  };
+  onStoreChange(({ pages, settings }) => {
+    if (settings) state.settings = settings;
+    if (pages.size) applyPageChanges(pages);
+    if (pages.size || (settings && state.view !== 'settings')) redraw();
   });
-  onSnapshotsChange(refresh);
+  onSnapshotsChange(() => loadSnapshots().then(redraw));
 }
 
 init();

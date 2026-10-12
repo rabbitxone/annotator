@@ -48,6 +48,12 @@ body {
   line-height: 16px;
 }
 
+.popup-loading {
+  padding: 24px 0;
+  color: var(--muted);
+  text-align: center;
+}
+
 .popup-header-actions {
   display: flex;
   gap: 6px;

@@ -625,6 +625,41 @@ textarea.input {
   font-weight: 600;
 }
 
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  font-size: 13px;
+  line-height: 19px;
+}
+
+.notice-warning {
+  border-color: var(--warning);
+  background: var(--warning-bg);
+}
+
+.notice-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--warning);
+  font-weight: 700;
+}
+
+.notice-text {
+  color: var(--on-surface);
+}
+
+.notice-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+
 .kbd {
   display: inline-flex;
   align-items: center;
@@ -1044,6 +1079,53 @@ body:has(.bulk-bar[data-open]) .toast {
 
 .export-dialog {
   width: min(560px, calc(100vw - 32px));
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.field-label {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.relocate-intro {
+  margin: -4px 0 14px;
+}
+
+.relocate-preview {
+  min-height: 20px;
+  margin: 4px 0 2px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.relocate-preview[data-state='ok'] {
+  color: var(--accent-on-soft);
+  font-weight: 600;
+}
+
+.relocate-preview[data-state='warn'] {
+  color: var(--warning);
+}
+
+.relocate-resolved {
+  min-height: 17px;
+  margin: 0 0 14px;
+  color: var(--subtle);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 17px;
+  word-break: break-all;
+}
+
+.relocate-note {
+  background: var(--surface);
+  color: var(--muted);
 }
 
 .export-field {

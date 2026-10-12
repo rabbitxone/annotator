@@ -83,3 +83,96 @@ export function hostnameOf(url) {
     return url;
   }
 }
+
+// ---- Local files ---------------------------------------------------------------------------
+// A page on disk has no host name, so notes about it are grouped, named and switched on or off
+// by folder and file name instead.
+
+export const isFileUrl = (url) => typeof url === 'string' && url.startsWith('file:');
+
+const decode = (text) => {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    return text;
+  }
+};
+
+/** "C:/papers/trial A/study 1.html", "/home/me/x.html" or "//server/share/x.html" */
+export function filePathOf(url) {
+  try {
+    const parsed = new URL(url);
+    let path = decode(parsed.pathname);
+    if (/^\/[A-Za-z]:\//.test(path)) path = path.slice(1);
+    return parsed.host ? `//${parsed.host}${path}` : path;
+  } catch {
+    return String(url);
+  }
+}
+
+export function fileNameOf(url) {
+  const path = filePathOf(url).replace(/\/+$/, '');
+  return path.slice(path.lastIndexOf('/') + 1);
+}
+
+export function folderOf(url) {
+  const path = filePathOf(url).replace(/\/+$/, '');
+  const cut = path.lastIndexOf('/');
+  return cut <= 0 ? path.slice(0, cut + 1) || '/' : path.slice(0, cut);
+}
+
+/** The key that "off on this site" rules are stored under; all local files share one. */
+export const siteKey = (url) => (isFileUrl(url) ? 'file://' : hostnameOf(url));
+
+/** For a spreadsheet column: the full path of a local file, or the host of a web page. */
+export const sourceOf = (url) => (isFileUrl(url) ? filePathOf(url) : hostnameOf(url));
+
+/** What to call the place a page lives in: the host, or the folder for a file. */
+export const siteLabel = (url) => (isFileUrl(url) ? folderOf(url) : hostnameOf(url));
+
+/** The page's title, or something readable when it has none. */
+export const pageName = ({ title, url }) => title?.trim() || (isFileUrl(url) ? fileNameOf(url) : hostnameOf(url));
+
+/** Addresses as people write them: decoded file paths, web addresses unchanged. */
+export const displayAddress = (url) => (isFileUrl(url) ? filePathOf(url) : url);
+
+/** What the page is called in a file name. */
+export const fileSafeName = (url) =>
+  (isFileUrl(url) ? fileNameOf(url).replace(/\.[^.]+$/, '') : hostnameOf(url)).replace(/[^\p{L}\p{N}._-]+/gu, '_') || 'page';
+
+/**
+ * Turns what someone types (C:\papers, \\server\share, /home/me, example.org, https://…) into an address.
+ * Returns '' when it can't be understood.
+ */
+export function toAddress(input) {
+  const text = String(input ?? '').trim();
+  if (!text) return '';
+  let candidate = text;
+  if (/^[A-Za-z]:[\\/]/.test(text)) candidate = `file:///${text[0].toUpperCase()}${text.slice(1).replace(/\\/g, '/')}`;
+  else if (text.startsWith('\\\\')) candidate = `file:${text.replace(/\\/g, '/')}`;
+  else if (text.startsWith('//')) candidate = `file:${text}`;
+  else if (text.startsWith('/')) candidate = `file://${text}`;
+  else if (!/^[a-z][a-z0-9+.-]*:/i.test(text)) candidate = `https://${text}`;
+  try {
+    const url = new URL(candidate);
+    if (!['http:', 'https:', 'file:'].includes(url.protocol)) return '';
+    url.hash = '';
+    return url.toString();
+  } catch {
+    return '';
+  }
+}
+
+const trimSlashes = (text) => text.replace(/\/+$/, '');
+
+/** Does `url` live at or below the address `from` (a folder, a site, or exactly one page)? */
+export function isUnder(url, from) {
+  const base = trimSlashes(from);
+  return !!base && (url === base || url.startsWith(`${base}/`) || url.startsWith(`${base}?`));
+}
+
+/** Moves `url` from below `from` to below `to`; null when it isn't below `from`. */
+export function relocateUrl(url, from, to) {
+  if (!isUnder(url, from)) return null;
+  return trimSlashes(to) + url.slice(trimSlashes(from).length);
+}

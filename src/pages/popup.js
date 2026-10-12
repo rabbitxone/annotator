@@ -13,10 +13,12 @@ import {
   setPageNote,
   updateAnnotation,
 } from '../shared/store.js';
-import { hostnameOf, normalizeUrl, unwrapReaderUrl } from '../shared/url.js';
+import { isFileUrl, hostnameOf, normalizeUrl, siteKey, displayAddress, unwrapReaderUrl } from '../shared/url.js';
 import { listSnapshots, onSnapshotsChange, snapshotPageUrl } from '../shared/snapshots.js';
 import { deleteWithUndo } from './components/actions.js';
 import { annotationCard } from './components/card.js';
+import { fileAccessNotice } from './components/file-access.js';
+import { fileAccessAllowed, mayBeBlockedFile } from '../shared/file-access.js';
 import { pageNoteBox } from './components/page-note.js';
 import { snapshotBar } from './components/snapshot-bar.js';
 import { privacyNote, settingsPanel } from './components/settings.js';
@@ -32,9 +34,11 @@ const state = {
   tabTitle: '',
   pageUrl: null,
   page: null,
-  pages: [],
+  pages: null, // every page with notes: read only when the Recent tab is opened
   orphans: new Set(),
   snapshots: [],
+  fileAccess: null,
+  tabHidden: false,
   appLike: false,
   settings: null,
   editing: false,
@@ -48,7 +52,7 @@ const search = document.getElementById('search');
 function matches(annotation, page) {
   if (!state.query) return true;
   const q = state.query;
-  return [annotation.quote?.exact, annotation.note, page.title, page.url].some((v) => v?.toLowerCase().includes(q));
+  return [annotation.quote?.exact, annotation.note, page.title, displayAddress(page.url)].some((v) => v?.toLowerCase().includes(q));
 }
 
 function emptyState(iconName, title, text) {
@@ -120,7 +124,11 @@ async function openElsewhere(page, id) {
 
 function renderPageTab() {
   if (!state.pageUrl) {
-    return [emptyState('alert', t('emptyUnsupportedTitle'), t('emptyUnsupportedText'))];
+    const maybeFile = mayBeBlockedFile({ allowed: state.fileAccess, pageUrl: null, tabUrl: state.tabHidden ? null : undefined });
+    return [
+      maybeFile && fileAccessNotice({ compact: true }),
+      emptyState('alert', t('emptyUnsupportedTitle'), t('emptyUnsupportedText')),
+    ].filter(Boolean);
   }
   const page = state.page ?? { url: state.pageUrl, title: state.tabTitle, annotations: [] };
   const noteBox = pageNoteBox(page.note, {
@@ -161,6 +169,10 @@ function renderPageTab() {
 }
 
 function renderRecentTab() {
+  if (!state.pages) {
+    loadPages();
+    return [h('p', { class: 'popup-loading' }, t('listLoading'))];
+  }
   const all = state.pages
     .flatMap((page) => page.annotations.map((annotation) => ({ annotation, page })))
     .filter(({ annotation, page }) => matches(annotation, page))
@@ -188,7 +200,9 @@ function renderSettingsTab() {
   return [
     settingsPanel(state.settings, {
       compact: true,
-      site: state.pageUrl ? hostnameOf(state.pageUrl) : null,
+      fileAccess: state.fileAccess,
+      site: state.pageUrl ? siteKey(state.pageUrl) : null,
+      siteName: state.pageUrl ? (isFileUrl(state.pageUrl) ? t('siteLocalFiles') : hostnameOf(state.pageUrl)) : null,
       siteAppLike: state.appLike,
     }),
     privacyNote(),
@@ -216,11 +230,30 @@ function render() {
 }
 
 async function refresh() {
-  const [page, pages] = await Promise.all([state.pageUrl ? getPage(state.pageUrl) : null, listPages()]);
-  state.page = page;
-  state.pages = pages;
+  state.page = state.pageUrl ? await getPage(state.pageUrl) : null;
   if (state.editing) state.dirty = true;
   else render();
+}
+
+let loadingPages = false;
+async function loadPages() {
+  if (state.pages || loadingPages) return;
+  loadingPages = true;
+  state.pages = await listPages();
+  loadingPages = false;
+  if (!state.editing) render();
+}
+
+// Keep what is already loaded current without reading every page again
+function applyPageChanges(changes) {
+  if (state.pageUrl && changes.has(state.pageUrl)) state.page = changes.get(state.pageUrl) ?? null;
+  if (!state.pages) return;
+  const byUrl = new Map(state.pages.map((p) => [p.url, p]));
+  for (const [url, page] of changes) {
+    if (page && Array.isArray(page.annotations) && (page.annotations.length > 0 || page.note?.trim())) byUrl.set(url, page);
+    else byUrl.delete(url);
+  }
+  state.pages = [...byUrl.values()];
 }
 
 async function loadOrphans() {
@@ -247,6 +280,8 @@ async function init() {
   const [tab] = await api.tabs.query({ active: true, currentWindow: true });
   state.tabId = tab?.id ?? null;
   state.tabTitle = tab?.title ?? '';
+  state.tabHidden = !!tab && tab.url == null;
+  state.fileAccess = await fileAccessAllowed();
   state.inReader = unwrapReaderUrl(tab?.url) !== tab?.url;
   state.pageUrl = tab?.url ? normalizeUrl(unwrapReaderUrl(tab.url)) : null;
   document.getElementById('open-panel').hidden = !state.pageUrl || state.inReader;
@@ -277,12 +312,12 @@ async function init() {
     window.close();
   });
 
-  onStoreChange(({ settings }) => {
-    if (settings) {
-      state.settings = settings;
-      if (state.tab === 'settings') return;
-    }
-    refresh();
+  onStoreChange(({ pages, settings }) => {
+    if (settings) state.settings = settings;
+    if (pages.size) applyPageChanges(pages);
+    if (!pages.size && state.tab === 'settings') return;
+    if (state.editing) state.dirty = true;
+    else render();
   });
 
 }
