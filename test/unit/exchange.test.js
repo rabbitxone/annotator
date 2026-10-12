@@ -2,11 +2,17 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
   BackupError,
+  buildExport,
   createBackup,
+  csvCell,
+  escapeMarkdown,
+  localDate,
   mergePage,
+  pagesFromGroups,
   parseBackup,
   quoteSnippet,
   textFragmentUrl,
+  toCsv,
   toMarkdown,
 } from '../../src/shared/exchange.js';
 
@@ -84,22 +90,122 @@ test('text fragment urls encode dashes and shorten long quotes', () => {
   assert.equal(textFragmentUrl('https://a.com/', long), 'https://a.com/#:~:text=one%20two%20three%20four,thirteen%20fourteen%20fifteen%20sixteen');
 });
 
-test('markdown export orders by text position and quotes every line', () => {
-  const md = toMarkdown(
-    [
-      {
-        page: page('https://a.com/', [], { title: 'A [b]', note: 'context' }),
-        annotations: [
-          annotation('2', { position: { start: 50, end: 60 }, note: 'second' }),
-          annotation('1', { position: { start: 0, end: 10 }, quote: { exact: 'l1\nl2' } }),
-        ],
-      },
-    ],
-    { title: 'Notes', pageNote: 'Page note' },
-  );
+const NOW = new Date(2026, 9, 12, 14, 30, 5).getTime();
+const at = (day) => new Date(2026, 9, day, 9, 15, 30).getTime();
+const labels = { title: 'Notes', summary: (n, p, d) => `Highlights: ${n} · pages: ${p} · exported ${d}` };
+
+function sampleGroups() {
+  return [
+    {
+      page: page('https://a.com/x_(1)', [], { title: 'A [b]', note: 'context', noteUpdatedAt: 1 }),
+      annotations: [
+        annotation('2', { position: { start: 50, end: 60 }, note: 'second', color: 'green', createdAt: at(12), updatedAt: at(13) }),
+        annotation('1', { position: { start: 0, end: 10 }, quote: { exact: 'l1\nl2 *x*' }, color: 'yellow', createdAt: at(11), updatedAt: at(11) }),
+      ],
+    },
+    { page: page('https://b.com/', [], { title: 'B', note: 'hidden' }), annotations: [annotation('3', { color: 'yellow', createdAt: at(10), updatedAt: at(10) })], includePageNote: false },
+  ];
+}
+
+test('markdown export: header, color legend, notes in text order, escaped quotes', () => {
+  const expected = [
+    '# Notes',
+    'Highlights: 3 · pages: 2 · exported 2026-10-12',
+    '🟡 Yellow 2 · 🟢 Green 1',
+    '## [A \\[b\\]](https://a.com/x_%281%29)',
+    'a.com · highlights: 2',
+    '**📝 Page note**\n\ncontext',
+    '- 🟡 **Yellow** · 2026-10-11\n  > l1\n  > l2 \\*x\\*',
+    '- 🟢 **Green** · 2026-10-12\n  > quote 2\n\n  second',
+    '## [B](https://b.com/)',
+    'b.com · highlights: 1',
+    '- 🟡 **Yellow** · 2026-10-10\n  > quote 3',
+  ];
+  assert.equal(toMarkdown(sampleGroups(), labels, { now: NOW }), expected.join('\n\n') + '\n');
+});
+
+test('markdown export grouped by color names the source of each highlight and puts page notes last', () => {
+  const md = toMarkdown(sampleGroups(), labels, { groupBy: 'color', now: NOW });
+  const sections = md.trim().split('\n\n');
+  assert.ok(sections.includes('## 🟡 Yellow · 2'));
+  assert.ok(sections.includes('## 🟢 Green · 1'));
+  assert.ok(md.includes('- **[A \\[b\\]](https://a.com/x_%281%29)** · 2026-10-11\n  > l1\n  > l2 \\*x\\*'));
+  assert.ok(md.includes('- **[B](https://b.com/)** · 2026-10-10\n  > quote 3'));
+  assert.ok(md.indexOf('## 🟡 Yellow') < md.indexOf('## 🟢 Green'));
+  assert.ok(md.indexOf('## 🟢 Green') < md.indexOf('## 📝 Page notes'));
+  assert.ok(md.trim().endsWith('- **[A \\[b\\]](https://a.com/x_%281%29)**\n\n  context'));
+  assert.ok(!md.includes('hidden'), 'notes of pages exported without their page note stay out');
+});
+
+test('markdown without a title is a plain single-page document (used by copy-all)', () => {
+  const md = toMarkdown([sampleGroups()[0]]);
+  assert.ok(md.startsWith('# [A \\[b\\]](https://a.com/x_%281%29)\n\na.com · highlights: 2'));
+  assert.ok(!md.includes('Highlights: '));
+});
+
+test('escapeMarkdown neutralizes inline and block syntax in quoted text', () => {
+  assert.equal(escapeMarkdown('p < 0.05* and a_b [12]'), 'p \\< 0.05\\* and a\\_b \\[12\\]');
+  assert.equal(escapeMarkdown('# not a heading\n- not a list\n1. nor this\n---'), '\\# not a heading\n\\- not a list\n1\\. nor this\n\\---');
+  assert.equal(escapeMarkdown('plain 3-4 text'), 'plain 3-4 text');
+});
+
+test('quote snippet escapes the quote and links to the text', () => {
   assert.equal(
-    md,
-    '# Notes\n\n## [A \\[b\\]](https://a.com/)\n\n**Page note:** context\n\n> l1\n> l2\n\n> quote 2\n\nsecond\n',
+    quoteSnippet(annotation('9', { quote: { exact: 'a*b' } }), page('https://a.com/', [])),
+    '> a\\*b\n\n— [Title](https://a.com/#:~:text=a*b)\n',
   );
-  assert.match(quoteSnippet(annotation('9'), page('https://a.com/', [])), /^> quote 9\n\n— \[Title\]\(https:\/\/a\.com\/#:~:text=quote%209\)\n$/);
+});
+
+test('csv cells are quoted when needed and never start a formula', () => {
+  assert.equal(csvCell('plain'), 'plain');
+  assert.equal(csvCell('a,b'), '"a,b"');
+  assert.equal(csvCell('a;b', ';'), '"a;b"');
+  assert.equal(csvCell('a;b', ','), 'a;b');
+  assert.equal(csvCell('say "hi"'), '"say ""hi"""');
+  assert.equal(csvCell('line\nbreak'), '"line\nbreak"');
+  assert.equal(csvCell('=HYPERLINK("x")'), '"\'=HYPERLINK(""x"")"');
+  assert.equal(csvCell('+1 hit'), "'+1 hit");
+  assert.equal(csvCell('-5% reduction'), "'-5% reduction");
+  assert.equal(csvCell('@sum'), "'@sum");
+  assert.equal(csvCell('-12.5'), '-12.5');
+  assert.equal(csvCell('+3'), '+3');
+});
+
+test('csv has one row per highlight with color name and code, in text order', () => {
+  const csv = toCsv(sampleGroups(), { labels: { colorName: (id) => id.toUpperCase() } });
+  assert.equal(
+    csv,
+    [
+      'Page title,Page URL,Color,Color code,Highlighted text,Note,Page note,Created,Modified',
+      'A [b],https://a.com/x_(1),YELLOW,#FACC15,"l1\nl2 *x*",,context,2026-10-11 09:15:30,2026-10-11 09:15:30',
+      'A [b],https://a.com/x_(1),GREEN,#22C55E,quote 2,second,context,2026-10-12 09:15:30,2026-10-13 09:15:30',
+      'B,https://b.com/,YELLOW,#FACC15,quote 3,,,2026-10-10 09:15:30,2026-10-10 09:15:30',
+    ].join('\r\n') + '\r\n',
+  );
+});
+
+test('csv keeps a page that only has a page note, and honors the separator', () => {
+  const groups = [{ page: page('https://c.com/', [], { title: 'C; D', note: 'only a note' }), annotations: [] }];
+  assert.equal(toCsv(groups, { separator: ';' }).split('\r\n')[1], '"C; D";https://c.com/;;;;;only a note;;');
+  assert.equal(toCsv([{ ...groups[0], includePageNote: false }]).split('\r\n').length, 2, 'only the header row and the final newline');
+});
+
+test('scoped json export keeps only what was asked for and can be imported again', () => {
+  const { text, extension, mime, importable } = buildExport('json', sampleGroups(), { now: NOW });
+  assert.deepEqual([extension, mime, importable], ['json', 'application/json', true]);
+  const { pages } = parseBackup(text);
+  assert.deepEqual(pages.map((p) => [p.url, p.annotations.length, p.note ?? null]), [
+    ['https://a.com/x_(1)', 2, 'context'],
+    ['https://b.com/', 1, null],
+  ]);
+  assert.equal(pagesFromGroups([{ page: page('https://z.com/', [annotation('q')], { note: 'n' }), annotations: [] }])[0].annotations.length, 0);
+});
+
+test('csv export starts with a BOM so Excel reads UTF-8, markdown and csv are not importable', () => {
+  const csv = buildExport('csv', sampleGroups(), { separator: ';' });
+  assert.equal(csv.text.charCodeAt(0), 0xfeff);
+  assert.equal(csv.importable, false);
+  assert.equal(buildExport('markdown', sampleGroups(), { labels, now: NOW }).importable, false);
+  assert.throws(() => buildExport('xlsx', []), /Unknown export format/);
+  assert.equal(localDate(NOW), '2026-10-12');
 });

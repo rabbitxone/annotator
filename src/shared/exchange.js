@@ -1,5 +1,5 @@
-import { COLOR_IDS } from './constants.js';
-import { normalizeUrl } from './url.js';
+import { COLORS, COLOR_IDS, colorById } from './constants.js';
+import { hostnameOf, normalizeUrl } from './url.js';
 
 export const BACKUP_FORMAT = 'annotator-backup';
 export const BACKUP_VERSION = 1;
@@ -142,49 +142,22 @@ export function textFragmentUrl(url, exact) {
   return `${url.includes('#') ? url : url + '#'}:~:text=${directive}`;
 }
 
-const escapeLinkText = (text) => text.replace(/[[\]\\]/g, '\\$&');
-const blockquote = (text) =>
-  String(text)
-    .split('\n')
-    .map((line) => (line ? `> ${line}` : '>'))
-    .join('\n');
+const pad = (n) => String(n).padStart(2, '0');
 
-function pageHeading(page, level) {
-  return `${'#'.repeat(level)} [${escapeLinkText(page.title || page.url)}](${page.url})`;
+export function localDate(ms) {
+  const d = new Date(ms);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-function annotationBlock(annotation) {
-  const parts = [blockquote(annotation.quote?.exact ?? '')];
-  if (annotation.note?.trim()) parts.push(annotation.note.trim());
-  return parts.join('\n\n');
+export function localDateTime(ms) {
+  const d = new Date(ms);
+  return `${localDate(ms)} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
 export function byTextPosition(a, b) {
   const pa = a.position?.start ?? Infinity;
   const pb = b.position?.start ?? Infinity;
   return pa === pb ? a.createdAt - b.createdAt : pa - pb;
-}
-
-/**
- * groups: [{ page, annotations, includePageNote }]
- * labels: { title, pageNote }
- */
-export function toMarkdown(groups, labels = {}) {
-  const out = [];
-  if (labels.title) out.push(`# ${labels.title}`);
-  const level = labels.title ? 2 : 1;
-  for (const { page, annotations, includePageNote = true } of groups) {
-    const sections = [pageHeading(page, level)];
-    if (includePageNote && page.note?.trim()) sections.push(`**${labels.pageNote ?? 'Page note'}:** ${page.note.trim()}`);
-    for (const annotation of [...annotations].sort(byTextPosition)) sections.push(annotationBlock(annotation));
-    out.push(sections.join('\n\n'));
-  }
-  return out.join('\n\n') + '\n';
-}
-
-export function quoteSnippet(annotation, page) {
-  const link = `[${escapeLinkText(page.title || page.url)}](${textFragmentUrl(page.url, annotation.quote?.exact)})`;
-  return `${annotationBlock(annotation)}\n\n— ${link}\n`;
 }
 
 export function groupItems(items) {
@@ -194,4 +167,190 @@ export function groupItems(items) {
     groups.get(page.url).annotations.push(annotation);
   }
   return [...groups.values()];
+}
+
+// Pages restricted to what is being exported; a page note only travels with an export that asked for it.
+export function pagesFromGroups(groups) {
+  return groups.map(({ page, annotations, includePageNote = true }) => {
+    const { note, noteUpdatedAt, ...rest } = page;
+    return { ...rest, ...(includePageNote && note?.trim() ? { note, noteUpdatedAt } : {}), annotations };
+  });
+}
+
+// ---- Markdown ------------------------------------------------------------------------------
+
+// Web text must not turn into formatting: escape inline markers everywhere and block markers at line starts.
+export function escapeMarkdown(text) {
+  return String(text)
+    .replace(/[\\`*_[\]<>]/g, '\\$&')
+    .replace(/^(\s*)(#{1,6})(?=\s|$)/gm, '$1\\$2')
+    .replace(/^(\s*)([-+])(?=\s)/gm, '$1\\$2')
+    .replace(/^(\s*)(\d+)([.)])(?=\s)/gm, '$1$2\\$3')
+    .replace(/^(\s*)(-{3,}|={3,})\s*$/gm, '$1\\$2');
+}
+
+const linkTarget = (url) => url.replace(/\(/g, '%28').replace(/\)/g, '%29');
+const mdLink = (text, url) => `[${escapeMarkdown(text)}](${linkTarget(url)})`;
+const blockquote = (text) =>
+  escapeMarkdown(text)
+    .split('\n')
+    .map((line) => (line ? `> ${line}` : '>'))
+    .join('\n');
+const indent = (text, by = '  ') => text.replace(/^(?=.)/gm, by);
+
+export const DEFAULT_LABELS = {
+  title: '',
+  pageNote: 'Page note',
+  pageNotes: 'Page notes',
+  colorName: (id) => id.charAt(0).toUpperCase() + id.slice(1),
+  summary: (notes, pages, date) => `Highlights: ${notes} · pages: ${pages} · exported ${date}`,
+  pageSummary: (host, count) => `${host} · highlights: ${count}`,
+  csvHeaders: ['Page title', 'Page URL', 'Color', 'Color code', 'Highlighted text', 'Note', 'Page note', 'Created', 'Modified'],
+};
+
+function highlightItem(heading, annotation) {
+  const parts = [`${heading}\n${blockquote(annotation.quote?.exact ?? '')}`];
+  if (annotation.note?.trim()) parts.push(annotation.note.trim());
+  return `- ${indent(parts.join('\n\n')).slice(2)}`;
+}
+
+const colorHeading = (annotation, L) => {
+  const color = colorById(annotation.color);
+  return `${color.emoji} **${escapeMarkdown(L.colorName(color.id))}** · ${localDate(annotation.createdAt)}`;
+};
+
+function pageNoteBlock(note, label) {
+  return `**📝 ${escapeMarkdown(label)}**\n\n${note.trim()}`;
+}
+
+/**
+ * groups: [{ page, annotations, includePageNote }]
+ * options.groupBy: 'page' (default) | 'color'
+ */
+export function toMarkdown(groups, labels = {}, { groupBy = 'page', now = Date.now() } = {}) {
+  const L = { ...DEFAULT_LABELS, ...labels };
+  const out = [];
+  const withTitle = !!L.title;
+
+  if (withTitle) {
+    const count = Object.fromEntries(COLORS.map((c) => [c.id, 0]));
+    let notes = 0;
+    for (const { annotations } of groups) {
+      for (const a of annotations) {
+        count[colorById(a.color).id]++;
+        notes++;
+      }
+    }
+    out.push(`# ${escapeMarkdown(L.title)}`, L.summary(notes, groups.length, localDate(now)));
+    const legend = COLORS.filter((c) => count[c.id] > 0).map((c) => `${c.emoji} ${escapeMarkdown(L.colorName(c.id))} ${count[c.id]}`);
+    if (legend.length) out.push(legend.join(' · '));
+  }
+
+  const level = '#'.repeat(withTitle ? 2 : 1);
+  if (groupBy === 'color') {
+    for (const color of COLORS) {
+      const items = [];
+      for (const { page, annotations } of groups) {
+        for (const annotation of [...annotations].sort(byTextPosition)) {
+          if (colorById(annotation.color).id === color.id) items.push({ page, annotation });
+        }
+      }
+      if (!items.length) continue;
+      out.push(
+        `${level} ${color.emoji} ${escapeMarkdown(L.colorName(color.id))} · ${items.length}`,
+        items
+          .map(({ page, annotation }) =>
+            highlightItem(`**${mdLink(page.title || page.url, page.url)}** · ${localDate(annotation.createdAt)}`, annotation),
+          )
+          .join('\n\n'),
+      );
+    }
+    const noted = groups.filter((g) => g.includePageNote !== false && g.page.note?.trim());
+    if (noted.length) {
+      out.push(
+        `${level} 📝 ${escapeMarkdown(L.pageNotes)}`,
+        noted.map(({ page }) => `- **${mdLink(page.title || page.url, page.url)}**\n\n${indent(page.note.trim())}`).join('\n\n'),
+      );
+    }
+  } else {
+    for (const { page, annotations, includePageNote = true } of groups) {
+      const sections = [
+        `${level} ${mdLink(page.title || page.url, page.url)}`,
+        escapeMarkdown(L.pageSummary(hostnameOf(page.url), annotations.length)),
+      ];
+      if (includePageNote && page.note?.trim()) sections.push(pageNoteBlock(page.note, L.pageNote));
+      if (annotations.length) {
+        sections.push([...annotations].sort(byTextPosition).map((a) => highlightItem(colorHeading(a, L), a)).join('\n\n'));
+      }
+      out.push(sections.join('\n\n'));
+    }
+  }
+  return out.join('\n\n') + '\n';
+}
+
+/** One highlight as a quote with a link that scrolls to it: for pasting elsewhere. */
+export function quoteSnippet(annotation, page) {
+  const parts = [blockquote(annotation.quote?.exact ?? '')];
+  if (annotation.note?.trim()) parts.push(annotation.note.trim());
+  return `${parts.join('\n\n')}\n\n— ${mdLink(page.title || page.url, textFragmentUrl(page.url, annotation.quote?.exact))}\n`;
+}
+
+// ---- CSV -----------------------------------------------------------------------------------
+
+export const CSV_SEPARATORS = { comma: ',', semicolon: ';' };
+
+const FORMULA_START = /^[=+\-@\t\r]/;
+const PLAIN_NUMBER = /^[+-]?\d+([.,]\d+)?$/;
+
+// Text from web pages can start with = + - @, which spreadsheets would run as a formula.
+export function csvCell(value, separator = ',') {
+  let text = String(value ?? '');
+  if (FORMULA_START.test(text) && !PLAIN_NUMBER.test(text)) text = `'${text}`;
+  return /["\r\n]/.test(text) || text.includes(separator) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+export function toCsv(groups, { separator = ',', labels = {} } = {}) {
+  const L = { ...DEFAULT_LABELS, ...labels };
+  const rows = [L.csvHeaders];
+  for (const { page, annotations, includePageNote = true } of groups) {
+    const pageNote = includePageNote ? (page.note ?? '').trim() : '';
+    const title = page.title || '';
+    if (annotations.length === 0) {
+      if (pageNote) rows.push([title, page.url, '', '', '', '', pageNote, '', '']);
+      continue;
+    }
+    for (const a of [...annotations].sort(byTextPosition)) {
+      const color = colorById(a.color);
+      rows.push([
+        title,
+        page.url,
+        L.colorName(color.id),
+        color.swatch,
+        a.quote?.exact ?? '',
+        a.note ?? '',
+        pageNote,
+        localDateTime(a.createdAt),
+        localDateTime(a.updatedAt ?? a.createdAt),
+      ]);
+    }
+  }
+  return rows.map((row) => row.map((cell) => csvCell(cell, separator)).join(separator)).join('\r\n') + '\r\n';
+}
+
+// ---- Everything the export dialog can produce ---------------------------------------------
+
+export const EXPORT_FORMATS = {
+  json: { extension: 'json', mime: 'application/json', importable: true },
+  markdown: { extension: 'md', mime: 'text/markdown', importable: false },
+  csv: { extension: 'csv', mime: 'text/csv', importable: false },
+};
+
+export function buildExport(format, groups, { labels, snapshots = [], separator = ',', groupBy = 'page', now = Date.now() } = {}) {
+  const meta = EXPORT_FORMATS[format];
+  if (!meta) throw new Error(`Unknown export format: ${format}`);
+  let text;
+  if (format === 'json') text = JSON.stringify(createBackup(pagesFromGroups(groups), { now, snapshots }), null, 2);
+  else if (format === 'markdown') text = toMarkdown(groups, labels, { groupBy, now });
+  else text = '﻿' + toCsv(groups, { separator, labels }); // BOM: Excel otherwise misreads UTF-8
+  return { ...meta, text };
 }

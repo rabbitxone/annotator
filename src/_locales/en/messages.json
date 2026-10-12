@@ -407,34 +407,19 @@
     "message": "Change shortcuts"
   },
   "dataBackup": {
-    "message": "Backup"
+    "message": "Export and backup"
   },
   "dataBackupHint": {
-    "message": "Save all notes and page snapshots to a file, or bring them back on another device. Importing merges and never deletes."
-  },
-  "dataExport": {
-    "message": "Export"
+    "message": "Save your notes as JSON (a full backup you can import again), or as Markdown or CSV for reading and analysis."
   },
   "dataImport": {
     "message": "Import"
-  },
-  "dataMarkdown": {
-    "message": "Markdown"
-  },
-  "dataMarkdownHint": {
-    "message": "All notes as a readable document, grouped by page."
-  },
-  "dataExportMarkdown": {
-    "message": "Download .md"
   },
   "bulkRecolor": {
     "message": "Change color"
   },
   "bulkCopyHint": {
     "message": "Copy selected notes as Markdown"
-  },
-  "bulkMarkdownHint": {
-    "message": "Download selected notes as a Markdown file"
   },
   "snapshotLabel": {
     "message": "Page snapshot"
@@ -604,5 +589,180 @@
   },
   "readerViewHint": {
     "message": "You're in Reader View. Highlights show and can be added on the original page."
+  },
+  "actionExport": {
+    "message": "Export"
+  },
+  "bulkExportHint": {
+    "message": "Export the selected notes"
+  },
+  "exportDialogTitle": {
+    "message": "Export notes"
+  },
+  "exportScopeLabel": {
+    "message": "What to export"
+  },
+  "exportScopeAll": {
+    "message": "All notes"
+  },
+  "exportScopeThisPage": {
+    "message": "This page"
+  },
+  "exportScopeFiltered": {
+    "message": "Current list (with filters)"
+  },
+  "exportScopeSelected": {
+    "message": "Selected notes"
+  },
+  "exportScopeCount": {
+    "message": "Notes: $V1$ · pages: $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "exportEmptyScope": {
+    "message": "Nothing to export here"
+  },
+  "exportEmpty": {
+    "message": "There is nothing to export in this selection."
+  },
+  "exportFormatLabel": {
+    "message": "Format"
+  },
+  "exportJson": {
+    "message": "JSON"
+  },
+  "exportJsonHint": {
+    "message": "A full backup with colors, notes and, optionally, page snapshots. The only format you can import back."
+  },
+  "exportMarkdown": {
+    "message": "Markdown"
+  },
+  "exportMarkdownHint": {
+    "message": "A readable document with colors, dates and links. Good for sharing, Obsidian, Notion or GitHub."
+  },
+  "exportCsv": {
+    "message": "CSV (Excel)"
+  },
+  "exportCsvHint": {
+    "message": "One row per highlight: page, color, text, note and dates. Opens in Excel, Google Sheets and LibreOffice."
+  },
+  "exportReimportable": {
+    "message": "Can be imported again"
+  },
+  "exportNote": {
+    "message": "Only JSON files can be imported back into Annotator. Markdown and CSV are for reading and analysis."
+  },
+  "exportIncludeSnapshots": {
+    "message": "Include page snapshots: $V1$ ($V2$)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "exportGroupBy": {
+    "message": "Organize by"
+  },
+  "exportGroupByPage": {
+    "message": "Page"
+  },
+  "exportGroupByColor": {
+    "message": "Color"
+  },
+  "exportSeparator": {
+    "message": "Column separator"
+  },
+  "exportSeparatorComma": {
+    "message": "Comma ( , )"
+  },
+  "exportSeparatorSemicolon": {
+    "message": "Semicolon ( ; )"
+  },
+  "exportSeparatorHint": {
+    "message": "If Excel puts everything in one column, choose the other separator."
+  },
+  "exportCsvFormulaHint": {
+    "message": "Text that starts with = + - or @ gets a leading apostrophe, so Excel never runs it as a formula."
+  },
+  "exportAction": {
+    "message": "Export"
+  },
+  "exportPageNotes": {
+    "message": "Page notes"
+  },
+  "exportSummary": {
+    "message": "Highlights: $V1$ · pages: $V2$ · exported $V3$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      },
+      "v3": {
+        "content": "$3"
+      }
+    }
+  },
+  "exportPageSummary": {
+    "message": "$V1$ · highlights: $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "toastExported": {
+    "message": "Exported $V1$ notes as $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "toastExportFailed": {
+    "message": "Couldn't create the export. Try again."
+  },
+  "csvPageTitle": {
+    "message": "Page title"
+  },
+  "csvPageUrl": {
+    "message": "Page URL"
+  },
+  "csvColor": {
+    "message": "Color"
+  },
+  "csvColorCode": {
+    "message": "Color code"
+  },
+  "csvQuote": {
+    "message": "Highlighted text"
+  },
+  "csvNote": {
+    "message": "Note"
+  },
+  "csvPageNote": {
+    "message": "Page note"
+  },
+  "csvCreated": {
+    "message": "Created"
+  },
+  "csvModified": {
+    "message": "Modified"
   }
 }

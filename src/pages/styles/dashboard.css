@@ -125,8 +125,18 @@ body {
   color: inherit;
 }
 
+.main-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .main-search {
   width: min(340px, 100%);
+}
+
+.main-tools .btn {
+  height: 36px;
 }
 
 #whats-new:empty {
@@ -474,7 +484,12 @@ body {
     padding: 20px 16px 96px;
   }
 
-  .main-search {
+  .main-tools {
     width: 100%;
+  }
+
+  .main-search {
+    flex: 1;
+    width: auto;
   }
 }

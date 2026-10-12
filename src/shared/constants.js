@@ -1,6 +1,7 @@
 export const COLORS = [
   {
     id: 'yellow',
+    emoji: '🟡',
     swatch: '#FACC15',
     fill: 'rgba(250, 204, 21, 0.42)',
     swatchDark: '#FDE047',
@@ -8,6 +9,7 @@ export const COLORS = [
   },
   {
     id: 'green',
+    emoji: '🟢',
     swatch: '#22C55E',
     fill: 'rgba(34, 197, 94, 0.32)',
     swatchDark: '#4ADE80',
@@ -15,6 +17,7 @@ export const COLORS = [
   },
   {
     id: 'blue',
+    emoji: '🔵',
     swatch: '#3B82F6',
     fill: 'rgba(59, 130, 246, 0.30)',
     swatchDark: '#60A5FA',
@@ -22,6 +25,7 @@ export const COLORS = [
   },
   {
     id: 'red',
+    emoji: '🔴',
     swatch: '#F43F5E',
     fill: 'rgba(244, 63, 94, 0.30)',
     swatchDark: '#FB7185',
@@ -29,6 +33,7 @@ export const COLORS = [
   },
   {
     id: 'purple',
+    emoji: '🟣',
     swatch: '#A855F7',
     fill: 'rgba(168, 85, 247, 0.30)',
     swatchDark: '#C084FC',

@@ -4,14 +4,17 @@ import { COLORS, colorById } from '../shared/constants.js';
 import { h } from '../shared/dom.js';
 import {
   BackupError,
+  buildExport,
   byTextPosition,
-  createBackup,
+  CSV_SEPARATORS,
   groupItems,
+  localDate,
   parseBackup,
   quoteSnippet,
   toMarkdown,
 } from '../shared/exchange.js';
-import { applyI18n, formatNumber, relativeTime, t } from '../shared/i18n.js';
+import { exportLabels } from '../shared/export-labels.js';
+import { applyI18n, formatNumber, relativeTime, t, uiLanguage } from '../shared/i18n.js';
 import { hydrateIcons, icon } from '../shared/icons.js';
 import {
   allSnapshotMeta,
@@ -34,6 +37,7 @@ import {
 import { hostnameOf } from '../shared/url.js';
 import { deleteWithUndo } from './components/actions.js';
 import { annotationCard, siteAvatar, swatchPicker } from './components/card.js';
+import { exportDialog } from './components/export-dialog.js';
 import { pageNoteBox } from './components/page-note.js';
 import { snapshotBar } from './components/snapshot-bar.js';
 import { dataPanel, privacyNote, settingsPanel, shortcutsPanel } from './components/settings.js';
@@ -113,7 +117,7 @@ function selectedItems() {
   return allItems().filter(({ annotation, page }) => state.selected.has(selectionKey(page.url, annotation.id)));
 }
 
-const dateStamp = () => new Date().toISOString().slice(0, 10);
+const dateStamp = () => localDate(Date.now());
 
 function download(name, text, type) {
   const url = URL.createObjectURL(new Blob([text], { type }));
@@ -124,15 +128,100 @@ function download(name, text, type) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-const markdownOf = (groups) => toMarkdown(groups, { title: t('exportTitle'), pageNote: t('pageNoteLabel') });
+const EXPORT_PREFS_KEY = 'annotator-export';
 
-function exportMarkdown(groups) {
-  download(`annotator-${dateStamp()}.md`, markdownOf(groups), 'text/markdown');
+function loadExportPrefs() {
+  // Excel reads the list separator from the regional settings: places that write 1,5 use ';'.
+  const defaults = {
+    scope: 'all',
+    format: 'json',
+    snapshots: true,
+    groupBy: 'page',
+    separator: (1.5).toLocaleString(uiLanguage()).includes(',') ? 'semicolon' : 'comma',
+  };
+  try {
+    return { ...defaults, ...JSON.parse(localStorage.getItem(EXPORT_PREFS_KEY) ?? '{}') };
+  } catch {
+    return defaults;
+  }
 }
 
-async function exportBackup() {
-  const snapshots = await exportSnapshots().catch(() => []);
-  download(`annotator-backup-${dateStamp()}.json`, JSON.stringify(createBackup(state.pages, { snapshots }), null, 2), 'application/json');
+function saveExportPrefs(prefs) {
+  try {
+    const { scope, ...rest } = prefs;
+    localStorage.setItem(EXPORT_PREFS_KEY, JSON.stringify(rest));
+  } catch {
+    // Storage unavailable: the dialog just starts from the defaults next time
+  }
+}
+
+function snapshotsFor(groups) {
+  let count = 0;
+  let bytes = 0;
+  for (const { page } of groups) {
+    for (const s of state.snapshots.get(page.url) ?? []) {
+      count++;
+      bytes += s.size || 0;
+    }
+  }
+  return { count, bytes };
+}
+
+function exportScopes() {
+  const make = (id, label, groups) => ({
+    id,
+    label,
+    groups,
+    notes: groups.reduce((n, g) => n + g.annotations.length, 0),
+    pages: groups.length,
+    pageNotes: groups.filter((g) => g.includePageNote !== false && g.page.note?.trim()).length,
+    snapshots: snapshotsFor(groups),
+  });
+  const everything = [...state.pages]
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .map((page) => ({ page, annotations: page.annotations, includePageNote: true }));
+  const scopes = [make('all', t('exportScopeAll'), everything)];
+
+  const listView = state.view === 'all' || state.view === 'page';
+  if (listView && (state.view === 'page' || isFiltered())) {
+    const items = filteredItems();
+    const page = state.view === 'page' ? state.pages.find((p) => p.url === state.pageUrl) : null;
+    const groups = page
+      ? [{ page, annotations: items.map((i) => i.annotation), includePageNote: true }]
+      : groupItems(items);
+    if (groups.length) scopes.push(make('view', page ? t('exportScopeThisPage') : t('exportScopeFiltered'), groups));
+  }
+  if (state.selected.size) scopes.push(make('selected', t('exportScopeSelected'), groupItems(selectedItems())));
+  return scopes;
+}
+
+async function openExport(preferred) {
+  const scopes = exportScopes();
+  const prefs = loadExportPrefs();
+  const has = (id) => scopes.some((s) => s.id === id);
+  const first = has(preferred) ? preferred : has('selected') ? 'selected' : has('view') ? 'view' : 'all';
+  const result = await exportDialog({ scopes, initial: { ...prefs, scope: first } });
+  if (!result) return;
+  saveExportPrefs(result.remember);
+
+  const { scope, format, options } = result;
+  try {
+    const urls = new Set(scope.groups.map((g) => g.page.url));
+    const snapshots =
+      format === 'json' && options.snapshots ? (await exportSnapshots()).filter((s) => urls.has(s.url)) : [];
+    const file = buildExport(format, scope.groups, {
+      labels: exportLabels(),
+      snapshots,
+      separator: CSV_SEPARATORS[options.separator],
+      groupBy: options.groupBy,
+    });
+    const name = format === 'json' && scope.id === 'all' ? 'annotator-backup' : 'annotator';
+    download(`${name}-${dateStamp()}.${file.extension}`, file.text, `${file.mime};charset=utf-8`);
+    toast(t('toastExported', [formatNumber(scope.notes), t(`export${format[0].toUpperCase()}${format.slice(1)}`)]));
+  } catch (err) {
+    console.error('Annotator: export failed', err);
+    toast(t('toastExportFailed'));
+  }
 }
 
 async function importBackup(file) {
@@ -393,14 +482,13 @@ function renderSettings() {
     h('p', { class: 'settings-section-title' }, t('settingsData')),
     dataPanel({
       settings: state.settings,
+      onExport: () => openExport('all'),
       snapshots: { ...snapshotStats(), unused: snapshotStats().unused.length },
       onCleanSnapshots: async () => {
         const { unused } = snapshotStats();
         await deleteSnapshots(unused);
         toast(t('toastSnapshotsCleaned', formatNumber(unused.length)));
       },
-      onExportBackup: exportBackup,
-      onExportMarkdown: () => exportMarkdown([...state.pages].sort((a, b) => b.updatedAt - a.updatedAt).map((page) => ({ page, annotations: page.annotations }))),
       onImport: importBackup,
     }),
     privacyNote(),
@@ -446,6 +534,7 @@ function renderHeader() {
   $('back').hidden = state.view !== 'page';
   $('sidebar-privacy').hidden = state.view === 'settings';
   $('search-wrap').hidden = state.view === 'settings';
+  $('export').hidden = state.view === 'settings';
 
   if (state.view === 'page') {
     const page = state.pages.find((p) => p.url === state.pageUrl);
@@ -583,10 +672,11 @@ async function init() {
     }),
   );
   $('bulk-copy').addEventListener('click', async () => {
-    const ok = await copyText(markdownOf(groupItems(selectedItems())));
+    const ok = await copyText(toMarkdown(groupItems(selectedItems()), exportLabels()));
     toast(t(ok ? 'toastCopied' : 'toastCopyFailed'));
   });
-  $('bulk-markdown').addEventListener('click', () => exportMarkdown(groupItems(selectedItems())));
+  $('bulk-export').addEventListener('click', () => openExport('selected'));
+  $('export').addEventListener('click', () => openExport());
 
   onStoreChange(({ settings }) => {
     if (settings) {

@@ -1,7 +1,7 @@
 import { api } from '../shared/api.js';
 import { copyText } from '../shared/clipboard.js';
 import { quoteSnippet, toMarkdown } from '../shared/exchange.js';
-import { t } from '../shared/i18n.js';
+import { exportLabels } from '../shared/export-labels.js';
 import {
   addAnnotation,
   deleteAnnotations,
@@ -113,7 +113,7 @@ function main() {
       onOpenSnapshot: () => api.runtime.sendMessage({ type: 'open-snapshot', url: pageUrl }).catch(() => { }),
       onCopyAll: () =>
         copyText(
-          toMarkdown([{ page: { ...currentPage(), note: pageNote }, annotations }], { pageNote: t('pageNoteLabel') }),
+          toMarkdown([{ page: { ...currentPage(), note: pageNote }, annotations }], { ...exportLabels(), title: '' }),
           ui.shadowRoot(),
         ),
     },

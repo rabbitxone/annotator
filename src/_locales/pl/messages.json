@@ -407,34 +407,19 @@
     "message": "Zmień skróty"
   },
   "dataBackup": {
-    "message": "Kopia zapasowa"
+    "message": "Eksport i kopia zapasowa"
   },
   "dataBackupHint": {
-    "message": "Zapisz wszystkie notatki i kopie stron do pliku albo przywróć je na innym urządzeniu. Import łączy dane i niczego nie usuwa."
-  },
-  "dataExport": {
-    "message": "Eksportuj"
+    "message": "Zapisz notatki jako JSON (pełna kopia, którą można zaimportować z powrotem) albo jako Markdown lub CSV do czytania i analizy."
   },
   "dataImport": {
     "message": "Importuj"
-  },
-  "dataMarkdown": {
-    "message": "Markdown"
-  },
-  "dataMarkdownHint": {
-    "message": "Wszystkie notatki jako czytelny dokument, pogrupowany według stron."
-  },
-  "dataExportMarkdown": {
-    "message": "Pobierz .md"
   },
   "bulkRecolor": {
     "message": "Zmień kolor"
   },
   "bulkCopyHint": {
     "message": "Kopiuj zaznaczone notatki jako Markdown"
-  },
-  "bulkMarkdownHint": {
-    "message": "Pobierz zaznaczone notatki jako plik Markdown"
   },
   "snapshotLabel": {
     "message": "Kopia strony"
@@ -604,5 +589,180 @@
   },
   "readerViewHint": {
     "message": "Jesteś w trybie czytania. Zakreślenia widać i można dodawać na oryginalnej stronie."
+  },
+  "actionExport": {
+    "message": "Eksportuj"
+  },
+  "bulkExportHint": {
+    "message": "Eksportuj zaznaczone notatki"
+  },
+  "exportDialogTitle": {
+    "message": "Eksportuj notatki"
+  },
+  "exportScopeLabel": {
+    "message": "Co wyeksportować"
+  },
+  "exportScopeAll": {
+    "message": "Wszystkie notatki"
+  },
+  "exportScopeThisPage": {
+    "message": "Ta strona"
+  },
+  "exportScopeFiltered": {
+    "message": "Bieżąca lista (z filtrami)"
+  },
+  "exportScopeSelected": {
+    "message": "Zaznaczone notatki"
+  },
+  "exportScopeCount": {
+    "message": "Notatki: $V1$ · strony: $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "exportEmptyScope": {
+    "message": "Nie ma tu nic do wyeksportowania"
+  },
+  "exportEmpty": {
+    "message": "W tym zakresie nie ma nic do wyeksportowania."
+  },
+  "exportFormatLabel": {
+    "message": "Format"
+  },
+  "exportJson": {
+    "message": "JSON"
+  },
+  "exportJsonHint": {
+    "message": "Pełna kopia zapasowa z kolorami, notatkami i, opcjonalnie, kopiami stron. Jedyny format, który można zaimportować z powrotem."
+  },
+  "exportMarkdown": {
+    "message": "Markdown"
+  },
+  "exportMarkdownHint": {
+    "message": "Czytelny dokument z kolorami, datami i linkami. Dobry do udostępniania, Obsidiana, Notiona czy GitHuba."
+  },
+  "exportCsv": {
+    "message": "CSV (Excel)"
+  },
+  "exportCsvHint": {
+    "message": "Jeden wiersz na zakreślenie: strona, kolor, tekst, notatka i daty. Otwiera się w Excelu, Arkuszach Google i LibreOffice."
+  },
+  "exportReimportable": {
+    "message": "Można zaimportować ponownie"
+  },
+  "exportNote": {
+    "message": "Tylko pliki JSON można ponownie zaimportować do Annotatora. Markdown i CSV służą do czytania i analizy."
+  },
+  "exportIncludeSnapshots": {
+    "message": "Dołącz kopie stron: $V1$ ($V2$)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "exportGroupBy": {
+    "message": "Uporządkuj według"
+  },
+  "exportGroupByPage": {
+    "message": "Stron"
+  },
+  "exportGroupByColor": {
+    "message": "Kolorów"
+  },
+  "exportSeparator": {
+    "message": "Separator kolumn"
+  },
+  "exportSeparatorComma": {
+    "message": "Przecinek ( , )"
+  },
+  "exportSeparatorSemicolon": {
+    "message": "Średnik ( ; )"
+  },
+  "exportSeparatorHint": {
+    "message": "Jeśli Excel wrzuci wszystko do jednej kolumny, wybierz drugi separator."
+  },
+  "exportCsvFormulaHint": {
+    "message": "Tekst zaczynający się od = + - lub @ dostaje na początku apostrof, żeby Excel nigdy nie wykonał go jako formuły."
+  },
+  "exportAction": {
+    "message": "Eksportuj"
+  },
+  "exportPageNotes": {
+    "message": "Notatki do stron"
+  },
+  "exportSummary": {
+    "message": "Zakreślenia: $V1$ · strony: $V2$ · wyeksportowano $V3$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      },
+      "v3": {
+        "content": "$3"
+      }
+    }
+  },
+  "exportPageSummary": {
+    "message": "$V1$ · zakreślenia: $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "toastExported": {
+    "message": "Wyeksportowano notatki: $V1$ (format: $V2$)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "toastExportFailed": {
+    "message": "Nie udało się utworzyć eksportu. Spróbuj ponownie."
+  },
+  "csvPageTitle": {
+    "message": "Tytuł strony"
+  },
+  "csvPageUrl": {
+    "message": "Adres strony"
+  },
+  "csvColor": {
+    "message": "Kolor"
+  },
+  "csvColorCode": {
+    "message": "Kod koloru"
+  },
+  "csvQuote": {
+    "message": "Zakreślony tekst"
+  },
+  "csvNote": {
+    "message": "Notatka"
+  },
+  "csvPageNote": {
+    "message": "Notatka do strony"
+  },
+  "csvCreated": {
+    "message": "Utworzono"
+  },
+  "csvModified": {
+    "message": "Zmieniono"
   }
 }

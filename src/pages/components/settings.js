@@ -1,6 +1,6 @@
 import { api } from '../../shared/api.js';
 import { h } from '../../shared/dom.js';
-import { t } from '../../shared/i18n.js';
+import { formatBytes, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 import { setSiteRule, updateSettings } from '../../shared/store.js';
 import { swatchPicker } from './card.js';
@@ -160,10 +160,7 @@ export function shortcutsPanel() {
   return panel;
 }
 
-const formatBytes = (bytes) =>
-  bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-
-export function dataPanel({ settings, snapshots, onExportBackup, onExportMarkdown, onImport, onCleanSnapshots }) {
+export function dataPanel({ settings, snapshots, onExport, onImport, onCleanSnapshots }) {
   const file = h('input', {
     type: 'file',
     accept: '.json,application/json',
@@ -183,7 +180,7 @@ export function dataPanel({ settings, snapshots, onExportBackup, onExportMarkdow
       h(
         'div',
         { class: 'setting-buttons' },
-        h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: onExportBackup }, icon('download', { size: 14 }), t('dataExport')),
+        h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: onExport }, icon('download', { size: 14 }), t('actionExport')),
         h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: () => file.click() }, icon('upload', { size: 14 }), t('dataImport')),
         file,
       ),
@@ -207,12 +204,6 @@ export function dataPanel({ settings, snapshots, onExportBackup, onExportMarkdow
         icon('delete', { size: 14 }),
         t('dataSnapshotsClean', String(snapshots.unused)),
       ),
-    ),
-    settingItem(
-      'note',
-      t('dataMarkdown'),
-      t('dataMarkdownHint'),
-      h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: onExportMarkdown }, icon('download', { size: 14 }), t('dataExportMarkdown')),
     ),
   );
 }
