@@ -1,4 +1,22 @@
+import { h } from '../../shared/dom.js';
+import { t } from '../../shared/i18n.js';
 import { afterAnimations } from '../../shared/motion.js';
+
+let ids = 0;
+
+/**
+ * Every dialog has the same shape: a grey frame with the title on it, and a white panel
+ * (rounded on its own) that holds the content and, at its foot, the buttons.
+ */
+export function buildDialog({ className = '', title, body, actions, role = 'dialog' }) {
+  const titleId = `dialog-title-${++ids}`;
+  return h(
+    'dialog',
+    { class: ['dialog', className], role: role === 'dialog' ? null : role, 'aria-labelledby': titleId },
+    h('div', { class: 'dialog-head' }, h('h2', { class: 'dialog-title', id: titleId }, title)),
+    h('div', { class: 'dialog-panel' }, h('div', { class: 'dialog-body' }, body), h('div', { class: 'dialog-actions' }, actions)),
+  );
+}
 
 /** Closes with the exit animation first; the dialog's own "close" event fires afterwards. */
 export function closeDialog(dialog, value = '') {
@@ -20,4 +38,28 @@ export function showDialog(dialog) {
   });
   document.body.append(dialog);
   dialog.showModal();
+}
+
+/** "Are you sure?" Resolves to true only when the person confirms. */
+export function confirmDialog({ title, text, confirmLabel = t('actionDelete'), danger = true }) {
+  return new Promise((resolve) => {
+    const cancel = h('button', { class: 'btn btn-outline', type: 'button', onclick: () => closeDialog(dialog, 'cancel') }, t('actionCancel'));
+    const dialog = buildDialog({
+      className: 'dialog-confirm',
+      role: 'alertdialog',
+      title,
+      body: text && h('p', { class: 'dialog-text' }, text),
+      actions: [
+        cancel,
+        h('button', { class: ['btn', danger ? 'btn-danger' : 'btn-primary'], type: 'button', onclick: () => closeDialog(dialog, 'confirm') }, confirmLabel),
+      ],
+    });
+    dialog.addEventListener('close', () => {
+      dialog.remove();
+      resolve(dialog.returnValue === 'confirm');
+    });
+    showDialog(dialog);
+    // The safe choice has focus, so Enter alone never deletes
+    cancel.focus();
+  });
 }

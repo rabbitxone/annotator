@@ -38,9 +38,6 @@
   "actionDelete": {
     "message": "Delete"
   },
-  "actionDeleteConfirm": {
-    "message": "Sure?"
-  },
   "actionClose": {
     "message": "Close"
   },
@@ -495,7 +492,7 @@
     "message": "JSON"
   },
   "exportJsonHint": {
-    "message": "A full backup with colors, notes and, optionally, page snapshots. The only format you can import back."
+    "message": "A full backup with colors, categories and notes. The only format you can import back."
   },
   "exportMarkdown": {
     "message": "Markdown"
@@ -633,10 +630,10 @@
     "message": "Chrome blocks Annotator on files saved on your computer. Turn on “Allow access to file URLs” in the extension's settings."
   },
   "fileAccessTextFirefox": {
-    "message": "Firefox keeps extensions out of pages saved on your computer until you allow it. Open about:addons, choose Annotator, then on the “Permissions and data” tab turn on “Access local files on your computer” and reload the page."
+    "message": "Firefox keeps extensions out of pages saved on your computer until you allow it. Open about:addons, choose Annotator, then on the “Permissions and data” tab turn on “Access local files on your computer” (not “Run on sites with restrictions”, that's a different switch) and reload the page."
   },
   "settingFileAccessOffFirefox": {
-    "message": "Firefox blocks Annotator on files saved on your computer. In about:addons, open Annotator's “Permissions and data” tab and turn on “Access local files on your computer”."
+    "message": "Firefox blocks Annotator on files saved on your computer. In about:addons, open Annotator's “Permissions and data” tab and turn on “Access local files on your computer” (not “Run on sites with restrictions”)."
   },
   "fileAccessCopy": {
     "message": "Copy about:addons"
@@ -844,5 +841,28 @@
   },
   "pickerNoMatch": {
     "message": "No category matches"
+  },
+  "confirmDeleteManyTitle": {
+    "message": "Delete $COUNT$ notes?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "confirmDeleteUndoText": {
+    "message": "The highlights disappear from their pages. You can still undo it right after."
+  },
+  "categoryResetTitle": {
+    "message": "Reset the built-in colors?"
+  },
+  "categoryResetText": {
+    "message": "Their names, colors and keys go back to the originals. Your own categories stay as they are."
+  },
+  "categoryResetAction": {
+    "message": "Reset"
+  },
+  "settingSitePdf": {
+    "message": "This is a PDF: Annotator can't run here."
   }
 }

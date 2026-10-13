@@ -1,8 +1,5 @@
 import {
   Alert02Icon,
-  Archive02Icon,
-  Camera01Icon,
-  Image01Icon,
   ArrowLeft01Icon,
   Cancel01Icon,
   CheckmarkCircle02Icon,
@@ -36,13 +33,30 @@ import {
   Target02Icon,
   TextUnderlineIcon,
   Tick02Icon,
+  CommandIcon,
+  OptionIcon,
+  CornerDownLeftIcon,
 } from '@hugeicons/core-free-icons';
 
+// Modifier and special keys, drawn like the rest: Apple's symbols are too thin as font glyphs.
+const stroke = (d) => ['path', { d, stroke: 'currentColor', strokeWidth: '1.5', strokeLinecap: 'round', strokeLinejoin: 'round' }];
+const KEY_ICONS = {
+  keyCommand: CommandIcon,
+  keyOption: OptionIcon,
+  keyReturn: CornerDownLeftIcon,
+  keyShift: [stroke('M12 3.5L20.5 12.5H15.5V20.5H8.5V12.5H3.5L12 3.5Z')],
+  keyControl: [stroke('M5.5 14.5L12 8L18.5 14.5')],
+  keyTab: [stroke('M3.5 12H17.5'), stroke('M13 7.5L17.5 12L13 16.5'), stroke('M20.5 6V18')],
+  keyBackspace: [stroke('M8.5 5.5H19C20.1 5.5 21 6.4 21 7.5V16.5C21 17.6 20.1 18.5 19 18.5H8.5L2.5 12L8.5 5.5Z'), stroke('M11.5 9.5L16.5 14.5M16.5 9.5L11.5 14.5')],
+  keyUp: [stroke('M12 19V5'), stroke('M6 11L12 5L18 11')],
+  keyDown: [stroke('M12 5V19'), stroke('M6 13L12 19L18 13')],
+  keyLeft: [stroke('M19 12H5'), stroke('M11 6L5 12L11 18')],
+  keyRight: [stroke('M5 12H19'), stroke('M13 6L19 12L13 18')],
+};
+
 const ICONS = {
+  ...KEY_ICONS,
   alert: Alert02Icon,
-  archive: Archive02Icon,
-  camera: Camera01Icon,
-  image: Image01Icon,
   back: ArrowLeft01Icon,
   close: Cancel01Icon,
   check: CheckmarkCircle02Icon,

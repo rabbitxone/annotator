@@ -1,33 +1,28 @@
 import { h } from '../../shared/dom.js';
-import { closeDialog, showDialog } from './dialog.js';
+import { buildDialog, closeDialog, showDialog } from './dialog.js';
+import { dropdown } from './dropdown.js';
 import { formatNumber, t } from '../../shared/i18n.js';
 
 /** Resolves to { moveTo } (the category that takes over its notes, if any) or null when cancelled. */
 export function categoryDeleteDialog({ category, others, count }) {
   return new Promise((resolve) => {
-    const target = h(
-      'select',
-      { class: 'input', 'aria-label': t('categoryDeleteMoveTo') },
-      others.map((c, i) => h('option', { value: c.id, selected: i === 0 }, `${c.emoji ?? ''} ${c.name}`.trim())),
-    );
-    const dialog = h(
-      'dialog',
-      { class: 'dialog', 'aria-labelledby': 'category-delete-title' },
-      h(
-        'div',
-        { class: 'dialog-body' },
-        h('h2', { class: 'dialog-title', id: 'category-delete-title' }, t('categoryDeleteTitle', category.name)),
+    const target = dropdown({
+      options: others.map((c) => ({ value: c.id, label: c.name, swatch: c.swatch })),
+      value: others[0]?.id ?? null,
+      ariaLabel: t('categoryDeleteMoveTo'),
+    });
+    const dialog = buildDialog({
+      role: 'alertdialog',
+      title: t('categoryDeleteTitle', category.name),
+      body:
         count > 0
-          ? [h('p', { class: 'choice-hint', style: { margin: '0 0 10px' } }, t('categoryDeleteMove', formatNumber(count))), target]
-          : h('p', { class: 'choice-hint' }, t('categoryDeleteUnused')),
-      ),
-      h(
-        'div',
-        { class: 'dialog-actions' },
+          ? [h('p', { class: 'dialog-text', style: { margin: '0 0 10px' } }, t('categoryDeleteMove', formatNumber(count))), target]
+          : h('p', { class: 'dialog-text' }, t('categoryDeleteUnused')),
+      actions: [
         h('button', { class: 'btn btn-outline', type: 'button', onclick: () => closeDialog(dialog, 'cancel') }, t('actionCancel')),
         h('button', { class: 'btn btn-danger', type: 'button', onclick: () => closeDialog(dialog, 'confirm') }, t('actionDelete')),
-      ),
-    );
+      ],
+    });
     dialog.addEventListener('close', () => {
       const confirmed = dialog.returnValue === 'confirm';
       const moveTo = target.value;

@@ -214,6 +214,7 @@ button:focus-visible {
 }
 
 .popover-categories {
+  overflow: hidden auto;
   padding: 6px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
@@ -409,10 +410,33 @@ textarea::placeholder {
   gap: 8px;
 }
 
-kbd {
+.key-hints {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 3px;
+}
+
+.key-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--surface-raised);
+  color: var(--muted);
   font: inherit;
   font-size: 11px;
-  color: var(--subtle);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.key-chip .icon {
+  display: block;
 }
 
 .btn-primary {
@@ -443,19 +467,29 @@ kbd {
 }
 
 .confirm-card {
-  width: min(260px, 100%);
-  padding: 14px;
-  background: var(--surface-raised);
+  width: min(280px, 100%);
+  padding: 0 2px 2px;
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   animation: frame-in 150ms ease-out;
 }
 
+/* Title on the grey frame, the question and buttons on the white panel inside it */
 .confirm-title {
-  margin: 0 0 4px;
-  font-size: 14px;
+  margin: 0;
+  padding: 8px 10px 6px;
+  font-size: 13px;
   font-weight: 600;
+  line-height: 18px;
+}
+
+.confirm-panel {
+  padding: 10px 10px 10px 12px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
 }
 
 .confirm-text {

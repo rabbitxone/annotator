@@ -1,5 +1,6 @@
 import { h } from '../../shared/dom.js';
-import { closeDialog, showDialog } from './dialog.js';
+import { buildDialog, closeDialog, showDialog } from './dialog.js';
+import { dropdown } from './dropdown.js';
 import { formatNumber, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 
@@ -27,7 +28,7 @@ function choice(name, value, checked, onPick, title, hint, badge) {
 
 function field(label, control, hint) {
   return h(
-    'label',
+    'div',
     { class: 'option-row' },
     h('span', { class: 'option-label' }, label),
     control,
@@ -35,12 +36,8 @@ function field(label, control, hint) {
   );
 }
 
-function select(options, value, onChange) {
-  return h(
-    'select',
-    { class: 'input option-select', onchange: (e) => onChange(e.target.value) },
-    options.map(([id, label]) => h('option', { value: id, selected: id === value }, label)),
-  );
+function select(options, value, onChange, ariaLabel) {
+  return dropdown({ options: options.map(([id, label]) => ({ value: id, label })), value, onChange, ariaLabel, className: 'option-select' });
 }
 
 /**
@@ -65,7 +62,7 @@ export function exportDialog({ scopes, initial }) {
         rows.push(
           field(
             t('exportGroupBy'),
-            select([['page', t('exportGroupByPage')], ['color', t('exportGroupByColor')]], state.groupBy, (v) => (state.groupBy = v)),
+            select([['page', t('exportGroupByPage')], ['color', t('exportGroupByColor')]], state.groupBy, (v) => (state.groupBy = v), t('exportGroupBy')),
           ),
         );
       }
@@ -73,7 +70,7 @@ export function exportDialog({ scopes, initial }) {
         rows.push(
           field(
             t('exportSeparator'),
-            select([['comma', t('exportSeparatorComma')], ['semicolon', t('exportSeparatorSemicolon')]], state.separator, (v) => (state.separator = v)),
+            select([['comma', t('exportSeparatorComma')], ['semicolon', t('exportSeparatorSemicolon')]], state.separator, (v) => (state.separator = v), t('exportSeparator')),
             t('exportSeparatorHint'),
           ),
           h('p', { class: 'choice-hint' }, t('exportCsvFormulaHint')),
@@ -114,27 +111,19 @@ export function exportDialog({ scopes, initial }) {
       ),
     );
 
-    const dialog = h(
-      'dialog',
-      { class: 'dialog export-dialog', 'aria-labelledby': 'export-title' },
-      h(
-        'div',
-        { class: 'dialog-body' },
-        h('h2', { class: 'dialog-title', id: 'export-title' }, t('exportDialogTitle')),
+    const dialog = buildDialog({
+      className: 'export-dialog',
+      title: t('exportDialogTitle'),
+      body: [
         scopes.length > 1 &&
         h('fieldset', { class: 'export-field' }, h('legend', null, t('exportScopeLabel')), h('div', { class: 'choices' }, scopeChoices)),
         h('fieldset', { class: 'export-field' }, h('legend', null, t('exportFormatLabel')), h('div', { class: 'choices' }, formatChoices)),
         options,
         h('p', { class: 'export-note' }, icon('info', { size: 14 }), h('span', null, t('exportNote'))),
         empty,
-      ),
-      h(
-        'div',
-        { class: 'dialog-actions' },
-        h('button', { class: 'btn btn-outline', type: 'button', onclick: () => closeDialog(dialog, 'cancel') }, t('actionCancel')),
-        submit,
-      ),
-    );
+      ],
+      actions: [h('button', { class: 'btn btn-outline', type: 'button', onclick: () => closeDialog(dialog, 'cancel') }, t('actionCancel')), submit],
+    });
 
     dialog.addEventListener('close', () => {
       const confirmed = dialog.returnValue === 'confirm';

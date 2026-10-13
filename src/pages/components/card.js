@@ -3,9 +3,8 @@ import { h } from '../../shared/dom.js';
 import { formatDate, relativeTime, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 import { highlightHits, renderMarkdown } from '../../shared/markdown.js';
-import { formatKeys } from '../../shared/platform.js';
 import { isFileUrl, pageName, siteLabel } from '../../shared/url.js';
-import { armOnce } from './confirm.js';
+import { dropdown } from './dropdown.js';
 
 function hueOf(text) {
   let hash = 0;
@@ -32,16 +31,14 @@ const SWATCH_LIMIT = 8;
 export function swatchPicker(selected, onPick) {
   const categories = getCategories();
   if (categories.length > SWATCH_LIMIT) {
-    return h(
-      'select',
-      {
-        class: 'input category-select',
-        'aria-label': t('colorLabel'),
-        onchange: (e) => e.target.value && onPick(e.target.value),
-      },
-      selected == null && h('option', { value: '', disabled: true, selected: true }, t('categoryChoose')),
-      categories.map((c) => h('option', { value: c.id, selected: c.id === selected }, `${c.emoji} ${c.name}`)),
-    );
+    return dropdown({
+      options: categories.map((c) => ({ value: c.id, label: c.name, swatch: c.swatch })),
+      value: selected ?? null,
+      placeholder: t('categoryChoose'),
+      ariaLabel: t('colorLabel'),
+      className: 'category-select',
+      onChange: onPick,
+    });
   }
   const group = h(
     'div',
@@ -125,10 +122,9 @@ export function annotationCard(annotation, page, options) {
   function renderView() {
     const deleteBtn = h(
       'button',
-      { class: 'icon-btn danger', type: 'button', title: t('actionDelete'), 'aria-label': t('actionDelete') },
+      { class: 'icon-btn danger', type: 'button', title: t('actionDelete'), 'aria-label': t('actionDelete'), onclick: () => onDelete?.() },
       icon('delete'),
     );
-    armOnce(deleteBtn, onDelete);
 
     const edited = annotation.updatedAt - annotation.createdAt > 1000;
     const when = edited ? annotation.updatedAt : annotation.createdAt;
@@ -246,7 +242,7 @@ export function annotationCard(annotation, page, options) {
             'div',
             { class: 'card-actions', style: { opacity: '1' } },
             h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => finish(false) }, t('actionCancel')),
-            h('button', { class: 'btn btn-primary btn-sm', type: 'button', title: `${t('actionSave')} (${formatKeys(['mod', 'Enter'])})`, onclick: () => finish(true) }, t('actionSave')),
+            h('button', { class: 'btn btn-primary btn-sm', type: 'button', title: t('actionSave'), 'data-tip-keys': 'mod+Enter', onclick: () => finish(true) }, t('actionSave')),
           ),
         ),
       ),

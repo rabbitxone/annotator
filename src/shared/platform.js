@@ -77,19 +77,42 @@ export function formatKeys(keys, { mac = isMac } = {}) {
   return [...new Set(modifiers), ...rest].join(' + ');
 }
 
-/**
- * A shortcut as the browser reports it. Chrome on a Mac already answers "⇧⌘L", Firefox
- * answers in manifest form ("Ctrl+Shift+L"); both come out the same way.
- */
-export function formatShortcut(shortcut, options) {
-  if (!shortcut) return '';
-  const text = String(shortcut).trim();
-  if (text.length > 1 && text.includes('+')) return formatKeys(text.split(/\s*\+\s*/).filter(Boolean), options);
+/** A shortcut as the browser reports it ("Ctrl+Shift+L", or Chrome on a Mac "⇧⌘L"), as a list of keys. */
+export function parseShortcut(shortcut) {
+  const text = String(shortcut ?? '').trim();
+  if (!text) return [];
+  if (text.length > 1 && text.includes('+')) return text.split(/\s*\+\s*/).filter(Boolean);
   const keys = [];
   let rest = text;
   while (rest.length > 1 && SYMBOL_NAMES[rest[0]]) {
     keys.push(SYMBOL_NAMES[rest[0]]);
     rest = rest.slice(1);
   }
-  return formatKeys([...keys, rest], options);
+  return [...keys, rest];
+}
+
+/** Both browsers' answers come out the same way. */
+export function formatShortcut(shortcut, options) {
+  const keys = parseShortcut(shortcut);
+  return keys.length ? formatKeys(keys, options) : '';
+}
+
+// What each Mac symbol is drawn with (see KEY_ICONS in icons.js); the rest stays text.
+const MAC_ICONS = { '⌘': 'keyCommand', '⌥': 'keyOption', '⇧': 'keyShift', '⌃': 'keyControl', '↩': 'keyReturn', '⇥': 'keyTab', '⌫': 'keyBackspace', '↑': 'keyUp', '↓': 'keyDown', '←': 'keyLeft', '→': 'keyRight' };
+const MAC_WORDS = { '⎋': 'esc', '␣': 'space', '⌦': 'del' };
+
+/**
+ * The pieces to draw: on a Mac each symbol becomes { icon }, other keys { text };
+ * elsewhere it's one { text } like "Ctrl + Enter".
+ */
+export function keyParts(keys, { mac = isMac } = {}) {
+  const label = formatKeys(keys, { mac });
+  if (!mac) return [{ text: label }];
+  return [...label].reduce((parts, char) => {
+    if (MAC_ICONS[char]) parts.push({ icon: MAC_ICONS[char] });
+    else if (MAC_WORDS[char]) parts.push({ text: MAC_WORDS[char] });
+    else if (parts.at(-1)?.text != null && !MAC_WORDS[parts.at(-1).text]) parts.at(-1).text += char;
+    else parts.push({ text: char });
+    return parts;
+  }, []);
 }

@@ -4,7 +4,7 @@ import { t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 import { setSiteRule, updateSettings } from '../../shared/store.js';
 import { fileAccessKeys } from '../../shared/file-access.js';
-import { formatShortcut } from '../../shared/platform.js';
+import { shortcutNode } from '../../shared/keys.js';
 import { swatchPicker } from './card.js';
 import { categoryEditor } from './category-editor.js';
 import { fileAccessButton } from './file-access.js';
@@ -57,14 +57,15 @@ function segmented(options, value, onChange) {
   return group;
 }
 
-function toggle(checked, label, onChange) {
+function toggle(checked, label, onChange, { disabled = false } = {}) {
   return h(
     'label',
-    { class: 'toggle' },
+    { class: ['toggle', disabled && 'disabled'] },
     h('input', {
       type: 'checkbox',
       role: 'switch',
       checked,
+      disabled,
       'aria-label': label,
       onchange: (e) => onChange(e.target.checked),
     }),
@@ -72,7 +73,7 @@ function toggle(checked, label, onChange) {
   );
 }
 
-export function settingsPanel(settings, { compact = false, site = null, siteName = null, siteAppLike = false, fileAccess = null } = {}) {
+export function settingsPanel(settings, { compact = false, site = null, siteName = null, siteAppLike = false, siteUnavailable = null, fileAccess = null } = {}) {
   const save = (patch) => updateSettings(patch);
 
   return h(
@@ -89,10 +90,12 @@ export function settingsPanel(settings, { compact = false, site = null, siteName
       'globe',
       t('settingSiteDisable'),
       siteName ?? site,
-      siteAppLike
-        ? toggle(settings.siteRules?.[site] !== 'always', t('settingSite'), (on) => setSiteRule(site, on ? 'auto' : 'always'))
-        : toggle(settings.siteRules?.[site] === 'never', t('settingSite'), (on) => setSiteRule(site, on ? 'never' : 'auto')),
-      siteAppLike ? t('settingSiteAppHint') : null,
+      siteUnavailable
+        ? toggle(false, t('settingSite'), () => { }, { disabled: true })
+        : siteAppLike
+          ? toggle(settings.siteRules?.[site] !== 'always', t('settingSite'), (on) => setSiteRule(site, on ? 'auto' : 'always'))
+          : toggle(settings.siteRules?.[site] === 'never', t('settingSite'), (on) => setSiteRule(site, on ? 'never' : 'auto')),
+      siteUnavailable ?? (siteAppLike ? t('settingSiteAppHint') : null),
     ),
     fileAccess !== null &&
     !(compact && fileAccess) &&
@@ -167,7 +170,7 @@ export function shortcutsPanel() {
             name === 'toggle-panel' ? 'panel' : name === 'highlight' ? 'highlighter' : 'noteEdit',
             t(`cmd_${name.replace(/-/g, '_')}`),
             null,
-            h('kbd', { class: ['kbd', !shortcut && 'kbd-empty'] }, shortcut ? formatShortcut(shortcut) : t('shortcutNone')),
+            shortcut ? shortcutNode(shortcut, { className: 'kbd', size: 13 }) : h('kbd', { class: 'kbd kbd-empty' }, t('shortcutNone')),
           );
         }),
       );

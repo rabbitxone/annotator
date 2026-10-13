@@ -3,7 +3,8 @@ import { colorById, getCategories } from '../shared/constants.js';
 import { h } from '../shared/dom.js';
 import { relativeTime, t } from '../shared/i18n.js';
 import { icon } from '../shared/icons.js';
-import { formatKeys } from '../shared/platform.js';
+import { keysNode } from '../shared/keys.js';
+import { installTooltips } from '../shared/tooltip.js';
 import tokensCss from '../shared/tokens.css';
 import uiCss from './ui.css';
 import { UI_HOST_TAG } from './anchoring.js';
@@ -13,11 +14,20 @@ const END_GAP = 4;
 const POPOVER_GAP = 10;
 const ARROW_INSET = 20;
 const EDGE = 8;
-const SAVE_KEYS = formatKeys(['mod', 'Enter']);
 const TOOLBAR_SWATCHES = 6;
 const POPOVER_SWATCHES = 5;
-const keyHint = (category, index) =>
-  [category.key?.toUpperCase(), index < 9 ? String(index + 1) : null].filter(Boolean).join(' / ');
+// The keys that pick a category: its own letter (if it has one) and its position
+const keyHint = (category, index, { letter = true } = {}) =>
+  [letter && category.key?.toUpperCase(), index < 9 ? String(index + 1) : null].filter(Boolean);
+// The key that was meant, also on keyboards that don't type Latin letters (e.key is then "ф")
+export function pressedKey(e) {
+  if (/^[a-z0-9/]$/i.test(e.key)) return e.key.toLowerCase();
+  const code = /^(?:Key([A-Z])|Digit(\d)|Numpad(\d))$/.exec(e.code ?? '');
+  if (code) return (code[1] ?? code[2] ?? code[3]).toLowerCase();
+  return e.code === 'Slash' ? '/' : e.key;
+}
+const digitIndex = (key) => (/^[1-9]$/.test(key) ? Number(key) - 1 : -1);
+const hintNodes = (keys) => keys.map((key) => keysNode([key], { className: 'key-chip' }));
 
 function place(el, getRect, prefer, gap) {
   const rect = getRect();
@@ -90,6 +100,7 @@ export function createUi(handlers) {
     );
     shadow = host.attachShadow({ mode: __E2E__ ? 'open' : 'closed' });
     shadow.append(h('style', null, tokensCss + uiCss));
+    installTooltips(shadow, { topLayer: false });
     for (const type of ['keydown', 'keyup', 'keypress']) {
       host.addEventListener(type, (e) => e.stopPropagation());
     }
@@ -108,8 +119,35 @@ export function createUi(handlers) {
     setTimeout(finish, 250);
   }
 
+  // When what a layer points at scrolls out of view, the layer fades away instead of sticking
+  // to the edge of the window, and comes back with it.
+  function setOffscreen(layer, off) {
+    if (layer.offscreen === off) return;
+    layer.offscreen = off;
+    const { el } = layer;
+    el.inert = off;
+    el.style.pointerEvents = off ? 'none' : '';
+    if (off && el.contains(shadow.activeElement)) shadow.activeElement.blur();
+    layer.fade?.cancel();
+    const frames = [{ opacity: 1, filter: 'blur(0)', transform: 'scale(1)' }, { opacity: 0, filter: 'blur(4px)', transform: 'scale(0.97)' }];
+    layer.fade = el.animate(off ? frames : frames.reverse(), {
+      duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 160,
+      easing: off ? 'ease-in' : 'ease-out',
+      fill: off ? 'forwards' : 'none',
+    });
+  }
+
+  function isOffscreen(rect) {
+    if (!rect) return true;
+    const vw = document.documentElement.clientWidth || window.innerWidth;
+    return rect.bottom < 0 || rect.top > window.innerHeight || rect.right < 0 || rect.left > vw;
+  }
+
   function reposition() {
     if (!current) return;
+    const off = isOffscreen(current.getRect());
+    setOffscreen(current, off);
+    if (off) return;
     const placed = place(current.el, current.getRect, current.prefer, current.gap ?? GAP);
     if (placed && current.framed) {
       current.el.dataset.side = placed.side;
@@ -150,8 +188,9 @@ export function createUi(handlers) {
       {
         class: 'swatch-btn',
         type: 'button',
-        title: hint ? `${color.name} (${hint})` : color.name,
+        title: color.name,
         'aria-label': color.name,
+        'data-tip-keys': hint?.length ? hint.join('|') : null,
         'aria-pressed': String(pressed),
         dataset: { color: color.id },
         style: { '--swatch': color.swatch },
@@ -184,7 +223,7 @@ export function createUi(handlers) {
     mount({ kind: 'handle', el, getRect, prefer: 'end', gap: END_GAP });
   }
 
-  function categoryItem(category, index, { active, onPick, onHover }) {
+  function categoryItem(category, index, { active, onPick, onHover, typeToFilter = false }) {
     return h(
       'li',
       { role: 'presentation' },
@@ -202,7 +241,7 @@ export function createUi(handlers) {
         },
         h('span', { class: 'swatch' }),
         h('span', { class: 'picker-name' }, category.name),
-        keyHint(category, index) && h('kbd', null, keyHint(category, index)),
+        h('span', { class: 'key-hints' }, hintNodes(keyHint(category, index, { letter: !typeToFilter }))),
       ),
     );
   }
@@ -228,6 +267,7 @@ export function createUi(handlers) {
         ...(items.length
           ? items.map(({ category, index }, i) =>
             categoryItem(category, index, {
+              typeToFilter: true,
               active: i === active,
               onPick: (id) => handlers.onHighlight(id),
               onHover: () => {
@@ -242,7 +282,13 @@ export function createUi(handlers) {
     }
     const handleKey = (e) => {
       const items = matches();
+      const digit = digitIndex(pressedKey(e));
       if (e.key === 'Escape') close();
+      else if (digit >= 0) {
+        // Digits pick by position, as the hints say; letters type the filter
+        const category = getCategories()[digit];
+        if (category) handlers.onHighlight(category.id);
+      }
       else if (e.key === 'Enter') items[active] && handlers.onHighlight(items[active].category.id);
       else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         active = items.length ? (active + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length : 0;
@@ -276,7 +322,8 @@ export function createUi(handlers) {
         {
           class: 'icon-btn toolbar-more',
           type: 'button',
-          title: `${t('toolbarMore')} (/)`,
+          title: t('toolbarMore'),
+          'data-tip-keys': '/',
           'aria-label': t('toolbarMore'),
           onclick: () => showPicker(getRect),
         },
@@ -288,7 +335,8 @@ export function createUi(handlers) {
         {
           class: 'toolbar-note',
           type: 'button',
-          title: noteKeyTaken ? t('toolbarAddNote') : `${t('toolbarAddNote')} (N)`,
+          title: t('toolbarAddNote'),
+          'data-tip-keys': noteKeyTaken ? null : 'N',
           onclick: () => handlers.onHighlightWithNote(),
         },
         icon('noteEdit', { size: 16 }),
@@ -318,13 +366,46 @@ export function createUi(handlers) {
     const swatches = h('div', { class: 'swatches', role: 'group', 'aria-label': t('colorLabel') });
     const categoryMenu = h('ul', { class: 'picker-list popover-categories', role: 'listbox', hidden: true });
 
+    let menuOpen = false;
+
     function pickCategory(id) {
       color = id;
       quote.style.setProperty('--swatch', colorById(id).swatch);
-      categoryMenu.hidden = true;
-      renderSwatches();
+      if (menuOpen) setMenu(false);
+      else renderSwatches();
       handlers.onColorChange(annotation.id, id);
-      reposition();
+    }
+
+    // Unfolds and folds the full list; the popover keeps hugging its highlight meanwhile.
+    function setMenu(open) {
+      if (open === menuOpen) return;
+      menuOpen = open;
+      if (open) {
+        categoryMenu.replaceChildren(
+          ...getCategories().map((c, i) => categoryItem(c, i, { active: c.id === color, onPick: pickCategory, onHover: () => { } })),
+        );
+        categoryMenu.hidden = false;
+      }
+      renderSwatches();
+      const done = () => {
+        if (!menuOpen) categoryMenu.hidden = true;
+        reposition();
+      };
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return done();
+      categoryMenu.getAnimations().forEach((a) => a.cancel());
+      const height = categoryMenu.scrollHeight;
+      const shut = { height: '0px', opacity: 0, paddingTop: '0px', paddingBottom: '0px', borderBottomWidth: '0px' };
+      const full = { height: `${height}px`, opacity: 1 };
+      const motion = categoryMenu.animate(open ? [shut, full] : [full, shut], {
+        duration: open ? 220 : 160,
+        easing: open ? 'cubic-bezier(0.16, 1, 0.3, 1)' : 'ease-in',
+      });
+      const follow = () => {
+        reposition();
+        if (motion.playState === 'running') requestAnimationFrame(follow);
+      };
+      requestAnimationFrame(follow);
+      motion.finished.then(done, () => { });
     }
 
     function renderSwatches() {
@@ -332,7 +413,7 @@ export function createUi(handlers) {
       let shown = categories.slice(0, POPOVER_SWATCHES);
       if (!shown.some((c) => c.id === color)) shown = [...shown, colorById(color)];
       swatches.replaceChildren(
-        ...shown.map((c) => swatchButton(c, c.id === color, pickCategory)),
+        ...shown.map((c) => swatchButton(c, c.id === color, pickCategory, keyHint(c, categories.indexOf(c)))),
         ...(categories.length > POPOVER_SWATCHES
           ? [
             h(
@@ -342,15 +423,8 @@ export function createUi(handlers) {
                 type: 'button',
                 title: t('toolbarMore'),
                 'aria-label': t('toolbarMore'),
-                'aria-expanded': String(!categoryMenu.hidden),
-                onclick: () => {
-                  categoryMenu.hidden = !categoryMenu.hidden;
-                  categoryMenu.replaceChildren(
-                    ...categories.map((c, i) => categoryItem(c, i, { active: c.id === color, onPick: pickCategory, onHover: () => { } })),
-                  );
-                  renderSwatches();
-                  reposition();
-                },
+                'aria-expanded': String(menuOpen),
+                onclick: () => setMenu(!menuOpen),
               },
               icon('more', { size: 16 }),
             ),
@@ -439,7 +513,7 @@ export function createUi(handlers) {
         h(
           'div',
           { class: 'foot-actions' },
-          h('kbd', null, SAVE_KEYS),
+          keysNode(['mod', 'Enter'], { className: 'key-chip' }),
           h(
             'button',
             {
@@ -487,8 +561,7 @@ export function createUi(handlers) {
           'div',
           { class: 'confirm-card' },
           h('p', { class: 'confirm-title' }, t('confirmDeleteTitle')),
-          h('p', { class: 'confirm-text' }, t('confirmDeleteText')),
-          h('div', { class: 'confirm-actions' }, cancel, remove),
+          h('div', { class: 'confirm-panel' }, h('p', { class: 'confirm-text' }, t('confirmDeleteText')), h('div', { class: 'confirm-actions' }, cancel, remove)),
         ),
       );
       for (const child of box.children) child.inert = true;
@@ -504,12 +577,29 @@ export function createUi(handlers) {
       textarea.focus({ preventScroll: true });
     }
 
-    el.addEventListener('keydown', (e) => {
+    // Keys reach this wherever focus is (on the page, in the popover), except while typing:
+    // Esc steps back (confirmation, then the list, then the popover), a digit or a category's
+    // letter recolors.
+    function handleKey(e) {
+      const origin = e.composedPath()[0];
       if (e.key === 'Escape') {
-        e.preventDefault();
         if (confirmation()) stopAsking();
+        else if (menuOpen) setMenu(false);
         else close();
-      } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !confirmation()) {
+        return true;
+      }
+      if (confirmation() || e.repeat) return false;
+      if (origin instanceof Element && (origin.isContentEditable || origin.closest('input, textarea, select'))) return false;
+      const key = pressedKey(e);
+      const categories = getCategories();
+      const category = categoryForKey(categories, key) ?? categories[digitIndex(key)];
+      if (!category) return false;
+      pickCategory(category.id);
+      return true;
+    }
+
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !confirmation()) {
         e.preventDefault();
         close({ save: true });
       }
@@ -523,6 +613,7 @@ export function createUi(handlers) {
       prefer: 'below',
       gap: POPOVER_GAP,
       framed: true,
+      handleKey,
       onClose: ({ save }) => {
         handlers.onPopoverClose(annotation.id);
         if (save && textarea.value !== original) handlers.onNoteSave(annotation.id, textarea.value);
@@ -540,6 +631,13 @@ export function createUi(handlers) {
     'keydown',
     (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing) return;
+      if (current?.kind === 'popover' && !current.offscreen) {
+        if (current.handleKey(e)) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        return;
+      }
       if (current?.kind === 'picker') {
         if (current.handleKey(e)) {
           e.preventDefault();
@@ -549,11 +647,12 @@ export function createUi(handlers) {
       }
       if (current?.kind !== 'toolbar') return;
       const categories = getCategories();
-      const byKey = categoryForKey(categories, e.key);
-      const byDigit = /^[1-9]$/.test(e.key) ? categories[Number(e.key) - 1] : null;
+      const key = pressedKey(e);
+      const byKey = categoryForKey(categories, key);
+      const byDigit = categories[digitIndex(key)] ?? null;
       if (byKey || byDigit) handlers.onHighlight((byKey ?? byDigit).id);
-      else if (e.key === 'n' || e.key === 'N') handlers.onHighlightWithNote();
-      else if (e.key === '/' && categories.length > TOOLBAR_SWATCHES) showPicker(current.getRect);
+      else if (key === 'n') handlers.onHighlightWithNote();
+      else if (key === '/' && categories.length > TOOLBAR_SWATCHES) showPicker(current.getRect);
       else return;
       e.preventDefault();
       e.stopPropagation();

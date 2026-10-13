@@ -1,5 +1,6 @@
 import { h } from '../../shared/dom.js';
-import { closeDialog, showDialog } from './dialog.js';
+import { buildDialog, closeDialog, showDialog } from './dialog.js';
+import { suggestions } from './dropdown.js';
 import { formatNumber, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 import { planRelocation } from '../../shared/relocate.js';
@@ -15,7 +16,6 @@ export function relocateDialog({ urls }) {
       h('input', {
         class: 'input',
         type: 'text',
-        list: 'relocate-folders',
         placeholder,
         spellcheck: 'false',
         autocomplete: 'off',
@@ -55,33 +55,26 @@ export function relocateDialog({ urls }) {
 
     const field = (label, control) => h('label', { class: 'field' }, h('span', { class: 'field-label' }, label), control);
 
-    const dialog = h(
-      'dialog',
-      { class: 'dialog export-dialog', 'aria-labelledby': 'relocate-title' },
-      h(
-        'div',
-        { class: 'dialog-body' },
-        h('h2', { class: 'dialog-title', id: 'relocate-title' }, t('relocateTitle')),
+    const dialog = buildDialog({
+      className: 'export-dialog',
+      title: t('relocateTitle'),
+      body: [
         h('p', { class: 'choice-hint relocate-intro' }, t('relocateIntro')),
         field(t('relocateFrom'), from),
         field(t('relocateTo'), to),
-        h('datalist', { id: 'relocate-folders' }, folders.map((folder) => h('option', { value: folder }))),
         preview,
         resolved,
         h('p', { class: 'export-note relocate-note' }, icon('info', { size: 14 }), h('span', null, t('relocateReminder'))),
-      ),
-      h(
-        'div',
-        { class: 'dialog-actions' },
-        h('button', { class: 'btn btn-outline', type: 'button', onclick: () => closeDialog(dialog, 'cancel') }, t('actionCancel')),
-        submit,
-      ),
-    );
+      ],
+      actions: [h('button', { class: 'btn btn-outline', type: 'button', onclick: () => closeDialog(dialog, 'cancel') }, t('actionCancel')), submit],
+    });
     dialog.addEventListener('close', () => {
       const confirmed = dialog.returnValue === 'confirm' && plan.moves.length > 0;
       dialog.remove();
       resolve(confirmed ? plan : null);
     });
+    suggestions(from, folders);
+    suggestions(to, folders);
     update();
     showDialog(dialog);
     from.focus();

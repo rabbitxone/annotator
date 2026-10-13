@@ -38,9 +38,6 @@
   "actionDelete": {
     "message": "Usuń"
   },
-  "actionDeleteConfirm": {
-    "message": "Na pewno?"
-  },
   "actionClose": {
     "message": "Zamknij"
   },
@@ -495,7 +492,7 @@
     "message": "JSON"
   },
   "exportJsonHint": {
-    "message": "Pełna kopia zapasowa z kolorami, notatkami i, opcjonalnie, kopiami stron. Jedyny format, który można zaimportować z powrotem."
+    "message": "Pełna kopia zapasowa z kolorami, kategoriami i notatkami. Jedyny format, który można zaimportować z powrotem."
   },
   "exportMarkdown": {
     "message": "Markdown"
@@ -633,10 +630,10 @@
     "message": "Chrome blokuje Annotatora na plikach zapisanych na komputerze. Włącz „Zezwalaj na dostęp do adresów URL plików” w ustawieniach rozszerzenia."
   },
   "fileAccessTextFirefox": {
-    "message": "Firefox nie wpuszcza rozszerzeń na strony zapisane na komputerze, dopóki tego nie dozwolisz. Otwórz about:addons, wybierz Annotatora, na karcie „Uprawnienia i dane” włącz „Dostęp do lokalnych plików na tym komputerze”, a potem odśwież stronę."
+    "message": "Firefox nie wpuszcza rozszerzeń na strony zapisane na komputerze, dopóki tego nie dozwolisz. Otwórz about:addons, wybierz Annotatora, na karcie „Uprawnienia i dane” włącz „Dostęp do lokalnych plików na tym komputerze” (to nie to samo co „Działanie na witrynach z ograniczeniami”), a potem odśwież stronę."
   },
   "settingFileAccessOffFirefox": {
-    "message": "Firefox blokuje Annotatora na plikach zapisanych na komputerze. W about:addons otwórz kartę „Uprawnienia i dane” Annotatora i włącz „Dostęp do lokalnych plików na tym komputerze”."
+    "message": "Firefox blokuje Annotatora na plikach zapisanych na komputerze. W about:addons otwórz kartę „Uprawnienia i dane” Annotatora i włącz „Dostęp do lokalnych plików na tym komputerze” (nie „Działanie na witrynach z ograniczeniami”)."
   },
   "fileAccessCopy": {
     "message": "Kopiuj about:addons"
@@ -844,5 +841,28 @@
   },
   "pickerNoMatch": {
     "message": "Żadna kategoria nie pasuje"
+  },
+  "confirmDeleteManyTitle": {
+    "message": "Usunąć zaznaczone notatki ($COUNT$)?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "confirmDeleteUndoText": {
+    "message": "Zaznaczenia znikną ze stron. Zaraz potem możesz jeszcze to cofnąć."
+  },
+  "categoryResetTitle": {
+    "message": "Przywrócić wbudowane kolory?"
+  },
+  "categoryResetText": {
+    "message": "Ich nazwy, kolory i klawisze wrócą do pierwotnych. Twoje własne kategorie zostaną bez zmian."
+  },
+  "categoryResetAction": {
+    "message": "Przywróć"
+  },
+  "settingSitePdf": {
+    "message": "To plik PDF: Annotator tu nie działa."
   }
 }

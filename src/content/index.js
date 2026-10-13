@@ -34,7 +34,7 @@ import {
   wrapRange,
 } from './highlighter.js';
 import { createPanel } from './panel.js';
-import { createUi } from './ui.js';
+import { createUi, pressedKey } from './ui.js';
 
 function alive() {
   try {
@@ -465,7 +465,7 @@ function main() {
     (e) => {
       if (e.defaultPrevented || !settings?.quickKeys || !pageUrl || !checkAlive()) return;
       if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing || e.repeat || ui.isInside(e)) return;
-      const category = categoryForKey(getCategories(), e.key);
+      const category = categoryForKey(getCategories(), pressedKey(e));
       if (!category) return;
       const target = e.target instanceof Element ? e.target : null;
       if (target?.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"], [role="textbox"]')) return;

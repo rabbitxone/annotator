@@ -12,6 +12,7 @@ import {
 import { getCategories } from '../../shared/constants.js';
 import { h } from '../../shared/dom.js';
 import { formatNumber, t } from '../../shared/i18n.js';
+import { confirmDialog } from './dialog.js';
 import { icon } from '../../shared/icons.js';
 
 /**
@@ -72,7 +73,9 @@ export function categoryEditor({ counts, onChange, onDelete }) {
     names[names.length - 1]?.select();
   }
 
-  function resetBuiltIn() {
+  async function resetBuiltIn() {
+    const sure = await confirmDialog({ title: t('categoryResetTitle'), text: t('categoryResetText'), confirmLabel: t('categoryResetAction') });
+    if (!sure) return;
     const originals = resolveCategories(null, categoryNameFor);
     const custom = list.filter((c) => !c.builtin);
     list = [...originals.map((c) => ({ id: c.id, name: c.name, swatch: c.swatch, key: null, builtin: true })), ...custom];

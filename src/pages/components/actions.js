@@ -1,7 +1,19 @@
 import { groupItems } from '../../shared/exchange.js';
 import { formatNumber, t } from '../../shared/i18n.js';
 import { deleteMany, restoreAnnotations } from '../../shared/store.js';
+import { confirmDialog } from './dialog.js';
 import { toast } from './toast.js';
+
+/** Asks first, then deletes; the toast still offers to undo it. */
+export async function confirmAndDelete(items) {
+  if (items.length === 0) return false;
+  const sure = await confirmDialog({
+    title: items.length === 1 ? t('confirmDeleteTitle') : t('confirmDeleteManyTitle', formatNumber(items.length)),
+    text: t('confirmDeleteUndoText'),
+  });
+  if (sure) await deleteWithUndo(items);
+  return sure;
+}
 
 export async function deleteWithUndo(items) {
   if (items.length === 0) return;

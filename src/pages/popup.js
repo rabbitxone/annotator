@@ -4,6 +4,7 @@ import { h } from '../shared/dom.js';
 import { quoteSnippet } from '../shared/exchange.js';
 import { applyI18n, t } from '../shared/i18n.js';
 import { hydrateIcons, icon } from '../shared/icons.js';
+import { installTooltips } from '../shared/tooltip.js';
 import {
   ensureMigrated,
   getPage,
@@ -14,7 +15,7 @@ import {
   updateAnnotation,
 } from '../shared/store.js';
 import { isFileUrl, isPdfUrl, hostnameOf, normalizeUrl, siteKey, displayAddress, unwrapReaderUrl } from '../shared/url.js';
-import { deleteWithUndo } from './components/actions.js';
+import { confirmAndDelete } from './components/actions.js';
 import { annotationCard } from './components/card.js';
 import { fileAccessNotice } from './components/file-access.js';
 import { notice } from './components/notice.js';
@@ -77,7 +78,7 @@ function card(annotation, page, extra) {
   return annotationCard(annotation, page, {
     query: state.query,
     onSave: (patch) => updateAnnotation(page.url, annotation.id, patch),
-    onDelete: () => deleteWithUndo([{ annotation, page }]),
+    onDelete: () => confirmAndDelete([{ annotation, page }]),
     onCopy: () => copyText(quoteSnippet(annotation, page)),
     onEditingChange: setEditing,
     ...extra,
@@ -197,6 +198,8 @@ function renderSettingsTab() {
       site: state.pageUrl ? siteKey(state.pageUrl) : null,
       siteName: state.pageUrl ? (isFileUrl(state.pageUrl) ? t('siteLocalFiles') : hostnameOf(state.pageUrl)) : null,
       siteAppLike: state.appLike,
+      // Nothing runs on a PDF, so there is nothing to switch off
+      siteUnavailable: state.pdf ? t('settingSitePdf') : null,
     }),
     privacyNote(),
     h(
@@ -259,7 +262,9 @@ function applyPageChanges(changes) {
 async function loadOrphans() {
   if (!state.tabId || !state.pageUrl) return;
   try {
-    const status = await api.tabs.sendMessage(state.tabId, { type: 'status' }, { frameId: 0 });
+    // Through the background, which loads the page script if it isn't there yet (a local file
+    // opened before access was allowed, a tab from before the install)
+    const status = await api.runtime.sendMessage({ type: 'tab-command', tabId: state.tabId, message: { type: 'status' } });
     if (status?.pdf) {
       state.pdf = true;
       document.getElementById('open-panel').hidden = true;
@@ -282,6 +287,7 @@ async function loadOrphans() {
 async function init() {
   applyI18n();
   hydrateIcons();
+  installTooltips();
 
   await ensureMigrated().catch(() => { });
   state.settings = await getSettings();

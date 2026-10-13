@@ -18,6 +18,7 @@ import {
 import { exportLabels } from '../shared/export-labels.js';
 import { applyI18n, formatNumber, relativeTime, t, uiLanguage } from '../shared/i18n.js';
 import { hydrateIcons, icon } from '../shared/icons.js';
+import { installTooltips } from '../shared/tooltip.js';
 import {
   ensureMigrated,
   getSettings,
@@ -32,7 +33,7 @@ import {
   updateSettings,
 } from '../shared/store.js';
 import { displayAddress, isFileUrl, pageName, siteLabel } from '../shared/url.js';
-import { deleteWithUndo } from './components/actions.js';
+import { confirmAndDelete } from './components/actions.js';
 import { annotationCard, siteAvatar, swatchPicker } from './components/card.js';
 import { exportDialog } from './components/export-dialog.js';
 import { categoryDeleteDialog } from './components/category-delete-dialog.js';
@@ -255,9 +256,11 @@ async function importBackup(file) {
   }
 }
 
+// Settings has its own "Local files" row saying the same, so the banner stays out of it
 function renderNotices() {
-  const blocked = state.fileAccess === false && state.pages.some((p) => isFileUrl(p.url));
-  $('notices').replaceChildren(...(blocked ? [fileAccessNotice()] : []));
+  const blocked = state.view !== 'settings' && state.fileAccess === false && state.pages.some((p) => isFileUrl(p.url));
+  if (blocked) state.fileNotice ??= fileAccessNotice();
+  $('notices').replaceChildren(...(blocked ? [state.fileNotice] : []));
 }
 
 function setEditing(editing) {
@@ -435,7 +438,7 @@ function cardFor({ annotation, page }, showSource) {
     onGo: () => api.runtime.sendMessage({ type: 'open-and-go', url: page.url, id: annotation.id }).catch(() => { }),
     onCopy: () => copyText(quoteSnippet(annotation, page)),
     onSave: (patch) => updateAnnotation(page.url, annotation.id, patch),
-    onDelete: () => deleteWithUndo([{ annotation, page }]),
+    onDelete: () => confirmAndDelete([{ annotation, page }]),
     onSelect: (checked) => {
       if (checked) state.selected.add(key);
       else state.selected.delete(key);
@@ -696,6 +699,7 @@ async function refresh() {
 async function init() {
   applyI18n();
   hydrateIcons();
+  installTooltips();
   $('sidebar-privacy').append(privacyNote());
 
   await ensureMigrated().catch((err) => console.error('Annotator: migration failed', err));
@@ -707,14 +711,18 @@ async function init() {
   state.fileAccess = await fileAccessAllowed();
   renderNotices();
   if (state.view === 'settings' && !state.editing) render();
-  // Back from the browser's extension settings: pick up the change without a reload
-  window.addEventListener('focus', async () => {
+  // Back from the browser's extension settings: pick up the change without a reload. Coming
+  // back from another tab doesn't always focus the window, so watch visibility too.
+  const recheckFileAccess = async () => {
+    if (document.hidden) return;
     const allowed = await fileAccessAllowed();
     if (allowed === state.fileAccess) return;
     state.fileAccess = allowed;
     renderNotices();
     if (state.view === 'settings' && !state.editing) render();
-  });
+  };
+  window.addEventListener('focus', recheckFileAccess);
+  document.addEventListener('visibilitychange', recheckFileAccess);
 
   window.addEventListener('hashchange', () => {
     readRoute();
@@ -722,6 +730,7 @@ async function init() {
     state.editing = false;
     render();
     window.scrollTo({ top: 0 });
+    renderNotices();
     enter($('content'));
   });
 
@@ -741,8 +750,8 @@ async function init() {
   });
   $('bulk-delete').addEventListener('click', async () => {
     const items = selectedItems();
-    state.selected.clear();
-    await deleteWithUndo(items);
+    if (await confirmAndDelete(items)) state.selected.clear();
+    renderBulkBar();
   });
   $('bulk-colors').append(
     swatchPicker(null, async (color) => {
