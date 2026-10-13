@@ -660,13 +660,13 @@
     "message": "Notes belong to a page's address or file path. If you moved files to another folder or drive, or a site changed its address, point your notes at the new location."
   },
   "dataRelocateAction": {
-    "message": "Change location…"
+    "message": "Fix locations…"
   },
   "relocateTitle": {
-    "message": "Move notes to a new location"
+    "message": "Update note locations"
   },
   "relocateIntro": {
-    "message": "Enter where the pages used to be and where they are now. A folder (C:\\papers), a network path or a web address all work."
+    "message": "Enter where the pages used to be and where they are now. A folder, a network path or a web address all work. Tip: copy the path from your file manager or the browser's address bar."
   },
   "relocateFrom": {
     "message": "Old location"

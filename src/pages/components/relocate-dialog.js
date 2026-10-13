@@ -3,6 +3,7 @@ import { buildDialog, closeDialog, showDialog } from './dialog.js';
 import { suggestions } from './dropdown.js';
 import { formatNumber, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
+import { isMac } from '../../shared/platform.js';
 import { planRelocation } from '../../shared/relocate.js';
 import { displayAddress, folderOf, isFileUrl, toAddress } from '../../shared/url.js';
 
@@ -22,11 +23,16 @@ export function relocateDialog({ urls }) {
         'aria-label': label,
         oninput: update,
       });
-    const from = input(t('relocateFrom'), 'C:\\papers');
-    const to = input(t('relocateTo'), 'D:\\archive\\papers');
+    const from = input(t('relocateFrom'), isMac ? '/Users/me/papers' : 'C:\\papers');
+    const to = input(t('relocateTo'), isMac ? '/Volumes/archive/papers' : 'D:\\archive\\papers');
     const preview = h('p', { class: 'relocate-preview', 'aria-live': 'polite' });
     const resolved = h('p', { class: 'relocate-resolved' });
-    const submit = h('button', { class: 'btn btn-primary', type: 'button', disabled: true, onclick: () => closeDialog(dialog, 'confirm') }, icon('folder', { size: 14 }), t('relocateAction'));
+    const submitLabel = h('span', null, t('relocateAction'));
+    const submit = h('button', { class: 'btn btn-primary', type: 'button', disabled: true, onclick: () => closeDialog(dialog, 'confirm') }, icon('folder', { size: 14 }), submitLabel);
+
+    // The normalised address is only worth a line when it reads differently from what was typed.
+    const bare = (text) => text.trim().replace(/[\\/]+$/, '');
+    const differs = (typed, address) => bare(typed) !== bare(displayAddress(address));
 
     function update() {
       const fromAddress = toAddress(from.value);
@@ -41,7 +47,9 @@ export function relocateDialog({ urls }) {
         preview.dataset.state = 'warn';
       } else {
         plan = planRelocation(urls, fromAddress, toAddressValue);
-        resolved.textContent = `${displayAddress(fromAddress)}  →  ${displayAddress(toAddressValue)}`;
+        if (differs(from.value, fromAddress) || differs(to.value, toAddressValue)) {
+          resolved.textContent = `${displayAddress(fromAddress)}  →  ${displayAddress(toAddressValue)}`;
+        }
         if (plan.moves.length === 0) {
           preview.textContent = fromAddress === toAddressValue ? t('relocateSame') : t('relocateNone');
           preview.dataset.state = 'warn';
@@ -51,6 +59,7 @@ export function relocateDialog({ urls }) {
         }
       }
       submit.disabled = plan.moves.length === 0;
+      submitLabel.textContent = plan.moves.length ? `${t('relocateAction')} (${formatNumber(plan.moves.length)})` : t('relocateAction');
     }
 
     const field = (label, control) => h('label', { class: 'field' }, h('span', { class: 'field-label' }, label), control);

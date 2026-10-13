@@ -1360,7 +1360,7 @@ body:has(.bulk-bar[data-open]) .toast {
 /* The title sits on the grey frame, the content on a white panel inside it */
 .dialog-head {
   flex-shrink: 0;
-  padding: 13px 15px 11px;
+  padding: 13px 17px 11px;
 }
 
 .dialog-title {
@@ -1435,7 +1435,7 @@ body:has(.bulk-bar[data-open]) .toast {
 
 .relocate-preview {
   min-height: 20px;
-  margin: 4px 0 2px;
+  margin: 10px 0 0;
   color: var(--muted);
   font-size: 13px;
   font-weight: 500;

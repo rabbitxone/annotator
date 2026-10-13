@@ -660,13 +660,13 @@
     "message": "Notatki należą do adresu strony lub ścieżki pliku. Jeśli przeniosłeś pliki do innego folderu lub na inny dysk albo strona zmieniła adres, wskaż notatkom nowe miejsce."
   },
   "dataRelocateAction": {
-    "message": "Zmień lokalizację…"
+    "message": "Popraw lokalizacje…"
   },
   "relocateTitle": {
-    "message": "Przenieś notatki w nowe miejsce"
+    "message": "Zaktualizuj lokalizację notatek"
   },
   "relocateIntro": {
-    "message": "Wpisz, gdzie strony były i gdzie są teraz. Może to być folder (C:\\papers), ścieżka sieciowa albo adres internetowy."
+    "message": "Wpisz, gdzie strony były i gdzie są teraz. Może to być folder, ścieżka sieciowa albo adres internetowy. Wskazówka: skopiuj ścieżkę z menedżera plików lub z paska adresu przeglądarki."
   },
   "relocateFrom": {
     "message": "Dawna lokalizacja"

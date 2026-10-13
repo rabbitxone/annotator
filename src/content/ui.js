@@ -16,9 +16,16 @@ const ARROW_INSET = 20;
 const EDGE = 8;
 const TOOLBAR_SWATCHES = 6;
 const POPOVER_SWATCHES = 5;
-// The keys that pick a category: its own letter (if it has one) and its position
-const keyHint = (category, index, { letter = true } = {}) =>
-  [letter && category.key?.toUpperCase(), index < 9 ? String(index + 1) : null].filter(Boolean);
+const digitIndex = (key) => (/^[1-9]$/.test(key) ? Number(key) - 1 : -1);
+// What a key picks: a category's own key first, else a digit by position. So a category whose own
+// key is "1" owns it, and the first category's position hint steps aside.
+const categoryForPress = (list, key) => categoryForKey(list, key) ?? list[digitIndex(key)] ?? null;
+// The keys that pick a category: its own key (if it has one) and its position, when that digit isn't taken
+const keyHint = (list, category, index, { letter = true } = {}) => {
+  const own = category.key && (letter || /^\d$/.test(category.key)) ? category.key.toUpperCase() : null;
+  const position = index < 9 && categoryForPress(list, String(index + 1)) === category ? String(index + 1) : null;
+  return [...new Set([own, position].filter(Boolean))];
+};
 // The key that was meant, also on keyboards that don't type Latin letters (e.key is then "ф")
 export function pressedKey(e) {
   if (/^[a-z0-9/]$/i.test(e.key)) return e.key.toLowerCase();
@@ -26,7 +33,6 @@ export function pressedKey(e) {
   if (code) return (code[1] ?? code[2] ?? code[3]).toLowerCase();
   return e.code === 'Slash' ? '/' : e.key;
 }
-const digitIndex = (key) => (/^[1-9]$/.test(key) ? Number(key) - 1 : -1);
 const hintNodes = (keys) => keys.map((key) => keysNode([key], { className: 'key-chip' }));
 
 function place(el, getRect, prefer, gap) {
@@ -244,7 +250,7 @@ export function createUi(handlers) {
         },
         h('span', { class: 'swatch' }),
         h('span', { class: 'picker-name' }, category.name),
-        h('span', { class: 'key-hints' }, hintNodes(keyHint(category, index, { letter: !typeToFilter }))),
+        h('span', { class: 'key-hints' }, hintNodes(keyHint(getCategories(), category, index, { letter: !typeToFilter }))),
       ),
     );
   }
@@ -285,11 +291,11 @@ export function createUi(handlers) {
     }
     const handleKey = (e) => {
       const items = matches();
-      const digit = digitIndex(pressedKey(e));
+      const key = pressedKey(e);
       if (e.key === 'Escape') close();
-      else if (digit >= 0) {
-        // Digits pick by position, as the hints say; letters type the filter
-        const category = getCategories()[digit];
+      else if (digitIndex(key) >= 0) {
+        // Digits pick (a category's own key, else by position, as the hints say); letters type the filter
+        const category = categoryForPress(getCategories(), key);
         if (category) handlers.onHighlight(category.id);
       }
       else if (e.key === 'Enter') items[active] && handlers.onHighlight(items[active].category.id);
@@ -318,7 +324,7 @@ export function createUi(handlers) {
     const el = h(
       'div',
       { class: 'layer toolbar', role: 'toolbar', 'aria-label': t('extName') },
-      categories.slice(0, TOOLBAR_SWATCHES).map((color, i) => swatchButton(color, false, (id) => handlers.onHighlight(id), keyHint(color, i))),
+      categories.slice(0, TOOLBAR_SWATCHES).map((color, i) => swatchButton(color, false, (id) => handlers.onHighlight(id), keyHint(categories, color, i))),
       categories.length > TOOLBAR_SWATCHES &&
       h(
         'button',
@@ -416,7 +422,7 @@ export function createUi(handlers) {
       let shown = categories.slice(0, POPOVER_SWATCHES);
       if (!shown.some((c) => c.id === color)) shown = [...shown, colorById(color)];
       swatches.replaceChildren(
-        ...shown.map((c) => swatchButton(c, c.id === color, pickCategory, keyHint(c, categories.indexOf(c)))),
+        ...shown.map((c) => swatchButton(c, c.id === color, pickCategory, keyHint(categories, c, categories.indexOf(c)))),
         ...(categories.length > POPOVER_SWATCHES
           ? [
             h(
@@ -595,7 +601,7 @@ export function createUi(handlers) {
       if (origin instanceof Element && (origin.isContentEditable || origin.closest('input, textarea, select'))) return false;
       const key = pressedKey(e);
       const categories = getCategories();
-      const category = categoryForKey(categories, key) ?? categories[digitIndex(key)];
+      const category = categoryForPress(categories, key);
       if (!category) return false;
       pickCategory(category.id);
       return true;
@@ -651,9 +657,8 @@ export function createUi(handlers) {
       if (current?.kind !== 'toolbar') return;
       const categories = getCategories();
       const key = pressedKey(e);
-      const byKey = categoryForKey(categories, key);
-      const byDigit = categories[digitIndex(key)] ?? null;
-      if (byKey || byDigit) handlers.onHighlight((byKey ?? byDigit).id);
+      const picked = categoryForPress(categories, key);
+      if (picked) handlers.onHighlight(picked.id);
       else if (key === 'n') handlers.onHighlightWithNote();
       else if (key === '/' && categories.length > TOOLBAR_SWATCHES) showPicker(current.getRect);
       else return;
