@@ -773,9 +773,6 @@
   "categoryCustomColor": {
     "message": "Własny"
   },
-  "categoryNotes": {
-    "message": "Notatki w tej kategorii"
-  },
   "categoryMoveUp": {
     "message": "Przesuń wyżej"
   },
@@ -1006,5 +1003,105 @@
         "content": "$1"
       }
     }
+  },
+  "toastOpenFileYourself": {
+    "message": "Firefox nie pozwala rozszerzeniom otwierać plików z komputera. Adres pliku jest skopiowany: wklej go w pasku adresu, a notatka pokaże się, gdy tylko plik się otworzy."
+  },
+  "categoryBulkOpen": {
+    "message": "Dodaj kilka"
+  },
+  "categoryBulkTitle": {
+    "message": "Dodaj kilka kategorii"
+  },
+  "categoryBulkIntro": {
+    "message": "Jedna nazwa w wierszu. Możesz wkleić kolumnę prosto z arkusza. Nazwy, które już istnieją, zostaną pominięte."
+  },
+  "categoryBulkPlaceholder": {
+    "message": "Wielkość próby\nInterwencja\nWynik"
+  },
+  "categoryBulkHint": {
+    "message": "Na razie nie ma czego dodać."
+  },
+  "categoryBulkCount": {
+    "message": "Do dodania: $V1$.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryBulkLimit": {
+    "message": "Ponad limit, pominięte: $V1$.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryBulkAction": {
+    "message": "Dodaj"
+  },
+  "categoryBulkAdded": {
+    "message": "Dodano: $V1$.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryCount_one": {
+    "message": "$COUNT$ kategoria",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryCount_few": {
+    "message": "$COUNT$ kategorie",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryCount_many": {
+    "message": "$COUNT$ kategorii",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryCount_other": {
+    "message": "$COUNT$ kategorii",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "csvNoteColumn": {
+    "message": "$V1$ (notatka)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportCsvLayout": {
+    "message": "Układ"
+  },
+  "exportCsvLayoutHighlights": {
+    "message": "Wiersz na zakreślenie"
+  },
+  "exportCsvLayoutPages": {
+    "message": "Wiersz na stronę"
+  },
+  "exportCsvLayoutHint": {
+    "message": "Wiersz na stronę daje każdej kategorii własną kolumnę, jak arkusz ekstrakcji danych; kilka zakreśleń jednej kategorii trafia do tej samej komórki, każde w nowym wierszu."
+  },
+  "categoryDrag": {
+    "message": "Przeciągnij, by zmienić kolejność (albo użyj strzałek)"
   }
 }

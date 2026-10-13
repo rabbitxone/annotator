@@ -633,7 +633,7 @@ textarea.input {
 .category-head,
 .category-row {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) 54px 40px 92px;
+  grid-template-columns: 18px 34px minmax(0, 1fr) 54px 92px;
   align-items: center;
   gap: 8px;
 }
@@ -651,6 +651,48 @@ textarea.input {
   display: grid;
   gap: 6px;
   padding: 3px 0;
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+}
+
+.category-grip {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 34px;
+  margin-right: -4px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--subtle);
+  cursor: grab;
+  touch-action: none;
+}
+
+.category-grip:hover,
+.category-grip:focus-visible {
+  outline: none;
+  background: var(--surface);
+  color: var(--on-surface);
+}
+
+/* While sorting, the others slide out of the way; the dragged one lifts */
+.category-editor.sorting .category-block:not(.dragging) {
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.category-block.dragging {
+  position: relative;
+  z-index: 2;
+  box-shadow: var(--shadow-md);
+  cursor: grabbing;
+}
+
+.category-editor.sorting,
+.category-editor.sorting * {
+  cursor: grabbing;
+  user-select: none;
 }
 
 .category-color {
@@ -687,11 +729,14 @@ textarea.input {
   font-weight: 700;
 }
 
-.category-count {
-  color: var(--subtle);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
+.bulk-intro {
+  margin-bottom: 10px;
+}
+
+.bulk-names {
+  min-height: 160px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
 }
 
 .category-actions {
@@ -934,7 +979,7 @@ textarea.input {
   display: flex;
   align-items: center;
   gap: 12px;
-  max-width: calc(100vw - 24px);
+  max-width: min(560px, calc(100vw - 24px));
   padding: 6px 6px 6px 14px;
   border-radius: var(--radius-md);
   background: var(--on-surface);
@@ -1362,7 +1407,7 @@ body:has(.bulk-bar[data-open]) .toast {
   flex-shrink: 0;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 3px;
+  margin-top: 1px;
   padding: 10px 12px;
   border-radius: var(--radius-xs) var(--radius-xs) var(--radius-md) var(--radius-md);
 }

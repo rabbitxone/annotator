@@ -54,8 +54,13 @@ const KEY_ICONS = {
   keyRight: [stroke('M5 12H19'), stroke('M13 6L19 12L13 18')],
 };
 
+// Six dots: something you can grab and drag
+const dot = (cx, cy) => ['circle', { cx, cy, r: '1.6', fill: 'currentColor' }];
+const GRIP = [dot('9', '6'), dot('15', '6'), dot('9', '12'), dot('15', '12'), dot('9', '18'), dot('15', '18')];
+
 const ICONS = {
   ...KEY_ICONS,
+  grip: GRIP,
   alert: Alert02Icon,
   back: ArrowLeft01Icon,
   close: Cancel01Icon,

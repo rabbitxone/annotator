@@ -12,12 +12,12 @@ import {
 import { getCategories } from '../../shared/constants.js';
 import { h } from '../../shared/dom.js';
 import { formatNumber, plural, t } from '../../shared/i18n.js';
+import { bulkCategoriesDialog } from './category-bulk-dialog.js';
 import { confirmDialog } from './dialog.js';
 import { icon } from '../../shared/icons.js';
 
 /**
  * Rename, recolor, reorder, add and remove categories, and give each a quick key.
- * `counts` is a Map of category id to how many notes use it.
  * `onChange(stored)` saves the list; `onDelete(category, remaining)` resolves true once it may go.
  */
 export function categoryEditor({ counts, onChange, onDelete }) {
@@ -43,6 +43,58 @@ export function categoryEditor({ counts, onChange, onDelete }) {
     save();
   }
 
+  // Drag a row by its grip: it follows the pointer, the others make room, and it lands where
+  // it is let go.
+  function startDrag(e, from) {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    const blocks = [...root.querySelectorAll('.category-block')];
+    const dragged = blocks[from];
+    const rects = blocks.map((b) => b.getBoundingClientRect());
+    const startY = e.clientY;
+    const pitch = rects.length > 1 ? rects[1].top - rects[0].top : rects[0].height;
+    let to = from;
+    paletteFor = null;
+    dragged.classList.add('dragging');
+    root.classList.add('sorting');
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Not a real pointer (a synthetic event): the window listeners below still follow it
+    }
+
+    const onMove = (ev) => {
+      const dy = Math.max(rects[0].top - rects[from].top, Math.min(rects.at(-1).top - rects[from].top, ev.clientY - startY));
+      dragged.style.transform = `translateY(${dy}px)`;
+      const middle = rects[from].top + rects[from].height / 2 + dy;
+      to = rects.reduce((best, r, i) => (Math.abs(r.top + r.height / 2 - middle) < Math.abs(rects[best].top + rects[best].height / 2 - middle) ? i : best), from);
+      blocks.forEach((b, i) => {
+        if (i === from) return;
+        const shift = from < to && i > from && i <= to ? -pitch : from > to && i < from && i >= to ? pitch : 0;
+        b.style.transform = shift ? `translateY(${shift}px)` : '';
+      });
+    };
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+      root.classList.remove('sorting');
+      if (to !== from) {
+        const [item] = list.splice(from, 1);
+        list.splice(to, 0, item);
+        render();
+        save();
+        root.querySelectorAll('.category-grip')[to]?.focus({ preventScroll: true });
+      } else {
+        dragged.classList.remove('dragging');
+        blocks.forEach((b) => (b.style.transform = ''));
+      }
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+  }
+
   function move(index, by) {
     const target = index + by;
     if (target < 0 || target >= list.length) return;
@@ -61,11 +113,25 @@ export function categoryEditor({ counts, onChange, onDelete }) {
     save();
   }
 
+  // A color nobody uses yet, while there are any left
+  function freeSwatch() {
+    const used = new Set(list.map((c) => c.swatch.toUpperCase()));
+    return PALETTE.find((hex) => !used.has(hex)) ?? PALETTE[list.length % PALETTE.length];
+  }
+
+  async function addMany() {
+    const room = MAX_CATEGORIES - list.length;
+    const names = await bulkCategoriesDialog({ existing: list.map((c) => c.name), room, maxLength: MAX_NAME_LENGTH });
+    if (!names?.length) return;
+    for (const name of names) list.push({ id: newCategoryId(list), name, swatch: freeSwatch(), key: null });
+    render();
+    save();
+    say(t('categoryBulkAdded', plural('categoryCount', names.length)));
+  }
+
   function add() {
     if (list.length >= MAX_CATEGORIES) return;
-    const used = new Set(list.map((c) => c.swatch.toUpperCase()));
-    const swatch = PALETTE.find((hex) => !used.has(hex)) ?? PALETTE[list.length % PALETTE.length];
-    list.push({ id: newCategoryId(list), name: t('categoryNewName', formatNumber(list.length + 1)), swatch, key: null });
+    list.push({ id: newCategoryId(list), name: t('categoryNewName', formatNumber(list.length + 1)), swatch: freeSwatch(), key: null });
     render();
     save();
     const names = root.querySelectorAll('.category-name');
@@ -126,7 +192,6 @@ export function categoryEditor({ counts, onChange, onDelete }) {
         e.target.value = category.key ?? '';
       },
     });
-    const count = counts.get(category.id) ?? 0;
     const open = paletteFor === category.id;
     return h(
       'div',
@@ -134,6 +199,23 @@ export function categoryEditor({ counts, onChange, onDelete }) {
       h(
         'div',
         { class: 'category-row' },
+        h(
+          'button',
+          {
+            class: 'category-grip',
+            type: 'button',
+            title: t('categoryDrag'),
+            'aria-label': t('categoryDrag'),
+            onpointerdown: (e) => startDrag(e, index),
+            onkeydown: (e) => {
+              if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+              e.preventDefault();
+              move(index, e.key === 'ArrowUp' ? -1 : 1);
+              root.querySelectorAll('.category-grip')[index + (e.key === 'ArrowUp' ? -1 : 1)]?.focus();
+            },
+          },
+          icon('grip', { size: 16 }),
+        ),
         h(
           'button',
           {
@@ -152,7 +234,6 @@ export function categoryEditor({ counts, onChange, onDelete }) {
         ),
         nameInput,
         keyInput,
-        h('span', { class: 'category-count', title: t('categoryNotes') }, count ? plural('noteCount', count) : ''),
         h(
           'div',
           { class: 'category-actions' },
@@ -188,9 +269,9 @@ export function categoryEditor({ counts, onChange, onDelete }) {
         'div',
         { class: 'category-head', 'aria-hidden': 'true' },
         h('span'),
+        h('span'),
         h('span', null, t('categoryName')),
         h('span', null, t('categoryKey')),
-        h('span'),
         h('span'),
       ),
       ...list.map(row),
@@ -202,6 +283,12 @@ export function categoryEditor({ counts, onChange, onDelete }) {
           { class: 'btn btn-outline btn-sm', type: 'button', disabled: list.length >= MAX_CATEGORIES, onclick: add },
           icon('add', { size: 14 }),
           t('categoryAdd'),
+        ),
+        h(
+          'button',
+          { class: 'btn btn-outline btn-sm', type: 'button', disabled: list.length >= MAX_CATEGORIES, onclick: addMany },
+          icon('note', { size: 14 }),
+          t('categoryBulkOpen'),
         ),
         h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: resetBuiltIn }, t('categoryReset')),
         status,

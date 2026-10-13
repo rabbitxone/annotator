@@ -15,7 +15,7 @@ import {
   updateAnnotation,
 } from '../shared/store.js';
 import { isFileUrl, isPdfUrl, hostnameOf, normalizeUrl, siteKey, displayAddress, unwrapReaderUrl } from '../shared/url.js';
-import { confirmAndDelete } from './components/actions.js';
+import { confirmAndDelete, openNote } from './components/actions.js';
 import { annotationCard } from './components/card.js';
 import { fileAccessNotice } from './components/file-access.js';
 import { notice } from './components/notice.js';
@@ -111,8 +111,8 @@ async function goToOnThisPage(id) {
 
 async function openElsewhere(page, id) {
   if (page.url === state.pageUrl) return goToOnThisPage(id);
-  await api.runtime.sendMessage({ type: 'open-and-go', url: page.url, id }).catch(() => { });
-  window.close();
+  // When the file has to be opened by hand, the popup stays to say so
+  if (await openNote(page, id)) window.close();
 }
 
 // Built once, so a re-render (typing in search, a store change) doesn't play their entrance again

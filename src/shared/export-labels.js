@@ -8,6 +8,7 @@ export function exportLabels() {
     pageNote: t('pageNoteLabel'),
     pageNotes: t('exportPageNotes'),
     wholePage: t('csvWholePage'),
+    noteColumn: (category) => t('csvNoteColumn', category),
     colorName: (id) => colorById(id).name,
     summary: (notes, pages, date) => t('exportSummary', [String(notes), String(pages), date]),
     pageSummary: (host, count) => t('exportPageSummary', [host, String(count)]),

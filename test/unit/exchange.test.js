@@ -14,6 +14,7 @@ import {
   quoteSnippet,
   textFragmentUrl,
   toCsv,
+  toCsvByPage,
   toMarkdown,
 } from '../../src/shared/exchange.js';
 import { resolveCategories } from '../../src/shared/categories.js';
@@ -267,4 +268,13 @@ test('a backup can carry the settings, and only well-formed ones come back', () 
   assert.deepEqual(parsed.settings, { selectionToolbar: false, quickKeys: true, highlightStyle: 'underline', defaultColor: 'green', siteRules: { 'a.com': 'never' } });
   assert.equal(parseBackup(JSON.stringify(createBackup([], { now: 0 }))).settings, null, 'left out unless asked for');
   assert.equal(parseBackup(JSON.stringify({ ...createBackup([], { now: 0 }), settings: { highlightStyle: 'neon' } })).settings, null);
+});
+
+test('csv by page: one row per page, a column per category, notes beside them only where there are any', () => {
+  const csv = toCsvByPage(sampleGroups(), { labels: { colorName: (id) => id.toUpperCase() } }).split('\r\n');
+  assert.equal(csv[0], 'Page title,Page URL,File or site,Page note,YELLOW,GREEN,GREEN (note)');
+  assert.equal(csv[1], 'A [b],https://a.com/x_(1),a.com,context,l1 l2 *x*,quote 2,second');
+  assert.equal(csv[2], 'B,https://b.com/,b.com,,quote 3,,');
+  const two = [{ page: page('https://c.com/', []), annotations: [annotation('1', { position: { start: 0 } }), annotation('2', { position: { start: 9 } })] }];
+  assert.equal(toCsvByPage(two).split('\r\n')[1], 'Title,https://c.com/,c.com,"quote 1\nquote 2"', 'several highlights share the cell, one per line');
 });

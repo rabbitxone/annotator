@@ -773,9 +773,6 @@
   "categoryCustomColor": {
     "message": "Custom"
   },
-  "categoryNotes": {
-    "message": "Notes in this category"
-  },
   "categoryMoveUp": {
     "message": "Move up"
   },
@@ -974,5 +971,89 @@
         "content": "$1"
       }
     }
+  },
+  "toastOpenFileYourself": {
+    "message": "Firefox doesn't let extensions open files from your computer. The file's address is copied: paste it into the address bar, and the note will show as soon as the file opens."
+  },
+  "categoryBulkOpen": {
+    "message": "Add several"
+  },
+  "categoryBulkTitle": {
+    "message": "Add several categories"
+  },
+  "categoryBulkIntro": {
+    "message": "One name per line. You can paste a column straight from a spreadsheet. Names already in use are skipped."
+  },
+  "categoryBulkPlaceholder": {
+    "message": "Sample size\nIntervention\nOutcome"
+  },
+  "categoryBulkHint": {
+    "message": "Nothing to add yet."
+  },
+  "categoryBulkCount": {
+    "message": "To add: $V1$.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryBulkLimit": {
+    "message": "Over the limit, left out: $V1$.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryBulkAction": {
+    "message": "Add"
+  },
+  "categoryBulkAdded": {
+    "message": "Added: $V1$.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryCount_one": {
+    "message": "$COUNT$ category",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryCount_other": {
+    "message": "$COUNT$ categories",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "csvNoteColumn": {
+    "message": "$V1$ (note)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportCsvLayout": {
+    "message": "Layout"
+  },
+  "exportCsvLayoutHighlights": {
+    "message": "A row per highlight"
+  },
+  "exportCsvLayoutPages": {
+    "message": "A row per page"
+  },
+  "exportCsvLayoutHint": {
+    "message": "A row per page puts each category in its own column, like a data extraction sheet; several highlights of one category share a cell, one per line."
+  },
+  "categoryDrag": {
+    "message": "Drag to reorder (or use the arrow keys)"
   }
 }

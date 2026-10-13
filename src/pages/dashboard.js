@@ -33,7 +33,8 @@ import {
   updateSettings,
 } from '../shared/store.js';
 import { displayAddress, isFileUrl, pageName, siteLabel } from '../shared/url.js';
-import { confirmAndDelete } from './components/actions.js';
+import { confirmAndDelete, openNote } from './components/actions.js';
+import { masonry } from './components/masonry.js';
 import { annotationCard, siteAvatar, swatchPicker } from './components/card.js';
 import { exportDialog } from './components/export-dialog.js';
 import { categoryDeleteDialog } from './components/category-delete-dialog.js';
@@ -145,6 +146,7 @@ function loadExportPrefs() {
     scope: 'all',
     format: 'json',
     groupBy: 'page',
+    csvLayout: 'highlights',
     separator: (1.5).toLocaleString(uiLanguage()).includes(',') ? 'semicolon' : 'comma',
   };
   try {
@@ -205,6 +207,7 @@ async function openExport(preferred) {
       labels: exportLabels(),
       separator: CSV_SEPARATORS[options.separator],
       groupBy: options.groupBy,
+      csvLayout: options.csvLayout,
       categories: format === 'json' ? state.settings.categories : null,
       settings: format === 'json' && options.settings ? state.settings : null,
     });
@@ -409,7 +412,7 @@ function moreButton(remaining, onClick) {
 }
 
 function renderCards(items, { showSource }) {
-  const grid = h('div', { class: 'grid' });
+  const grid = masonry(h('div', { class: 'grid' }));
   const footer = h('div', { class: 'list-more' });
   let shown = 0;
 
@@ -444,7 +447,7 @@ function cardFor({ annotation, page }, showSource) {
     selectable: true,
     selected: state.selected.has(key),
     query: state.query,
-    onGo: () => api.runtime.sendMessage({ type: 'open-and-go', url: page.url, id: annotation.id }).catch(() => { }),
+    onGo: () => openNote(page, annotation.id),
     onCopy: () => copyText(quoteSnippet(annotation, page)),
     onSave: (patch) => updateAnnotation(page.url, annotation.id, patch),
     onDelete: () => confirmAndDelete([{ annotation, page }]),

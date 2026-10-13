@@ -3,7 +3,7 @@ import { t } from '../shared/i18n.js';
 import { fileAccessAllowed, mayBeBlockedFile } from '../shared/file-access.js';
 import { rolloutOnInstall } from '../shared/rollout.js';
 import { ensureMigrated } from '../shared/store.js';
-import { isPdfUrl } from '../shared/url.js';
+import { isFileUrl, isPdfUrl, normalizeUrl, unwrapReaderUrl } from '../shared/url.js';
 
 const MENU_ID = 'annotator-create';
 
@@ -96,25 +96,69 @@ api.commands?.onCommand.addListener(async (command, tab) => {
   commandTab(target.id, message, null, target.url);
 });
 
-async function openAndGo(url, id) {
-  const tab = await api.tabs.create({ url });
+// Keep asking the page until its script answers (it may still be loading), then show the note.
+async function goWhenReady(tabId, id) {
   const deadline = Date.now() + 20000;
-
-  const onUpdated = async (tabId, change) => {
-    if (tabId !== tab.id || change.status !== 'complete') return;
-    api.tabs.onUpdated.removeListener(onUpdated);
-    while (Date.now() < deadline) {
-      try {
-        await sendToTab(tab.id, { type: 'go-to', id });
-        return;
-      } catch {
-        await new Promise((r) => setTimeout(r, 300));
-      }
+  while (Date.now() < deadline) {
+    try {
+      await sendToTab(tabId, { type: 'go-to', id });
+      return;
+    } catch {
+      // Not ready yet
     }
+    await new Promise((r) => setTimeout(r, 300));
+  }
+}
+
+function whenLoaded(tabId, then) {
+  const onUpdated = (updatedId, change) => {
+    if (updatedId !== tabId || change.status !== 'complete') return;
+    api.tabs.onUpdated.removeListener(onUpdated);
+    then();
   };
   api.tabs.onUpdated.addListener(onUpdated);
   setTimeout(() => api.tabs.onUpdated.removeListener(onUpdated), 20000);
 }
+
+const PENDING_KEY = 'pendingGoTo';
+const PENDING_FOR = 15 * 60 * 1000;
+const pendingStore = () => api.storage.session ?? api.storage.local;
+
+/**
+ * Shows a note, in the tab that already has its page or in a new one. Firefox won't let an
+ * extension open a file from disk ("Illegal URL"): then the note is remembered, and shown as
+ * soon as the person opens that file themselves. Resolves to { ok } or { manual: true }.
+ */
+async function openAndGo(url, id) {
+  const target = normalizeUrl(url);
+  const tabs = await api.tabs.query({}).catch(() => []);
+  const open = tabs.find((tab) => tab.url && normalizeUrl(unwrapReaderUrl(tab.url)) === target);
+  if (open) {
+    await api.tabs.update(open.id, { active: true });
+    await api.windows?.update(open.windowId, { focused: true }).catch(() => { });
+    if (open.status === 'complete') goWhenReady(open.id, id);
+    else whenLoaded(open.id, () => goWhenReady(open.id, id));
+    return { ok: true };
+  }
+  let tab;
+  try {
+    tab = await api.tabs.create({ url });
+  } catch (err) {
+    if (!isFileUrl(url)) throw err;
+    await pendingStore().set({ [PENDING_KEY]: { url: target, id, at: Date.now() } });
+    return { manual: true };
+  }
+  whenLoaded(tab.id, () => goWhenReady(tab.id, id));
+  return { ok: true };
+}
+
+api.tabs.onUpdated.addListener(async (tabId, change, tab) => {
+  if (change.status !== 'complete' || !isFileUrl(tab.url)) return;
+  const { [PENDING_KEY]: pending } = await pendingStore().get(PENDING_KEY).catch(() => ({}));
+  if (!pending || normalizeUrl(tab.url) !== pending.url) return;
+  await pendingStore().remove(PENDING_KEY);
+  if (Date.now() - pending.at < PENDING_FOR) goWhenReady(tabId, pending.id);
+});
 
 function setBadge(tabId, count) {
   const text = count > 0 ? (count > 99 ? '99+' : String(count)) : '';
@@ -143,8 +187,8 @@ api.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return true;
     case 'open-and-go':
       openAndGo(message.url, message.id).then(
-        () => sendResponse(true),
-        () => sendResponse(false),
+        (result) => sendResponse(result),
+        () => sendResponse({ ok: false }),
       );
       return true;
     default:

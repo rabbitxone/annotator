@@ -235,6 +235,12 @@ body[data-view='settings'] :is(#notices, #whats-new) {
   align-items: start;
 }
 
+/* Rows of 1px; masonry.js makes each card span its own height (see there) */
+.grid.masonry {
+  grid-auto-rows: 1px;
+  row-gap: 0;
+}
+
 .grid .card-check+.card-quote,
 .grid .card-source {
   padding-right: 28px;
