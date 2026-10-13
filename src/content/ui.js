@@ -123,7 +123,10 @@ export function createUi(handlers) {
   // to the edge of the window, and comes back with it.
   function setOffscreen(layer, off) {
     if (layer.offscreen === off) return;
+    const first = layer.offscreen === undefined;
     layer.offscreen = off;
+    // A layer that opens in view already has its entrance; nothing to fade in
+    if (first && !off) return;
     const { el } = layer;
     el.inert = off;
     el.style.pointerEvents = off ? 'none' : '';
