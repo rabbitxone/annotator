@@ -217,7 +217,6 @@ export const DEFAULT_LABELS = {
   summary: (notes, pages, date) => `Highlights: ${notes} · pages: ${pages} · exported ${date}`,
   pageSummary: (host, count) => `${host} · highlights: ${count}`,
   wholePage: '(whole page)',
-  noteColumn: (category) => `${category} (note)`,
   csvHeaders: ['Page title', 'Page URL', 'File or site', 'Category', 'Color code', 'Highlighted text', 'Note', 'Created', 'Modified'],
 };
 
@@ -355,38 +354,6 @@ export function toCsv(groups, { separator = ',', labels = {} } = {}) {
   return rows.map((row) => row.map((cell) => csvCell(cell, separator)).join(separator)).join('\r\n') + '\r\n';
 }
 
-/**
- * One row per page, one column per category: the spreadsheet a review fills in by hand,
- * filled from the highlights. Several highlights of a category on a page share its cell, one
- * per line, in text order; a category gets a second column for notes when it has any.
- */
-export function toCsvByPage(groups, { separator = ',', labels = {} } = {}) {
-  const L = { ...DEFAULT_LABELS, ...labels };
-  const oneLine = (text) => String(text ?? '').replace(/\s*\n\s*/g, ' ').trim();
-  const categories = categoriesUsed(groups).filter((c) => groups.some((g) => g.annotations.some((a) => a.color === c.id)));
-  const withNotes = new Set(categories.filter((c) => groups.some((g) => g.annotations.some((a) => a.color === c.id && a.note?.trim()))).map((c) => c.id));
-  const pageNotes = groups.some((g) => g.includePageNote !== false && g.page.note?.trim());
-
-  const header = [...L.csvHeaders.slice(0, 3), ...(pageNotes ? [L.pageNote] : [])];
-  for (const c of categories) {
-    header.push(L.colorName(c.id));
-    if (withNotes.has(c.id)) header.push(L.noteColumn(L.colorName(c.id)));
-  }
-  const rows = [header];
-  for (const { page, annotations, includePageNote = true } of groups) {
-    const row = [pageName(page), page.url, sourceOf(page.url)];
-    if (pageNotes) row.push(includePageNote ? (page.note ?? '').trim() : '');
-    const sorted = [...annotations].sort(byTextPosition);
-    for (const c of categories) {
-      const mine = sorted.filter((a) => a.color === c.id);
-      row.push(mine.map((a) => oneLine(a.quote?.exact)).join('\n'));
-      if (withNotes.has(c.id)) row.push(mine.map((a) => oneLine(a.note)).filter(Boolean).join('\n'));
-    }
-    rows.push(row);
-  }
-  return rows.map((row) => row.map((cell) => csvCell(cell, separator)).join(separator)).join('\r\n') + '\r\n';
-}
-
 // ---- Everything the export dialog can produce ---------------------------------------------
 
 export const EXPORT_FORMATS = {
@@ -395,13 +362,12 @@ export const EXPORT_FORMATS = {
   csv: { extension: 'csv', mime: 'text/csv', importable: false },
 };
 
-export function buildExport(format, groups, { labels, categories = null, settings = null, separator = ',', groupBy = 'page', csvLayout = 'highlights', now = Date.now() } = {}) {
+export function buildExport(format, groups, { labels, categories = null, settings = null, separator = ',', groupBy = 'page', now = Date.now() } = {}) {
   const meta = EXPORT_FORMATS[format];
   if (!meta) throw new Error(`Unknown export format: ${format}`);
   let text;
   if (format === 'json') text = JSON.stringify(createBackup(pagesFromGroups(groups), { now, categories, settings }), null, 2);
   else if (format === 'markdown') text = toMarkdown(groups, labels, { groupBy, now });
-  // BOM: Excel otherwise misreads UTF-8
-  else text = '﻿' + (csvLayout === 'pages' ? toCsvByPage : toCsv)(groups, { separator, labels });
+  else text = '﻿' + toCsv(groups, { separator, labels }); // BOM: Excel otherwise misreads UTF-8
   return { ...meta, text };
 }

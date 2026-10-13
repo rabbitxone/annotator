@@ -81,13 +81,6 @@ export function exportDialog({ scopes, initial }) {
       if (state.format === 'csv') {
         rows.push(
           field(
-            t('exportCsvLayout'),
-            select([['highlights', t('exportCsvLayoutHighlights')], ['pages', t('exportCsvLayoutPages')]], state.csvLayout ?? 'highlights', (v) => (state.csvLayout = v), t('exportCsvLayout')),
-            t('exportCsvLayoutHint'),
-          ),
-        );
-        rows.push(
-          field(
             t('exportSeparator'),
             select([['comma', t('exportSeparatorComma')], ['semicolon', t('exportSeparatorSemicolon')]], state.separator, (v) => (state.separator = v), t('exportSeparator')),
             t('exportSeparatorHint'),
@@ -151,7 +144,7 @@ export function exportDialog({ scopes, initial }) {
           ? {
             scope: current(),
             format: state.format,
-            options: { groupBy: state.groupBy, separator: state.separator, csvLayout: state.csvLayout ?? 'highlights', settings: !!state.settings },
+            options: { groupBy: state.groupBy, separator: state.separator, settings: !!state.settings },
             remember: { ...state },
           }
           : null,

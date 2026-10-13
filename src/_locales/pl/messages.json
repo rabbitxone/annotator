@@ -1081,26 +1081,6 @@
       }
     }
   },
-  "csvNoteColumn": {
-    "message": "$V1$ (notatka)",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      }
-    }
-  },
-  "exportCsvLayout": {
-    "message": "Układ"
-  },
-  "exportCsvLayoutHighlights": {
-    "message": "Wiersz na zakreślenie"
-  },
-  "exportCsvLayoutPages": {
-    "message": "Wiersz na stronę"
-  },
-  "exportCsvLayoutHint": {
-    "message": "Wiersz na stronę daje każdej kategorii własną kolumnę, jak arkusz ekstrakcji danych; kilka zakreśleń jednej kategorii trafia do tej samej komórki, każde w nowym wierszu."
-  },
   "categoryDrag": {
     "message": "Przeciągnij, by zmienić kolejność (albo użyj strzałek)"
   }

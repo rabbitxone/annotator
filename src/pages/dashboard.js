@@ -146,7 +146,6 @@ function loadExportPrefs() {
     scope: 'all',
     format: 'json',
     groupBy: 'page',
-    csvLayout: 'highlights',
     separator: (1.5).toLocaleString(uiLanguage()).includes(',') ? 'semicolon' : 'comma',
   };
   try {
@@ -207,7 +206,6 @@ async function openExport(preferred) {
       labels: exportLabels(),
       separator: CSV_SEPARATORS[options.separator],
       groupBy: options.groupBy,
-      csvLayout: options.csvLayout,
       categories: format === 'json' ? state.settings.categories : null,
       settings: format === 'json' && options.settings ? state.settings : null,
     });
