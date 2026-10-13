@@ -1,6 +1,7 @@
 import { h } from '../../shared/dom.js';
 import { buildDialog, closeDialog, showDialog } from './dialog.js';
 import { dropdown } from './dropdown.js';
+import { toggle } from './toggle.js';
 import { formatNumber, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 
@@ -42,7 +43,7 @@ function select(options, value, onChange, ariaLabel) {
 
 /**
  * scopes: [{ id, label, notes, pages, pageNotes }]
- * initial: { scope, format, groupBy, separator }
+ * initial: { scope, format, groupBy, separator, settings }
  * Resolves to { scope, format, options } or null when cancelled.
  */
 export function exportDialog({ scopes, initial }) {
@@ -58,6 +59,17 @@ export function exportDialog({ scopes, initial }) {
     function renderOptions() {
       const scope = current();
       const rows = [];
+      if (state.format === 'json') {
+        rows.push(
+          h(
+            'div',
+            { class: 'option-row' },
+            h('span', { class: 'option-label' }, t('exportIncludeSettings')),
+            toggle(!!state.settings, t('exportIncludeSettings'), (on) => (state.settings = on)),
+            h('span', { class: 'choice-hint option-hint' }, t('exportIncludeSettingsHint')),
+          ),
+        );
+      }
       if (state.format === 'markdown') {
         rows.push(
           field(
@@ -119,7 +131,6 @@ export function exportDialog({ scopes, initial }) {
         h('fieldset', { class: 'export-field' }, h('legend', null, t('exportScopeLabel')), h('div', { class: 'choices' }, scopeChoices)),
         h('fieldset', { class: 'export-field' }, h('legend', null, t('exportFormatLabel')), h('div', { class: 'choices' }, formatChoices)),
         options,
-        h('p', { class: 'export-note' }, icon('info', { size: 14 }), h('span', null, t('exportNote'))),
         empty,
       ],
       actions: [h('button', { class: 'btn btn-outline', type: 'button', onclick: () => closeDialog(dialog, 'cancel') }, t('actionCancel')), submit],
@@ -133,7 +144,7 @@ export function exportDialog({ scopes, initial }) {
           ? {
             scope: current(),
             format: state.format,
-            options: { groupBy: state.groupBy, separator: state.separator },
+            options: { groupBy: state.groupBy, separator: state.separator, settings: !!state.settings },
             remember: { ...state },
           }
           : null,

@@ -37,10 +37,14 @@ function manifestFor(target) {
       default_icon: { 16: 'icons/icon-16.png', 32: 'icons/icon-32.png', 48: 'icons/icon-48.png' },
     },
     content_scripts: [{ matches: ['<all_urls>'], js: ['content.js'], run_at: 'document_idle' }],
+    // Left hand only, so the right one stays on the mouse. Alt+letter is free in both browsers
+    // (Chrome and Firefox take Alt+D/E/F and the menu letters B, H, S, T, V). On a Mac, Option
+    // types characters (Option+Q is œ), so it's Control there; Q, W and X mean nothing to text
+    // fields, unlike Control+A or +E.
     commands: {
-      highlight: { suggested_key: { default: 'Ctrl+Shift+L' }, description: '__MSG_cmd_highlight__' },
-      'highlight-note': { suggested_key: { default: 'Ctrl+Shift+Period' }, description: '__MSG_cmd_highlight_note__' },
-      'toggle-panel': { suggested_key: { default: 'Ctrl+Shift+Comma' }, description: '__MSG_cmd_toggle_panel__' },
+      highlight: { suggested_key: { default: 'Alt+Q', mac: 'MacCtrl+Q' }, description: '__MSG_cmd_highlight__' },
+      'highlight-note': { suggested_key: { default: 'Alt+W', mac: 'MacCtrl+W' }, description: '__MSG_cmd_highlight_note__' },
+      'toggle-panel': { suggested_key: { default: 'Alt+X', mac: 'MacCtrl+X' }, description: '__MSG_cmd_toggle_panel__' },
     },
   };
 

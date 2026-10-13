@@ -5,8 +5,9 @@ import { afterAnimations } from '../../shared/motion.js';
 let ids = 0;
 
 /**
- * Every dialog has the same shape: a grey frame with the title on it, and a white panel
- * (rounded on its own) that holds the content and, at its foot, the buttons.
+ * Every dialog has the same shape: a grey frame with the title on it, holding two white
+ * blocks, the content and under it the buttons, set slightly apart with softly rounded corners
+ * where they meet.
  */
 export function buildDialog({ className = '', title, body, actions, role = 'dialog' }) {
   const titleId = `dialog-title-${++ids}`;
@@ -14,7 +15,8 @@ export function buildDialog({ className = '', title, body, actions, role = 'dial
     'dialog',
     { class: ['dialog', className], role: role === 'dialog' ? null : role, 'aria-labelledby': titleId },
     h('div', { class: 'dialog-head' }, h('h2', { class: 'dialog-title', id: titleId }, title)),
-    h('div', { class: 'dialog-panel' }, h('div', { class: 'dialog-body' }, body), h('div', { class: 'dialog-actions' }, actions)),
+    [body].flat().some(Boolean) && h('div', { class: 'dialog-panel' }, h('div', { class: 'dialog-body' }, body)),
+    h('div', { class: 'dialog-actions' }, actions),
   );
 }
 

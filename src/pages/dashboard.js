@@ -206,6 +206,7 @@ async function openExport(preferred) {
       separator: CSV_SEPARATORS[options.separator],
       groupBy: options.groupBy,
       categories: format === 'json' ? state.settings.categories : null,
+      settings: format === 'json' && options.settings ? state.settings : null,
     });
     const name = format === 'json' && scope.id === 'all' ? 'annotator-backup' : 'annotator';
     download(`${name}-${dateStamp()}.${file.extension}`, file.text, `${file.mime};charset=utf-8`);
@@ -238,18 +239,26 @@ async function openRelocate() {
 
 async function importBackup(file) {
   try {
-    const { pages, categories } = parseBackup(await file.text());
+    const { pages, categories, settings } = parseBackup(await file.text());
     const merged = mergeCategories(state.settings.categories, categories, categoryNameFor);
     if (merged.added > 0) {
       state.settings = await updateSettings({ categories: merged.categories });
       applyCategories(state.settings);
     }
     const { added, updated } = await importPages(pages);
-    toast(
-      added || updated
-        ? t('toastImported', [formatNumber(added), formatNumber(updated)])
-        : t('toastImportedNothing'),
-    );
+    if (settings) {
+      // Rules for sites add to the ones here; a default color must exist on this device
+      const { defaultColor, siteRules, ...rest } = settings;
+      const known = getCategories().some((c) => c.id === defaultColor);
+      state.settings = await updateSettings({
+        ...rest,
+        ...(known ? { defaultColor } : {}),
+        ...(siteRules ? { siteRules: { ...state.settings.siteRules, ...siteRules } } : {}),
+      });
+      applyCategories(state.settings);
+    }
+    const summary = added || updated ? t('toastImported', [formatNumber(added), formatNumber(updated)]) : settings ? '' : t('toastImportedNothing');
+    toast([summary, settings && t('toastImportedSettings')].filter(Boolean).join(' '));
   } catch (err) {
     if (!(err instanceof BackupError)) console.error('Annotator: import failed', err);
     toast(t(err instanceof BackupError ? 'toastImportInvalid' : 'toastImportFailed'));

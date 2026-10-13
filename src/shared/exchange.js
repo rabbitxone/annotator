@@ -46,7 +46,25 @@ function stripLocal(page) {
   return { ...rest, annotations: annotations.map(({ lostAt, ...annotation }) => annotation) };
 }
 
-export function createBackup(pages, { now = Date.now(), categories = null } = {}) {
+// The settings a backup may carry: how Annotator looks and behaves, and the per-site rules
+const SITE_RULES = new Set(['never', 'always', 'auto']);
+export function sanitizeBackupSettings(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const out = {};
+  for (const key of ['selectionToolbar', 'quickKeys']) if (typeof raw[key] === 'boolean') out[key] = raw[key];
+  if (raw.highlightStyle === 'background' || raw.highlightStyle === 'underline') out.highlightStyle = raw.highlightStyle;
+  if (isValidCategoryId(raw.defaultColor)) out.defaultColor = raw.defaultColor;
+  if (raw.siteRules && typeof raw.siteRules === 'object' && !Array.isArray(raw.siteRules)) {
+    out.siteRules = Object.fromEntries(
+      Object.entries(raw.siteRules)
+        .filter(([site, rule]) => typeof site === 'string' && site.length <= 2048 && SITE_RULES.has(rule))
+        .slice(0, 5000),
+    );
+  }
+  return Object.keys(out).length ? out : null;
+}
+
+export function createBackup(pages, { now = Date.now(), categories = null, settings = null } = {}) {
   const backup = {
     format: BACKUP_FORMAT,
     version: BACKUP_VERSION,
@@ -54,6 +72,8 @@ export function createBackup(pages, { now = Date.now(), categories = null } = {}
     pages: pages.map(stripLocal),
   };
   if (Array.isArray(categories) && categories.length) backup.categories = categories;
+  const kept = sanitizeBackupSettings(settings);
+  if (kept) backup.settings = kept;
   return backup;
 }
 
@@ -80,7 +100,7 @@ export function parseBackup(text, now = Date.now()) {
     const known = byUrl.get(page.url);
     byUrl.set(page.url, known ? mergePage(known, page).page : page);
   }
-  return { pages: [...byUrl.values()], categories: sanitizeStoredCategories(data.categories) };
+  return { pages: [...byUrl.values()], categories: sanitizeStoredCategories(data.categories), settings: sanitizeBackupSettings(data.settings) };
 }
 
 export function mergePage(existing, incoming) {
@@ -196,7 +216,8 @@ export const DEFAULT_LABELS = {
   colorName: (id) => colorById(id).name,
   summary: (notes, pages, date) => `Highlights: ${notes} · pages: ${pages} · exported ${date}`,
   pageSummary: (host, count) => `${host} · highlights: ${count}`,
-  csvHeaders: ['Page title', 'Page URL', 'File or site', 'Category', 'Color code', 'Highlighted text', 'Note', 'Page note', 'Created', 'Modified'],
+  wholePage: '(whole page)',
+  csvHeaders: ['Page title', 'Page URL', 'File or site', 'Category', 'Color code', 'Highlighted text', 'Note', 'Created', 'Modified'],
 };
 
 function highlightItem(heading, annotation) {
@@ -300,6 +321,10 @@ export function csvCell(value, separator = ',') {
   return /["\r\n]/.test(text) || text.includes(separator) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
+/**
+ * One row per highlight. A page note gets a row of its own, "(whole page)" in place of the
+ * highlighted text, ahead of the page's highlights, instead of repeating on every one of them.
+ */
 export function toCsv(groups, { separator = ',', labels = {} } = {}) {
   const L = { ...DEFAULT_LABELS, ...labels };
   const rows = [L.csvHeaders];
@@ -307,9 +332,9 @@ export function toCsv(groups, { separator = ',', labels = {} } = {}) {
     const pageNote = includePageNote ? (page.note ?? '').trim() : '';
     const title = pageName(page);
     const source = sourceOf(page.url);
-    if (annotations.length === 0) {
-      if (pageNote) rows.push([title, page.url, source, '', '', '', '', pageNote, '', '']);
-      continue;
+    if (pageNote) {
+      const when = page.noteUpdatedAt ? localDateTime(page.noteUpdatedAt) : '';
+      rows.push([title, page.url, source, '', '', L.wholePage, pageNote, when, when]);
     }
     for (const a of [...annotations].sort(byTextPosition)) {
       const color = colorById(a.color);
@@ -321,7 +346,6 @@ export function toCsv(groups, { separator = ',', labels = {} } = {}) {
         color.swatch,
         a.quote?.exact ?? '',
         a.note ?? '',
-        pageNote,
         localDateTime(a.createdAt),
         localDateTime(a.updatedAt ?? a.createdAt),
       ]);
@@ -338,11 +362,11 @@ export const EXPORT_FORMATS = {
   csv: { extension: 'csv', mime: 'text/csv', importable: false },
 };
 
-export function buildExport(format, groups, { labels, categories = null, separator = ',', groupBy = 'page', now = Date.now() } = {}) {
+export function buildExport(format, groups, { labels, categories = null, settings = null, separator = ',', groupBy = 'page', now = Date.now() } = {}) {
   const meta = EXPORT_FORMATS[format];
   if (!meta) throw new Error(`Unknown export format: ${format}`);
   let text;
-  if (format === 'json') text = JSON.stringify(createBackup(pagesFromGroups(groups), { now, categories }), null, 2);
+  if (format === 'json') text = JSON.stringify(createBackup(pagesFromGroups(groups), { now, categories, settings }), null, 2);
   else if (format === 'markdown') text = toMarkdown(groups, labels, { groupBy, now });
   else text = '﻿' + toCsv(groups, { separator, labels }); // BOM: Excel otherwise misreads UTF-8
   return { ...meta, text };

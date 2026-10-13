@@ -509,9 +509,6 @@
   "exportReimportable": {
     "message": "Można zaimportować ponownie"
   },
-  "exportNote": {
-    "message": "Tylko pliki JSON można ponownie zaimportować do Annotatora. Markdown i CSV służą do czytania i analizy."
-  },
   "exportGroupBy": {
     "message": "Uporządkuj według"
   },
@@ -598,9 +595,6 @@
   },
   "csvNote": {
     "message": "Notatka"
-  },
-  "csvPageNote": {
-    "message": "Notatka do strony"
   },
   "csvCreated": {
     "message": "Utworzono"
@@ -864,5 +858,17 @@
   },
   "settingSitePdf": {
     "message": "To plik PDF: Annotator tu nie działa."
+  },
+  "csvWholePage": {
+    "message": "(cała strona)"
+  },
+  "exportIncludeSettings": {
+    "message": "Dołącz ustawienia Annotatora"
+  },
+  "exportIncludeSettingsHint": {
+    "message": "Wygląd, szybkie klawisze i reguły dla witryn. Import pliku zastosuje je na drugim urządzeniu."
+  },
+  "toastImportedSettings": {
+    "message": "Przywrócono ustawienia."
   }
 }

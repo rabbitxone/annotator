@@ -7,6 +7,7 @@ import {
   csvCell,
   escapeMarkdown,
   localDate,
+  localDateTime,
   mergePage,
   pagesFromGroups,
   parseBackup,
@@ -172,22 +173,23 @@ test('csv cells are quoted when needed and never start a formula', () => {
   assert.equal(csvCell('+3'), '+3');
 });
 
-test('csv has one row per highlight with color name and code, in text order', () => {
+test('csv has one row per highlight in text order, and the page note once, on its own row', () => {
   const csv = toCsv(sampleGroups(), { labels: { colorName: (id) => id.toUpperCase() } });
   assert.equal(
     csv,
     [
-      'Page title,Page URL,File or site,Category,Color code,Highlighted text,Note,Page note,Created,Modified',
-      'A [b],https://a.com/x_(1),a.com,YELLOW,#FACC15,"l1\nl2 *x*",,context,2026-10-11 09:15:30,2026-10-11 09:15:30',
-      'A [b],https://a.com/x_(1),a.com,GREEN,#22C55E,quote 2,second,context,2026-10-12 09:15:30,2026-10-13 09:15:30',
-      'B,https://b.com/,b.com,YELLOW,#FACC15,quote 3,,,2026-10-10 09:15:30,2026-10-10 09:15:30',
+      'Page title,Page URL,File or site,Category,Color code,Highlighted text,Note,Created,Modified',
+      `A [b],https://a.com/x_(1),a.com,,,(whole page),context,${localDateTime(1)},${localDateTime(1)}`,
+      'A [b],https://a.com/x_(1),a.com,YELLOW,#FACC15,"l1\nl2 *x*",,2026-10-11 09:15:30,2026-10-11 09:15:30',
+      'A [b],https://a.com/x_(1),a.com,GREEN,#22C55E,quote 2,second,2026-10-12 09:15:30,2026-10-13 09:15:30',
+      'B,https://b.com/,b.com,YELLOW,#FACC15,quote 3,,2026-10-10 09:15:30,2026-10-10 09:15:30',
     ].join('\r\n') + '\r\n',
   );
 });
 
 test('csv keeps a page that only has a page note, and honors the separator', () => {
   const groups = [{ page: page('https://c.com/', [], { title: 'C; D', note: 'only a note' }), annotations: [] }];
-  assert.equal(toCsv(groups, { separator: ';' }).split('\r\n')[1], '"C; D";https://c.com/;c.com;;;;;only a note;;');
+  assert.equal(toCsv(groups, { separator: ';' }).split('\r\n')[1], '"C; D";https://c.com/;c.com;;;(whole page);only a note;;');
   assert.equal(toCsv([{ ...groups[0], includePageNote: false }]).split('\r\n').length, 2, 'only the header row and the final newline');
 });
 
@@ -215,7 +217,7 @@ test('local files are named by file name, folder and full path in exports', () =
   const file = 'file:///C:/papers/trial%20A/study%20001.html';
   const groups = [{ page: page(file, [], { title: '' }), annotations: [annotation('1', { createdAt: at(10), updatedAt: at(10) })] }];
   const csv = toCsv(groups).split('\r\n');
-  assert.equal(csv[1], `study 001.html,${file},C:/papers/trial A/study 001.html,Yellow,#FACC15,quote 1,,,2026-10-10 09:15:30,2026-10-10 09:15:30`);
+  assert.equal(csv[1], `study 001.html,${file},C:/papers/trial A/study 001.html,Yellow,#FACC15,quote 1,,2026-10-10 09:15:30,2026-10-10 09:15:30`);
   const md = toMarkdown(groups, {}, { now: NOW });
   assert.ok(md.startsWith(`# [study 001.html](${file})\n\nC:/papers/trial A · highlights: 1`));
 });
@@ -257,4 +259,12 @@ test('custom categories show up by name in markdown and csv, and unknown ones in
   } finally {
     setCategories(null);
   }
+});
+
+test('a backup can carry the settings, and only well-formed ones come back', () => {
+  const settings = { selectionToolbar: false, highlightStyle: 'underline', defaultColor: 'green', quickKeys: true, siteRules: { 'a.com': 'never', 'b.com': 'bogus' }, secret: 1 };
+  const parsed = parseBackup(JSON.stringify(createBackup([], { now: 0, settings })));
+  assert.deepEqual(parsed.settings, { selectionToolbar: false, quickKeys: true, highlightStyle: 'underline', defaultColor: 'green', siteRules: { 'a.com': 'never' } });
+  assert.equal(parseBackup(JSON.stringify(createBackup([], { now: 0 }))).settings, null, 'left out unless asked for');
+  assert.equal(parseBackup(JSON.stringify({ ...createBackup([], { now: 0 }), settings: { highlightStyle: 'neon' } })).settings, null);
 });

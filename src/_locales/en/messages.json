@@ -509,9 +509,6 @@
   "exportReimportable": {
     "message": "Can be imported again"
   },
-  "exportNote": {
-    "message": "Only JSON files can be imported back into Annotator. Markdown and CSV are for reading and analysis."
-  },
   "exportGroupBy": {
     "message": "Organize by"
   },
@@ -598,9 +595,6 @@
   },
   "csvNote": {
     "message": "Note"
-  },
-  "csvPageNote": {
-    "message": "Page note"
   },
   "csvCreated": {
     "message": "Created"
@@ -864,5 +858,17 @@
   },
   "settingSitePdf": {
     "message": "This is a PDF: Annotator can't run here."
+  },
+  "csvWholePage": {
+    "message": "(whole page)"
+  },
+  "exportIncludeSettings": {
+    "message": "Include Annotator's settings"
+  },
+  "exportIncludeSettingsHint": {
+    "message": "Appearance, quick keys and per-site rules. Importing the file applies them on the other device."
+  },
+  "toastImportedSettings": {
+    "message": "Settings restored."
   }
 }

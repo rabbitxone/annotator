@@ -9,6 +9,7 @@ import { swatchPicker } from './card.js';
 import { categoryEditor } from './category-editor.js';
 import { fileAccessButton } from './file-access.js';
 import { notice } from './notice.js';
+import { toggle } from './toggle.js';
 
 function settingItem(iconName, label, sublabel, trailing, callout, { stacked = false } = {}) {
   return h(
@@ -55,22 +56,6 @@ function segmented(options, value, onChange) {
     ),
   );
   return group;
-}
-
-function toggle(checked, label, onChange, { disabled = false } = {}) {
-  return h(
-    'label',
-    { class: ['toggle', disabled && 'disabled'] },
-    h('input', {
-      type: 'checkbox',
-      role: 'switch',
-      checked,
-      disabled,
-      'aria-label': label,
-      onchange: (e) => onChange(e.target.checked),
-    }),
-    h('span', { class: 'toggle-track' }),
-  );
 }
 
 export function settingsPanel(settings, { compact = false, site = null, siteName = null, siteAppLike = false, siteUnavailable = null, fileAccess = null } = {}) {
