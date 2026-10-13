@@ -10,6 +10,8 @@ All data is stored locally on your device. It is never sent to the developer or 
 
 ## Features
 
+- **Guide with a live demo** – opens once after installing (and any time from *How it works* in the dashboard or the popup's settings): the essentials in a few steps, with your real shortcuts, next to a paragraph you can highlight for practice. Nothing done there is saved.
+
 - **Side panel on the page** – all highlights in reading order, a note for the whole page, and notes the extension could no longer find (open it from the popup or with a shortcut).
 - **Keyboard shortcuts** – all under the left hand, so the right one stays on the mouse: `Alt+Q` (`⌃Q` on a Mac) highlights the selection, `Alt+W` (`⌃W`) highlights and opens the note, `Alt+X` (`⌃X`) toggles the side panel. In the color bar, `1`–`9` pick a category by position, `/` searches all categories and `N` adds a note. Shortcuts can be changed in the browser's extension settings.
 - **Your own categories** – in *Settings → Categories* rename the colors after what you mark ("Sample size", "Outcome"…), recolor them, add up to 60 more, reorder them and give each a key. With *Quick keys* on, select text and press a category's key to highlight it at once (never inside text fields). The color bar shows the first six categories and a searchable list for the rest. Exports (CSV *Category* column, Markdown, JSON backup) use your names; deleting a category moves its notes to another one.

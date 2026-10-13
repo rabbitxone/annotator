@@ -42,6 +42,8 @@ api.runtime.onInstalled.addListener(async (details) => {
   createMenus();
   ensureMigrated().catch((err) => console.error('Annotator: migration failed', err));
   await applyRollout(details).catch((err) => console.error('Annotator: rollout failed', err));
+  // First install: show what it can do (updates get the "what's new" notice instead)
+  if (details.reason === 'install' && !__E2E__) api.tabs.create({ url: api.runtime.getURL('guide.html') }).catch(() => { });
   injectIntoOpenTabs().catch(() => { });
 });
 api.runtime.onStartup.addListener(createMenus);

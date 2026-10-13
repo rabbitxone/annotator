@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title data-i18n="guideTitle">Annotator</title>
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+    <link rel="stylesheet" href="fonts/fonts.css" />
+    <link rel="stylesheet" href="styles/tokens.css" />
+    <link rel="stylesheet" href="styles/app.css" />
+    <link rel="stylesheet" href="styles/guide.css" />
+  </head>
+  <body>
+    <header class="guide-hero">
+      <img src="icons/logo.svg" width="119" height="32" alt="Annotator" />
+      <h1 class="display guide-title" data-i18n="guideTitle"></h1>
+      <p class="guide-intro" data-i18n="guideIntro"></p>
+    </header>
+
+    <main class="guide-layout">
+      <ol class="guide-steps" id="steps"></ol>
+
+      <aside class="guide-demo" id="demo-card" aria-labelledby="demo-title">
+        <div class="guide-demo-head">
+          <h2 class="guide-demo-title" id="demo-title" data-i18n="guideTryTitle"></h2>
+          <span class="badge" data-i18n="guideTryOptional"></span>
+        </div>
+        <article class="guide-demo-text" id="demo">
+          <p data-i18n="guideDemo1"></p>
+          <p data-i18n="guideDemo2"></p>
+          <p data-i18n="guideDemo3"></p>
+        </article>
+        <p class="guide-demo-hint">
+          <span data-icon="info" data-size="14"></span>
+          <span data-i18n="guideTryHint"></span>
+        </p>
+        <div class="guide-demo-actions">
+          <button id="demo-panel" class="btn btn-outline btn-sm" type="button">
+            <span data-icon="panel" data-size="14"></span>
+            <span data-i18n="actionOpenPanel"></span>
+          </button>
+          <button id="demo-reset" class="btn btn-ghost btn-sm" type="button">
+            <span data-icon="undo" data-size="14"></span>
+            <span data-i18n="guideTryReset"></span>
+          </button>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="guide-foot">
+      <button id="open-dashboard" class="btn btn-primary" type="button">
+        <span data-icon="note" data-size="16"></span>
+        <span data-i18n="guideOpenDashboard"></span>
+      </button>
+      <button id="change-shortcuts" class="btn btn-outline" type="button">
+        <span data-icon="keyboard" data-size="16"></span>
+        <span data-i18n="shortcutChange"></span>
+      </button>
+    </footer>
+
+    <script src="guide.js"></script>
+  </body>
+</html>

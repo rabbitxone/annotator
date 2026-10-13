@@ -119,7 +119,7 @@ export function settingsPanel(settings, { compact = false, site = null, siteName
 
 const COMMANDS = ['highlight', 'highlight-note', 'toggle-panel'];
 
-function openShortcutSettings() {
+export function openShortcutSettings() {
   if (api.commands?.openShortcutSettings) api.commands.openShortcutSettings();
   else api.tabs.create({ url: 'chrome://extensions/shortcuts' });
 }

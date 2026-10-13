@@ -870,5 +870,77 @@
   },
   "toastImportedSettings": {
     "message": "Przywrócono ustawienia."
+  },
+  "navGuide": {
+    "message": "Jak to działa"
+  },
+  "guideTitle": {
+    "message": "Jak korzystać z Annotatora"
+  },
+  "guideIntro": {
+    "message": "Zakreślaj to, co ważne, na dowolnej stronie, dopisuj notatki i odnajduj wszystko później. Wszystko zostaje na tym urządzeniu."
+  },
+  "guideTryTitle": {
+    "message": "Wypróbuj tutaj"
+  },
+  "guideTryOptional": {
+    "message": "Opcjonalnie"
+  },
+  "guideTryHint": {
+    "message": "Nic z tej strony nie jest zapisywane, więc śmiało próbuj. Twoje kategorie i klawisze działają tu tak samo jak wszędzie."
+  },
+  "guideTryReset": {
+    "message": "Zacznij od nowa"
+  },
+  "guideDemo1": {
+    "message": "Dobre notatki zaczynają się od uważnego czytania. Zaznacz to zdanie, kliknij mały przycisk na jego końcu i wybierz kolor: tak powstaje zakreślenie."
+  },
+  "guideDemo2": {
+    "message": "Teraz spróbuj skrótu: zaznacz dowolny fragment tego akapitu i naciśnij ten pokazany obok. Przy otwartym pasku kolorów kategorię wybierają też cyfry 1–9."
+  },
+  "guideDemo3": {
+    "message": "Kliknij zakreślenie, żeby dopisać do niego notatkę albo zmienić kolor. Potem otwórz panel boczny, by zobaczyć na jednej liście wszystko, co zaznaczono na tej stronie."
+  },
+  "guideStepHighlightTitle": {
+    "message": "Zakreślaj"
+  },
+  "guideStepHighlightText": {
+    "message": "Zaznacz tekst, kliknij mały przycisk na jego końcu i wybierz kolor. Albo pomiń klikanie i użyj skrótu:"
+  },
+  "guideStepNoteTitle": {
+    "message": "Dopisuj notatki"
+  },
+  "guideStepNoteText": {
+    "message": "Kliknij zakreślenie, by dopisać notatkę, zmienić kolor albo je usunąć. Aby zakreślić i od razu zacząć pisać:"
+  },
+  "guideStepKeysTitle": {
+    "message": "Wybieraj klawiszami"
+  },
+  "guideStepKeysText": {
+    "message": "Przy otwartym pasku kolorów 1–9 wybiera kategorię, / przeszukuje wszystkie, a N dodaje notatkę. Z włączonymi szybkimi klawiszami własny klawisz kategorii od razu zakreśla zaznaczenie."
+  },
+  "guideStepPanelTitle": {
+    "message": "Panel boczny"
+  },
+  "guideStepPanelText": {
+    "message": "Panel boczny pokazuje zakreślenia strony w kolejności czytania i notatkę do całej strony."
+  },
+  "guideStepCategoriesTitle": {
+    "message": "Własne kategorie"
+  },
+  "guideStepCategoriesText": {
+    "message": "W Ustawieniach → Kategorie nazwij kolory według tego, co zaznaczasz, dodaj kolejne i przypisz im klawisze."
+  },
+  "guideStepAllTitle": {
+    "message": "Wszystko w jednym miejscu"
+  },
+  "guideStepAllText": {
+    "message": "Notatki ze wszystkich stron: wyszukiwanie, filtrowanie po kategoriach i eksport do JSON, Markdown lub CSV."
+  },
+  "guideStepFilesTitle": {
+    "message": "Pliki z Twojego komputera"
+  },
+  "guideOpenDashboard": {
+    "message": "Przejdź do wszystkich notatek"
   }
 }

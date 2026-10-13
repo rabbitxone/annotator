@@ -101,3 +101,25 @@ body {
   scrollbar-width: thin;
   scrollbar-gutter: stable;
 }
+
+.popup-footer-note {
+  align-items: center;
+}
+
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--accent-on-soft);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.link-btn:hover {
+  background: var(--accent-soft);
+}

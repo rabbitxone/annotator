@@ -870,5 +870,77 @@
   },
   "toastImportedSettings": {
     "message": "Settings restored."
+  },
+  "navGuide": {
+    "message": "How it works"
+  },
+  "guideTitle": {
+    "message": "How to use Annotator"
+  },
+  "guideIntro": {
+    "message": "Highlight what matters on any page, add your notes and find it all later. Everything stays on this device."
+  },
+  "guideTryTitle": {
+    "message": "Try it here"
+  },
+  "guideTryOptional": {
+    "message": "Optional"
+  },
+  "guideTryHint": {
+    "message": "Nothing on this page is saved, so try anything. Your categories and keys work here as everywhere else."
+  },
+  "guideTryReset": {
+    "message": "Start over"
+  },
+  "guideDemo1": {
+    "message": "Good notes start with careful reading. Select this sentence, click the small button at its end and pick a color: that's a highlight."
+  },
+  "guideDemo2": {
+    "message": "Now try a shortcut: select any part of this paragraph and press the one shown on the left. With the color bar open, the digits 1–9 pick a category too."
+  },
+  "guideDemo3": {
+    "message": "Click a highlight to write a note about it or to change its color. Then open the side panel to see everything you marked on this page in one list."
+  },
+  "guideStepHighlightTitle": {
+    "message": "Highlight"
+  },
+  "guideStepHighlightText": {
+    "message": "Select text, click the small button at its end and pick a color. Or skip the clicking with a shortcut:"
+  },
+  "guideStepNoteTitle": {
+    "message": "Add notes"
+  },
+  "guideStepNoteText": {
+    "message": "Click a highlight to write a note, change its color or delete it. To highlight and start the note at once:"
+  },
+  "guideStepKeysTitle": {
+    "message": "Pick with keys"
+  },
+  "guideStepKeysText": {
+    "message": "With the color bar open, 1–9 pick a category, / searches them all and N adds a note. With quick keys on, a category's own key highlights the selection straight away."
+  },
+  "guideStepPanelTitle": {
+    "message": "Side panel"
+  },
+  "guideStepPanelText": {
+    "message": "The side panel lists the page's highlights in reading order, along with a note for the whole page."
+  },
+  "guideStepCategoriesTitle": {
+    "message": "Your own categories"
+  },
+  "guideStepCategoriesText": {
+    "message": "In Settings → Categories, name the colors after what you mark, add more and give each a key."
+  },
+  "guideStepAllTitle": {
+    "message": "Everything in one place"
+  },
+  "guideStepAllText": {
+    "message": "All notes from every page: search, filter by category, and export to JSON, Markdown or CSV."
+  },
+  "guideStepFilesTitle": {
+    "message": "Files on your computer"
+  },
+  "guideOpenDashboard": {
+    "message": "Go to all notes"
   }
 }

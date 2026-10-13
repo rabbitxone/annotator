@@ -205,8 +205,20 @@ function renderSettingsTab() {
     h(
       'p',
       { class: 'popup-footer-note' },
-      h('span', null, 'Annotator'),
-      h('span', null, `v${api.runtime.getManifest().version}`),
+      h('span', null, `Annotator v${api.runtime.getManifest().version}`),
+      h(
+        'button',
+        {
+          class: 'link-btn',
+          type: 'button',
+          onclick: () => {
+            api.tabs.create({ url: api.runtime.getURL('guide.html') });
+            window.close();
+          },
+        },
+        icon('info', { size: 12 }),
+        t('navGuide'),
+      ),
     ),
   ];
 }
