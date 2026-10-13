@@ -8,7 +8,7 @@ import { toast } from './toast.js';
 export async function confirmAndDelete(items) {
   if (items.length === 0) return false;
   const sure = await confirmDialog({
-    title: items.length === 1 ? t('confirmDeleteTitle') : t('confirmDeleteManyTitle', formatNumber(items.length)),
+    title: items.length === 1 ? t('confirmDeleteTitle') : t('confirmDeleteManyTitle', plural('noteCount', items.length)),
     text: t('confirmDeleteUndoText'),
   });
   if (sure) await deleteWithUndo(items);

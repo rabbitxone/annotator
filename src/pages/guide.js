@@ -95,7 +95,7 @@ async function renderSteps() {
   const shortcut = (name) => commands?.find((c) => c.name === name)?.shortcut || '';
   const fileAccess = await fileAccessAllowed();
 
-  document.getElementById('steps').replaceChildren(
+  document.getElementById('steps').replaceChildren(...[
     step('highlighter', t('guideStepHighlightTitle'), t('guideStepHighlightText'), keysRow(shortcut('highlight'))),
     step('noteEdit', t('guideStepNoteTitle'), t('guideStepNoteText'), keysRow(shortcut('highlight-note'))),
     step(
@@ -109,7 +109,7 @@ async function renderSteps() {
     step('note', t('guideStepAllTitle'), t('guideStepAllText')),
     fileAccess === false && step('folder', t('guideStepFilesTitle'), t(fileAccessKeys.text), h('p', { class: 'guide-keys' }, fileAccessButton())),
     step('shield', t('privacyTitle'), t('privacyText')),
-  );
+  ].filter(Boolean));
 }
 
 async function init() {

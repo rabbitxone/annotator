@@ -16,7 +16,7 @@ import {
   toMarkdown,
 } from '../shared/exchange.js';
 import { exportLabels } from '../shared/export-labels.js';
-import { applyI18n, formatNumber, relativeTime, t, uiLanguage } from '../shared/i18n.js';
+import { applyI18n, formatNumber, plural, relativeTime, t, uiLanguage } from '../shared/i18n.js';
 import { hydrateIcons, icon } from '../shared/icons.js';
 import { installTooltips } from '../shared/tooltip.js';
 import {
@@ -210,7 +210,7 @@ async function openExport(preferred) {
     });
     const name = format === 'json' && scope.id === 'all' ? 'annotator-backup' : 'annotator';
     download(`${name}-${dateStamp()}.${file.extension}`, file.text, `${file.mime};charset=utf-8`);
-    toast(t('toastExported', [formatNumber(scope.notes), t(`export${format[0].toUpperCase()}${format.slice(1)}`)]));
+    toast(t('toastExported', [plural('noteCount', scope.notes), t(`export${format[0].toUpperCase()}${format.slice(1)}`)]));
   } catch (err) {
     console.error('Annotator: export failed', err);
     toast(t('toastExportFailed'));
@@ -227,7 +227,7 @@ async function openRelocate() {
   try {
     const { moved, merged } = await applyMoves(plan.moves);
     toast(
-      t('toastRelocated', formatNumber(moved)),
+      t('toastRelocated', plural('pageCount', moved)),
       // Notes that were combined with existing ones can't be pulled apart again
       merged === 0 ? { actionLabel: t('actionUndo'), onAction: () => applyMoves(reverseMoves(plan.moves)) } : {},
     );

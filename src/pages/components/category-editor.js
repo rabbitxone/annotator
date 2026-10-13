@@ -11,7 +11,7 @@ import {
 } from '../../shared/categories.js';
 import { getCategories } from '../../shared/constants.js';
 import { h } from '../../shared/dom.js';
-import { formatNumber, t } from '../../shared/i18n.js';
+import { formatNumber, plural, t } from '../../shared/i18n.js';
 import { confirmDialog } from './dialog.js';
 import { icon } from '../../shared/icons.js';
 
@@ -152,7 +152,7 @@ export function categoryEditor({ counts, onChange, onDelete }) {
         ),
         nameInput,
         keyInput,
-        h('span', { class: 'category-count', title: t('categoryNotes') }, count ? formatNumber(count) : ''),
+        h('span', { class: 'category-count', title: t('categoryNotes') }, count ? plural('noteCount', count) : ''),
         h(
           'div',
           { class: 'category-actions' },

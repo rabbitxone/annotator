@@ -565,7 +565,7 @@
     }
   },
   "toastExported": {
-    "message": "Exported $V1$ notes as $V2$",
+    "message": "Exported $V1$ as $V2$",
     "placeholders": {
       "v1": {
         "content": "$1"
@@ -709,7 +709,7 @@
     "message": "Move notes"
   },
   "toastRelocated": {
-    "message": "Moved the notes of $V1$ pages",
+    "message": "Moved the notes of $V1$",
     "placeholders": {
       "v1": {
         "content": "$1"
@@ -808,7 +808,7 @@
     }
   },
   "categoryDeleteMove": {
-    "message": "$V1$ notes use this category. Move them to:",
+    "message": "In this category: $V1$. Move them to:",
     "placeholders": {
       "v1": {
         "content": "$1"
@@ -837,7 +837,7 @@
     "message": "No category matches"
   },
   "confirmDeleteManyTitle": {
-    "message": "Delete $COUNT$ notes?",
+    "message": "Delete $COUNT$?",
     "placeholders": {
       "count": {
         "content": "$1"
@@ -942,5 +942,37 @@
   },
   "guideOpenDashboard": {
     "message": "Go to all notes"
+  },
+  "noteCount_one": {
+    "message": "$COUNT$ note",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "noteCount_other": {
+    "message": "$COUNT$ notes",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageCount_one": {
+    "message": "$COUNT$ page",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageCount_other": {
+    "message": "$COUNT$ pages",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
   }
 }

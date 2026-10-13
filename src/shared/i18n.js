@@ -44,6 +44,18 @@ export function formatDate(timestamp) {
   return new Date(timestamp).toLocaleString(uiLanguage(), { dateStyle: 'medium', timeStyle: 'short' });
 }
 
+let pluralRules;
+
+/**
+ * "1 note", "2 notes"; "1 notatka", "3 notatki", "5 notatek". The locale has one message per
+ * plural form, `${base}_one`, `_few`, `_many`, `_other`, as Intl.PluralRules names them.
+ */
+export function plural(base, count) {
+  pluralRules ??= new Intl.PluralRules(uiLanguage());
+  const number = formatNumber(count);
+  return api.i18n.getMessage(`${base}_${pluralRules.select(count)}`, number) || api.i18n.getMessage(`${base}_other`, number) || number;
+}
+
 export function formatNumber(value) {
   return new Intl.NumberFormat(uiLanguage()).format(value);
 }

@@ -565,7 +565,7 @@
     }
   },
   "toastExported": {
-    "message": "Wyeksportowano notatki: $V1$ (format: $V2$)",
+    "message": "Wyeksportowano: $V1$ ($V2$)",
     "placeholders": {
       "v1": {
         "content": "$1"
@@ -709,7 +709,7 @@
     "message": "Przenieś notatki"
   },
   "toastRelocated": {
-    "message": "Przeniesiono notatki z $V1$ stron",
+    "message": "Gotowe. Przeniesione: $V1$",
     "placeholders": {
       "v1": {
         "content": "$1"
@@ -808,7 +808,7 @@
     }
   },
   "categoryDeleteMove": {
-    "message": "Notatek w tej kategorii: $V1$. Przenieś je do:",
+    "message": "W tej kategorii: $V1$. Przenieś je do:",
     "placeholders": {
       "v1": {
         "content": "$1"
@@ -837,7 +837,7 @@
     "message": "Żadna kategoria nie pasuje"
   },
   "confirmDeleteManyTitle": {
-    "message": "Usunąć zaznaczone notatki ($COUNT$)?",
+    "message": "Usunąć $COUNT$?",
     "placeholders": {
       "count": {
         "content": "$1"
@@ -942,5 +942,69 @@
   },
   "guideOpenDashboard": {
     "message": "Przejdź do wszystkich notatek"
+  },
+  "noteCount_one": {
+    "message": "$COUNT$ notatka",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "noteCount_few": {
+    "message": "$COUNT$ notatki",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "noteCount_many": {
+    "message": "$COUNT$ notatek",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "noteCount_other": {
+    "message": "$COUNT$ notatki",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageCount_one": {
+    "message": "$COUNT$ strona",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageCount_few": {
+    "message": "$COUNT$ strony",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageCount_many": {
+    "message": "$COUNT$ stron",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageCount_other": {
+    "message": "$COUNT$ strony",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
   }
 }
