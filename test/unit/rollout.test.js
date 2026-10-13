@@ -9,13 +9,9 @@ test('compares dotted versions numerically', () => {
   assert.equal(compareVersions('2.1.0', '2.1'), 0);
 });
 
-test('existing users get snapshots off and a what-s-new notice; new installs get defaults', () => {
-  assert.deepEqual(rolloutOnInstall({ reason: 'update', previousVersion: '2.0', storedSettings: { defaultColor: 'red' } }), {
-    settings: { autoSnapshot: false },
-    whatsNew: '2.1',
-  });
-  assert.deepEqual(rolloutOnInstall({ reason: 'update', previousVersion: '1.4', storedSettings: undefined }).settings, { autoSnapshot: false });
-  assert.equal(rolloutOnInstall({ reason: 'update', previousVersion: '2.0', storedSettings: { autoSnapshot: true } }).settings, null);
+test('existing users get a what-s-new notice; new installs and later versions get nothing', () => {
+  assert.deepEqual(rolloutOnInstall({ reason: 'update', previousVersion: '2.0' }), { whatsNew: '2.1' });
+  assert.deepEqual(rolloutOnInstall({ reason: 'update', previousVersion: '1.4' }), { whatsNew: '2.1' });
   assert.equal(rolloutOnInstall({ reason: 'update', previousVersion: '2.1' }), null);
   assert.equal(rolloutOnInstall({ reason: 'install' }), null);
   assert.equal(rolloutOnInstall({ reason: 'browser_update', previousVersion: '2.0' }), null);

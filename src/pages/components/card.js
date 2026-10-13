@@ -81,7 +81,6 @@ export function annotationCard(annotation, page, options) {
     onGo,
     onCopy,
     onReanchor,
-    onSnapshot,
     onSave,
     onDelete,
     onSelect,
@@ -177,13 +176,6 @@ export function annotationCard(annotation, page, options) {
             'button',
             { class: 'icon-btn', type: 'button', title: t('actionReanchorHint'), 'aria-label': t('actionReanchor'), onclick: onReanchor },
             icon('pin'),
-          ),
-          orphan &&
-          onSnapshot &&
-          h(
-            'button',
-            { class: 'icon-btn', type: 'button', title: t('snapshotOpenNote'), 'aria-label': t('snapshotOpenNote'), onclick: onSnapshot },
-            icon('archive'),
           ),
           onGo &&
           h('button', { class: 'icon-btn', type: 'button', title: goLabel, 'aria-label': goLabel, onclick: onGo }, icon(goIcon)),

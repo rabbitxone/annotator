@@ -46,7 +46,7 @@ function stripLocal(page) {
   return { ...rest, annotations: annotations.map(({ lostAt, ...annotation }) => annotation) };
 }
 
-export function createBackup(pages, { now = Date.now(), snapshots = [], categories = null } = {}) {
+export function createBackup(pages, { now = Date.now(), categories = null } = {}) {
   const backup = {
     format: BACKUP_FORMAT,
     version: BACKUP_VERSION,
@@ -54,26 +54,7 @@ export function createBackup(pages, { now = Date.now(), snapshots = [], categori
     pages: pages.map(stripLocal),
   };
   if (Array.isArray(categories) && categories.length) backup.categories = categories;
-  if (snapshots.length) backup.snapshots = snapshots;
   return backup;
-}
-
-const MAX_SNAPSHOT_HTML = 8 * 1024 * 1024;
-
-function cleanSnapshot(raw) {
-  if (!raw || typeof raw !== 'object' || !raw.id || typeof raw.html !== 'string' || raw.html.length > MAX_SNAPSHOT_HTML) return null;
-  const url = normalizeUrl(str(raw.url));
-  if (!url || !Number.isFinite(raw.capturedAt)) return null;
-  return {
-    id: String(raw.id),
-    url,
-    title: str(raw.title),
-    capturedAt: raw.capturedAt,
-    hash: str(raw.hash),
-    size: raw.html.length,
-    auto: !!raw.auto,
-    html: raw.html,
-  };
 }
 
 export class BackupError extends Error {
@@ -99,8 +80,7 @@ export function parseBackup(text, now = Date.now()) {
     const known = byUrl.get(page.url);
     byUrl.set(page.url, known ? mergePage(known, page).page : page);
   }
-  const snapshots = (Array.isArray(data.snapshots) ? data.snapshots : []).map(cleanSnapshot).filter(Boolean);
-  return { pages: [...byUrl.values()], snapshots, categories: sanitizeStoredCategories(data.categories) };
+  return { pages: [...byUrl.values()], categories: sanitizeStoredCategories(data.categories) };
 }
 
 export function mergePage(existing, incoming) {
@@ -358,11 +338,11 @@ export const EXPORT_FORMATS = {
   csv: { extension: 'csv', mime: 'text/csv', importable: false },
 };
 
-export function buildExport(format, groups, { labels, snapshots = [], categories = null, separator = ',', groupBy = 'page', now = Date.now() } = {}) {
+export function buildExport(format, groups, { labels, categories = null, separator = ',', groupBy = 'page', now = Date.now() } = {}) {
   const meta = EXPORT_FORMATS[format];
   if (!meta) throw new Error(`Unknown export format: ${format}`);
   let text;
-  if (format === 'json') text = JSON.stringify(createBackup(pagesFromGroups(groups), { now, snapshots, categories }), null, 2);
+  if (format === 'json') text = JSON.stringify(createBackup(pagesFromGroups(groups), { now, categories }), null, 2);
   else if (format === 'markdown') text = toMarkdown(groups, labels, { groupBy, now });
   else text = '﻿' + toCsv(groups, { separator, labels }); // BOM: Excel otherwise misreads UTF-8
   return { ...meta, text };

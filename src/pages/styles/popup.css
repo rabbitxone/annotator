@@ -17,16 +17,6 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-.popup-view .snapshot-icon {
-  display: none;
-}
-
-.popup-view .snapshot-title {
-  flex-wrap: wrap;
-  column-gap: 8px;
-  row-gap: 0;
-}
-
 .popup-loading {
   padding: 24px 0;
   color: var(--muted);
@@ -38,8 +28,7 @@ body {
   gap: 6px;
 }
 
-.popup-view .page-note,
-.popup-view .snapshot-bar {
+.popup-view .page-note {
   flex-shrink: 0;
 }
 

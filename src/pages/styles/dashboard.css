@@ -308,19 +308,6 @@ body[data-view='settings'] :is(#notices, #whats-new) {
   color: var(--accent);
 }
 
-.page-extras {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 12px;
-  align-items: start;
-}
-
-@media (max-width: 900px) {
-  .page-extras {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
 .list-more {
   display: flex;
   justify-content: center;

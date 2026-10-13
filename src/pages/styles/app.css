@@ -514,66 +514,6 @@ textarea.input {
   color: var(--on-surface);
 }
 
-.snapshot-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 10px 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface-raised);
-}
-
-.snapshot-bar.empty {
-  border-style: dashed;
-  background: none;
-}
-
-.snapshot-icon {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  flex-shrink: 0;
-  border-radius: var(--radius-sm);
-  background: var(--accent-soft);
-  color: var(--accent-on-soft);
-}
-
-.snapshot-bar.empty .snapshot-icon {
-  background: var(--surface-sunken);
-  color: var(--muted);
-}
-
-.snapshot-text {
-  flex: 1;
-  min-width: 0;
-}
-
-.snapshot-title {
-  display: flex;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.snapshot-status {
-  color: var(--accent-hover);
-  font-weight: 500;
-}
-
-.snapshot-sub {
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 16px;
-}
-
-.snapshot-actions {
-  display: flex;
-  flex-shrink: 0;
-  gap: 6px;
-}
-
 .notice {
   display: flex;
   flex-direction: column;
@@ -643,7 +583,6 @@ textarea.input {
   display: none;
 }
 
-.notice-muted,
 .notice-neutral .notice-text {
   color: var(--muted);
 }
@@ -675,14 +614,6 @@ textarea.input {
   align-items: center;
   gap: 6px;
   margin-top: 2px;
-}
-
-.notice-done {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--accent-on-soft);
-  font-weight: 600;
 }
 
 .category-intro {

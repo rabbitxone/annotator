@@ -339,16 +339,13 @@
     }
   },
   "toastImported": {
-    "message": "Zaimportowano. Nowe notatki: $V1$, zaktualizowane: $V2$, kopie stron: $V3$",
+    "message": "Zaimportowano. Nowe notatki: $V1$, zaktualizowane: $V2$",
     "placeholders": {
       "v1": {
         "content": "$1"
       },
       "v2": {
         "content": "$2"
-      },
-      "v3": {
-        "content": "$3"
       }
     }
   },
@@ -421,137 +418,6 @@
   "bulkCopyHint": {
     "message": "Kopiuj zaznaczone notatki jako Markdown"
   },
-  "snapshotLabel": {
-    "message": "Kopia strony"
-  },
-  "snapshotBadge": {
-    "message": "Kopia strony"
-  },
-  "snapshotSave": {
-    "message": "Zapisz kopię"
-  },
-  "snapshotOpen": {
-    "message": "Otwórz"
-  },
-  "snapshotOpenNote": {
-    "message": "Pokaż w zapisanej kopii"
-  },
-  "snapshotSummary": {
-    "message": "Zapisano $V1$ · wersje: $V2$",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      },
-      "v2": {
-        "content": "$2"
-      }
-    }
-  },
-  "snapshotNone": {
-    "message": "Jeszcze nie zapisano"
-  },
-  "snapshotNoneDashboard": {
-    "message": "Brak kopii. Otwórz stronę i zapisz ją z panelu bocznego albo z okienka rozszerzenia."
-  },
-  "snapshotUnchanged": {
-    "message": "Bez zmian od ostatniej kopii"
-  },
-  "snapshotFailed": {
-    "message": "Nie udało się zapisać kopii"
-  },
-  "snapshotVersion": {
-    "message": "Wersja"
-  },
-  "snapshotDownload": {
-    "message": "Pobierz"
-  },
-  "snapshotDelete": {
-    "message": "Usuń tę wersję"
-  },
-  "snapshotSavedOn": {
-    "message": "Zapisano $V1$",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      }
-    }
-  },
-  "snapshotOriginal": {
-    "message": "oryginał"
-  },
-  "snapshotLatest": {
-    "message": "najnowsza"
-  },
-  "snapshotShowImages": {
-    "message": "Pokaż obrazy ($V1$)",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      }
-    }
-  },
-  "snapshotEmptyTitle": {
-    "message": "Brak zapisanej kopii"
-  },
-  "snapshotEmptyText": {
-    "message": "Nie ma kopii tej strony albo została usunięta."
-  },
-  "snapshotNotesTitle": {
-    "message": "Notatki"
-  },
-  "snapshotNotesMissing": {
-    "message": "Brak w tej wersji: $V1$",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      }
-    }
-  },
-  "snapshotNoteMissing": {
-    "message": "Brak w tej wersji"
-  },
-  "snapshotNoNotes": {
-    "message": "Brak notatek dla tej strony."
-  },
-  "settingAutoSnapshot": {
-    "message": "Automatycznie zapisuj kopie stron"
-  },
-  "settingAutoSnapshotHint": {
-    "message": "Przy pierwszym zakreśleniu zapisuje czytelną kopię tekstu strony na wypadek, gdyby została zmieniona lub usunięta. Gdy tekst się zmieni, nowa wersja dochodzi najwyżej raz dziennie. Pliki lokalne są pomijane, bo i tak zostają na Twoim komputerze; kopię można nadal zapisać ręcznie."
-  },
-  "dataSnapshots": {
-    "message": "Kopie stron"
-  },
-  "dataSnapshotsHint": {
-    "message": "Zapisane: $V1$, łącznie $V2$",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      },
-      "v2": {
-        "content": "$2"
-      }
-    }
-  },
-  "dataSnapshotsNone": {
-    "message": "Jeszcze żadnej."
-  },
-  "dataSnapshotsClean": {
-    "message": "Usuń nieużywane ($V1$)",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      }
-    }
-  },
-  "toastSnapshotsCleaned": {
-    "message": "Usunięto kopie stron: $V1$",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      }
-    }
-  },
   "whatsNewTitle": {
     "message": "Nowości w Annotatorze $V1$",
     "placeholders": {
@@ -561,7 +427,7 @@
     }
   },
   "whatsNewShort": {
-    "message": "Panel boczny, skróty klawiszowe, kopie zapasowe i kopie stron."
+    "message": "Panel boczny, skróty klawiszowe, własne kategorie i kopie zapasowe."
   },
   "whatsNewPanel": {
     "message": "Panel boczny na każdej stronie: zakreślenia, notatka do strony i notatki, których tekst się przesunął."
@@ -569,20 +435,11 @@
   "whatsNewShortcuts": {
     "message": "Skróty klawiszowe, formatowanie w notatkach i kopiowanie cytatów z linkiem."
   },
+  "whatsNewCategories": {
+    "message": "Własne kategorie: nazwij kolory według tego, co zaznaczasz, dodaj kolejne i przypisz im klawisze."
+  },
   "whatsNewBackup": {
     "message": "Kopie zapasowe do przeniesienia na inne urządzenie i eksport do Markdown."
-  },
-  "whatsNewSnapshots": {
-    "message": "Kopie stron: czytelna kopia zakreślanych stron na wypadek, gdyby się zmieniły lub zniknęły."
-  },
-  "whatsNewSnapshotsOff": {
-    "message": "Automatyczne kopie stron są u Ciebie wyłączone, więc nic się nie zmienia, dopóki nie zdecydujesz. Zostają tylko na tym urządzeniu."
-  },
-  "whatsNewEnableSnapshots": {
-    "message": "Włącz kopie stron"
-  },
-  "whatsNewSnapshotsOn": {
-    "message": "Kopie stron włączone"
   },
   "whatsNewDismiss": {
     "message": "Rozumiem"
@@ -657,17 +514,6 @@
   },
   "exportNote": {
     "message": "Tylko pliki JSON można ponownie zaimportować do Annotatora. Markdown i CSV służą do czytania i analizy."
-  },
-  "exportIncludeSnapshots": {
-    "message": "Dołącz kopie stron: $V1$ ($V2$)",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      },
-      "v2": {
-        "content": "$2"
-      }
-    }
   },
   "exportGroupBy": {
     "message": "Uporządkuj według"

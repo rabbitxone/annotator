@@ -1,6 +1,6 @@
 import { h } from '../../shared/dom.js';
 import { closeDialog, showDialog } from './dialog.js';
-import { formatBytes, formatNumber, t } from '../../shared/i18n.js';
+import { formatNumber, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 
 const FORMATS = [
@@ -44,8 +44,8 @@ function select(options, value, onChange) {
 }
 
 /**
- * scopes: [{ id, label, notes, pages, pageNotes, snapshots: { count, bytes } }]
- * initial: { scope, format, snapshots, groupBy, separator }
+ * scopes: [{ id, label, notes, pages, pageNotes }]
+ * initial: { scope, format, groupBy, separator }
  * Resolves to { scope, format, options } or null when cancelled.
  */
 export function exportDialog({ scopes, initial }) {
@@ -61,16 +61,6 @@ export function exportDialog({ scopes, initial }) {
     function renderOptions() {
       const scope = current();
       const rows = [];
-      if (state.format === 'json' && scope.snapshots.count > 0) {
-        rows.push(
-          h(
-            'label',
-            { class: 'option-check' },
-            h('input', { class: 'checkbox', type: 'checkbox', checked: state.snapshots, onchange: (e) => (state.snapshots = e.target.checked) }),
-            t('exportIncludeSnapshots', [formatNumber(scope.snapshots.count), formatBytes(scope.snapshots.bytes)]),
-          ),
-        );
-      }
       if (state.format === 'markdown') {
         rows.push(
           field(
@@ -154,7 +144,7 @@ export function exportDialog({ scopes, initial }) {
           ? {
             scope: current(),
             format: state.format,
-            options: { snapshots: state.snapshots, groupBy: state.groupBy, separator: state.separator },
+            options: { groupBy: state.groupBy, separator: state.separator },
             remember: { ...state },
           }
           : null,

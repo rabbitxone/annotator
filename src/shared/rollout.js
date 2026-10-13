@@ -1,6 +1,6 @@
 // Decides what an update changes for people who already use the extension.
 // New installs get the defaults; existing users keep how things worked before and
-// are told about new features, with page snapshots left off until they opt in.
+// are told about new features.
 
 export const WHATS_NEW_VERSION = '2.1';
 
@@ -14,8 +14,7 @@ export function compareVersions(a, b) {
   return 0;
 }
 
-export function rolloutOnInstall({ reason, previousVersion, storedSettings }) {
+export function rolloutOnInstall({ reason, previousVersion }) {
   if (reason !== 'update' || !previousVersion || compareVersions(previousVersion, WHATS_NEW_VERSION) >= 0) return null;
-  const chose = storedSettings && typeof storedSettings === 'object' && 'autoSnapshot' in storedSettings;
-  return { settings: chose ? null : { autoSnapshot: false }, whatsNew: WHATS_NEW_VERSION };
+  return { whatsNew: WHATS_NEW_VERSION };
 }

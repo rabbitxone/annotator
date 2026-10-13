@@ -16,16 +16,15 @@ All data is stored locally on your device. It is never sent to the developer or 
 - **Formatting in notes** – `**bold**`, `*italics*`, `` `code` ``, lists and links.
 - **Notes that lost their text** – when a page changes, select the new wording and click *Pin to selection*. The dashboard can filter notes that were not found.
 - **Copy quote with link** – copies the quote, your note and a link that scrolls straight to the text (text fragment), even for people without the extension.
-- **Page snapshots** – when you first highlight a page, a readable copy of its text is saved, so your notes keep their context if the page is edited or taken down. Open it from the panel, popup or dashboard: your highlights are shown on the saved copy, images load only on request, and you can download it as an HTML file. Up to 5 versions per page (the original is always kept).
 - **Export** – the *Export* button (dashboard header, Settings or the selection bar) opens a dialog where you pick what to export (all notes, the current list or your selection) and the format:
-  - **JSON** – a full backup with colors, notes and optionally page snapshots, which you can import on another device (importing merges and never deletes).
+  - **JSON** – a full backup with colors, categories and notes, which you can import on another device (importing merges and never deletes).
   - **Markdown** – a readable document with colors, dates and links, organized by page or by color.
   - **CSV** – one row per highlight (page, URL, color name and code, text, note, dates) that opens in Excel, Google Sheets or LibreOffice. Text starting with `=`, `+`, `-` or `@` gets a leading apostrophe so spreadsheets never run it as a formula.
 
   Only JSON files can be imported back.
 - **Dashboard tools** – sort by text order, group pages by site, recolor, copy or export a selection, and undo deletions.
 
-Annotator stays out of the way in web apps (mail, chat, editors) and turns on for articles. To tell them apart it uses the same check Firefox uses to offer Reader View ([Mozilla Readability](https://github.com/mozilla/readability), Apache-2.0), together with the page's own `og:type`/schema.org article markup. Readability also picks the article text for page snapshots.
+Annotator stays out of the way in web apps (mail, chat, editors) and turns on for articles. To tell them apart it uses the same check Firefox uses to offer Reader View ([Mozilla Readability](https://github.com/mozilla/readability), Apache-2.0), together with the page's own `og:type`/schema.org article markup.
 
 ### Local files
 
@@ -37,7 +36,6 @@ Annotator works on HTML files saved on your computer too (handy for collections 
 - PDFs can't be annotated: both browsers open them in their own viewer, which extensions can't reach. The popup and the icon say so instead of failing silently.
 - Local pages are named by their file name and grouped by folder; the CSV export has a *File or site* column with the full path. One *off on this site* rule covers all local files.
 - Notes are stored under the file's path. If you move the files (another folder, drive or computer), use *Settings → Moved your files? → Change location* to point the notes at the new place. It also works for websites that changed their address, and can be undone when no notes had to be combined.
-- Automatic page snapshots skip local files, since they already stay on your computer; you can still save one by hand.
 - Lists draw in batches, so the dashboard stays fast with tens of thousands of notes (tested with 100,000 highlights across 20,000 files).
 
 ## Development

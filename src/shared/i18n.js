@@ -47,8 +47,3 @@ export function formatDate(timestamp) {
 export function formatNumber(value) {
   return new Intl.NumberFormat(uiLanguage()).format(value);
 }
-
-export function formatBytes(bytes) {
-  const mb = bytes / 1024 / 1024;
-  return mb < 1 ? `${formatNumber(Math.max(1, Math.round(bytes / 1024)))} KB` : `${new Intl.NumberFormat(uiLanguage(), { maximumFractionDigits: 1 }).format(mb)} MB`;
-}

@@ -339,16 +339,13 @@
     }
   },
   "toastImported": {
-    "message": "Imported. New notes: $V1$, updated: $V2$, page snapshots: $V3$",
+    "message": "Imported. New notes: $V1$, updated: $V2$",
     "placeholders": {
       "v1": {
         "content": "$1"
       },
       "v2": {
         "content": "$2"
-      },
-      "v3": {
-        "content": "$3"
       }
     }
   },
@@ -421,137 +418,6 @@
   "bulkCopyHint": {
     "message": "Copy selected notes as Markdown"
   },
-  "snapshotLabel": {
-    "message": "Page snapshot"
-  },
-  "snapshotBadge": {
-    "message": "Snapshot"
-  },
-  "snapshotSave": {
-    "message": "Save snapshot"
-  },
-  "snapshotOpen": {
-    "message": "Open"
-  },
-  "snapshotOpenNote": {
-    "message": "Show in the saved snapshot"
-  },
-  "snapshotSummary": {
-    "message": "Saved $V1$ · versions: $V2$",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      },
-      "v2": {
-        "content": "$2"
-      }
-    }
-  },
-  "snapshotNone": {
-    "message": "Not saved yet"
-  },
-  "snapshotNoneDashboard": {
-    "message": "No snapshot yet. Open the page and save one from the side panel or the popup."
-  },
-  "snapshotUnchanged": {
-    "message": "No changes since the last snapshot"
-  },
-  "snapshotFailed": {
-    "message": "Couldn't save the snapshot"
-  },
-  "snapshotVersion": {
-    "message": "Version"
-  },
-  "snapshotDownload": {
-    "message": "Download"
-  },
-  "snapshotDelete": {
-    "message": "Delete this version"
-  },
-  "snapshotSavedOn": {
-    "message": "Saved $V1$",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      }
-    }
-  },
-  "snapshotOriginal": {
-    "message": "original"
-  },
-  "snapshotLatest": {
-    "message": "latest"
-  },
-  "snapshotShowImages": {
-    "message": "Show images ($V1$)",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      }
-    }
-  },
-  "snapshotEmptyTitle": {
-    "message": "No saved snapshot"
-  },
-  "snapshotEmptyText": {
-    "message": "There is no snapshot of this page, or it has been deleted."
-  },
-  "snapshotNotesTitle": {
-    "message": "Notes"
-  },
-  "snapshotNotesMissing": {
-    "message": "Not in this version: $V1$",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      }
-    }
-  },
-  "snapshotNoteMissing": {
-    "message": "Not in this version"
-  },
-  "snapshotNoNotes": {
-    "message": "No notes for this page."
-  },
-  "settingAutoSnapshot": {
-    "message": "Save page snapshots automatically"
-  },
-  "settingAutoSnapshotHint": {
-    "message": "Keeps a readable copy of a page's text when you first highlight it, in case the page is edited or removed. If the text changes, a new version is added at most once a day. Local files are skipped, since they already stay on your computer; you can still save one by hand."
-  },
-  "dataSnapshots": {
-    "message": "Page snapshots"
-  },
-  "dataSnapshotsHint": {
-    "message": "$V1$ saved, $V2$ in total",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      },
-      "v2": {
-        "content": "$2"
-      }
-    }
-  },
-  "dataSnapshotsNone": {
-    "message": "None saved yet."
-  },
-  "dataSnapshotsClean": {
-    "message": "Remove unused ($V1$)",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      }
-    }
-  },
-  "toastSnapshotsCleaned": {
-    "message": "Removed page snapshots: $V1$",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      }
-    }
-  },
   "whatsNewTitle": {
     "message": "New in Annotator $V1$",
     "placeholders": {
@@ -561,7 +427,7 @@
     }
   },
   "whatsNewShort": {
-    "message": "Side panel, keyboard shortcuts, backups and page snapshots."
+    "message": "Side panel, keyboard shortcuts, your own categories and backups."
   },
   "whatsNewPanel": {
     "message": "A side panel on every page with your highlights, a page note and notes whose text has moved."
@@ -569,20 +435,11 @@
   "whatsNewShortcuts": {
     "message": "Keyboard shortcuts, formatting in notes, and copying quotes with a link."
   },
+  "whatsNewCategories": {
+    "message": "Your own categories: name the colors after what you mark, add more and give each a key."
+  },
   "whatsNewBackup": {
     "message": "Backups you can import on another device, and Markdown export."
-  },
-  "whatsNewSnapshots": {
-    "message": "Page snapshots: a readable copy of pages you highlight, in case they change or disappear."
-  },
-  "whatsNewSnapshotsOff": {
-    "message": "Automatic page snapshots are off for you, so nothing changes until you decide. They stay on this device only."
-  },
-  "whatsNewEnableSnapshots": {
-    "message": "Turn on page snapshots"
-  },
-  "whatsNewSnapshotsOn": {
-    "message": "Page snapshots are on"
   },
   "whatsNewDismiss": {
     "message": "Got it"
@@ -657,17 +514,6 @@
   },
   "exportNote": {
     "message": "Only JSON files can be imported back into Annotator. Markdown and CSV are for reading and analysis."
-  },
-  "exportIncludeSnapshots": {
-    "message": "Include page snapshots: $V1$ ($V2$)",
-    "placeholders": {
-      "v1": {
-        "content": "$1"
-      },
-      "v2": {
-        "content": "$2"
-      }
-    }
   },
   "exportGroupBy": {
     "message": "Organize by"

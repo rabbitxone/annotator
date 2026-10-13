@@ -1,6 +1,6 @@
 import { colorById } from '../shared/constants.js';
 import { h } from '../shared/dom.js';
-import { formatNumber, relativeTime, t } from '../shared/i18n.js';
+import { formatNumber, t } from '../shared/i18n.js';
 import { icon } from '../shared/icons.js';
 import { renderMarkdown } from '../shared/markdown.js';
 
@@ -8,7 +8,7 @@ const NOTE_SAVE_DELAY = 800;
 
 export function createPanel({ shadowRoot, handlers }) {
   let el = null;
-  let model = { items: [], orphans: [], pageNote: '', snapshot: null };
+  let model = { items: [], orphans: [], pageNote: '' };
   let refs = null;
   let noteTimer = null;
   let savedNote = '';
@@ -62,39 +62,7 @@ export function createPanel({ shadowRoot, handlers }) {
       if (await handlers.onCopyAll()) confirmIcon(copyAll, 'copy');
     });
 
-    let statusTimer = null;
-    const showStatus = (key) => {
-      clearTimeout(statusTimer);
-      refs.snapshotText.textContent = t(key);
-      refs.snapshotText.dataset.status = '';
-      statusTimer = setTimeout(() => refs && render(), 2500);
-    };
-    const saveSnapshot = h(
-      'button',
-      {
-        class: 'btn-outline btn-xs',
-        type: 'button',
-        onclick: async () => {
-          saveSnapshot.disabled = true;
-          const result = await handlers.onSaveSnapshot();
-          saveSnapshot.disabled = false;
-          if (refs) showStatus(result?.unchanged ? 'snapshotUnchanged' : result?.ok ? 'panelSaved' : 'snapshotFailed');
-        },
-        title: t('snapshotSave'),
-      },
-      icon('camera', { size: 14 }),
-      t('actionSave'),
-    );
-    const openSnapshot = h(
-      'button',
-      { class: 'btn-outline btn-xs', type: 'button', onclick: () => handlers.onOpenSnapshot() },
-      icon('archive', { size: 14 }),
-      t('snapshotOpen'),
-    );
-
     refs = {
-      snapshotText: h('span', { class: 'panel-snapshot-text', 'aria-live': 'polite' }),
-      openSnapshot,
       note,
       noteState: h('span', { class: 'panel-hint', 'aria-live': 'polite' }),
       count: h('span', { class: 'panel-count' }),
@@ -118,12 +86,6 @@ export function createPanel({ shadowRoot, handlers }) {
           { class: 'panel-section' },
           h('p', { class: 'panel-label' }, icon('pageNote', { size: 14 }), t('pageNoteLabel'), refs.noteState),
           note,
-        ),
-        h(
-          'section',
-          { class: 'panel-section' },
-          h('p', { class: 'panel-label' }, icon('archive', { size: 14 }), t('snapshotLabel')),
-          h('div', { class: 'panel-snapshot' }, refs.snapshotText, h('div', { class: 'panel-snapshot-actions' }, openSnapshot, saveSnapshot)),
         ),
         refs.list,
       ),
@@ -194,14 +156,9 @@ export function createPanel({ shadowRoot, handlers }) {
   }
 
   function render() {
-    const { items, orphans, pageNote, snapshot } = model;
+    const { items, orphans, pageNote } = model;
     const total = items.length + orphans.length;
     refs.count.textContent = total ? formatNumber(total) : '';
-    delete refs.snapshotText.dataset.status;
-    refs.snapshotText.textContent = snapshot?.count
-      ? t('snapshotSummary', [relativeTime(snapshot.latest.capturedAt), formatNumber(snapshot.count)])
-      : t('snapshotNone');
-    refs.openSnapshot.hidden = !snapshot?.count;
 
     const editing = refs.note.getRootNode().activeElement === refs.note || refs.note.value !== savedNote;
     if (!editing && pageNote !== savedNote) {

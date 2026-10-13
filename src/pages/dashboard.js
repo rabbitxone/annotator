@@ -19,15 +19,6 @@ import { exportLabels } from '../shared/export-labels.js';
 import { applyI18n, formatNumber, relativeTime, t, uiLanguage } from '../shared/i18n.js';
 import { hydrateIcons, icon } from '../shared/icons.js';
 import {
-  allSnapshotMeta,
-  deleteSnapshots,
-  exportSnapshots,
-  importSnapshots,
-  onSnapshotsChange,
-  relocateSnapshots,
-  snapshotPageUrl,
-} from '../shared/snapshots.js';
-import {
   ensureMigrated,
   getSettings,
   importPages,
@@ -50,7 +41,6 @@ import { reverseMoves } from '../shared/relocate.js';
 import { fileAccessNotice } from './components/file-access.js';
 import { fileAccessAllowed } from '../shared/file-access.js';
 import { pageNoteBox } from './components/page-note.js';
-import { snapshotBar } from './components/snapshot-bar.js';
 import { categoriesPanel, dataPanel, privacyNote, settingsPanel, shortcutsPanel } from './components/settings.js';
 import { toast } from './components/toast.js';
 import { whatsNewBanner } from './components/whats-new.js';
@@ -68,7 +58,6 @@ const state = {
   view: 'all',
   pageUrl: null,
   pages: [],
-  snapshots: new Map(),
   fileAccess: null,
   settings: null,
   query: '',
@@ -154,7 +143,6 @@ function loadExportPrefs() {
   const defaults = {
     scope: 'all',
     format: 'json',
-    snapshots: true,
     groupBy: 'page',
     separator: (1.5).toLocaleString(uiLanguage()).includes(',') ? 'semicolon' : 'comma',
   };
@@ -174,18 +162,6 @@ function saveExportPrefs(prefs) {
   }
 }
 
-function snapshotsFor(groups) {
-  let count = 0;
-  let bytes = 0;
-  for (const { page } of groups) {
-    for (const s of state.snapshots.get(page.url) ?? []) {
-      count++;
-      bytes += s.size || 0;
-    }
-  }
-  return { count, bytes };
-}
-
 function exportScopes() {
   const make = (id, label, groups) => ({
     id,
@@ -194,7 +170,6 @@ function exportScopes() {
     notes: groups.reduce((n, g) => n + g.annotations.length, 0),
     pages: groups.length,
     pageNotes: groups.filter((g) => g.includePageNote !== false && g.page.note?.trim()).length,
-    snapshots: snapshotsFor(groups),
   });
   const everything = [...state.pages]
     .sort((a, b) => b.updatedAt - a.updatedAt)
@@ -225,12 +200,8 @@ async function openExport(preferred) {
 
   const { scope, format, options } = result;
   try {
-    const urls = new Set(scope.groups.map((g) => g.page.url));
-    const snapshots =
-      format === 'json' && options.snapshots ? (await exportSnapshots()).filter((s) => urls.has(s.url)) : [];
     const file = buildExport(format, scope.groups, {
       labels: exportLabels(),
-      snapshots,
       separator: CSV_SEPARATORS[options.separator],
       groupBy: options.groupBy,
       categories: format === 'json' ? state.settings.categories : null,
@@ -245,9 +216,7 @@ async function openExport(preferred) {
 }
 
 async function applyMoves(moves) {
-  const result = await relocatePages(moves);
-  await relocateSnapshots(moves).catch(() => { });
-  return result;
+  return relocatePages(moves);
 }
 
 async function openRelocate() {
@@ -268,17 +237,16 @@ async function openRelocate() {
 
 async function importBackup(file) {
   try {
-    const { pages, snapshots, categories } = parseBackup(await file.text());
+    const { pages, categories } = parseBackup(await file.text());
     const merged = mergeCategories(state.settings.categories, categories, categoryNameFor);
     if (merged.added > 0) {
       state.settings = await updateSettings({ categories: merged.categories });
       applyCategories(state.settings);
     }
     const { added, updated } = await importPages(pages);
-    const snapshotsAdded = await importSnapshots(snapshots);
     toast(
-      added || updated || snapshotsAdded
-        ? t('toastImported', [formatNumber(added), formatNumber(updated), formatNumber(snapshotsAdded)])
+      added || updated
+        ? t('toastImported', [formatNumber(added), formatNumber(updated)])
         : t('toastImportedNothing'),
     );
   } catch (err) {
@@ -466,7 +434,6 @@ function cardFor({ annotation, page }, showSource) {
     query: state.query,
     onGo: () => api.runtime.sendMessage({ type: 'open-and-go', url: page.url, id: annotation.id }).catch(() => { }),
     onCopy: () => copyText(quoteSnippet(annotation, page)),
-    onSnapshot: state.snapshots.has(page.url) ? () => openSnapshot(page.url, annotation.id) : null,
     onSave: (patch) => updateAnnotation(page.url, annotation.id, patch),
     onDelete: () => deleteWithUndo([{ annotation, page }]),
     onSelect: (checked) => {
@@ -477,25 +444,6 @@ function cardFor({ annotation, page }, showSource) {
     },
     onEditingChange: setEditing,
   });
-}
-
-function openSnapshot(url, annotationId) {
-  api.tabs.create({ url: snapshotPageUrl({ url, annotationId }) });
-}
-
-function snapshotStats() {
-  const urls = new Set(state.pages.map((p) => p.url));
-  let count = 0;
-  let bytes = 0;
-  const unused = [];
-  for (const [url, list] of state.snapshots) {
-    for (const s of list) {
-      count++;
-      bytes += s.size || 0;
-      if (!urls.has(url)) unused.push(s.id);
-    }
-  }
-  return { count, bytes, unused };
 }
 
 function pageRow(page) {
@@ -514,7 +462,6 @@ function pageRow(page) {
       'div',
       { class: 'page-row-meta' },
       page.note?.trim() && h('span', { class: 'page-row-note', title: t('pageNoteLabel') }, icon('pageNote', { size: 14 })),
-      state.snapshots.has(page.url) && h('span', { class: 'page-row-note', title: t('snapshotLabel') }, icon('archive', { size: 14 })),
       h(
         'span',
         { class: 'page-row-colors' },
@@ -613,14 +560,7 @@ function renderSettings() {
     shortcutsPanel(),
     h('p', { class: 'settings-section-title' }, t('settingsData')),
     dataPanel({
-      settings: state.settings,
       onExport: () => openExport('all'),
-      snapshots: { ...snapshotStats(), unused: snapshotStats().unused.length },
-      onCleanSnapshots: async () => {
-        const { unused } = snapshotStats();
-        await deleteSnapshots(unused);
-        toast(t('toastSnapshotsCleaned', formatNumber(unused.length)));
-      },
       onImport: importBackup,
       onRelocate: openRelocate,
     }),
@@ -710,19 +650,11 @@ function render() {
     const page = state.view === 'page' ? state.pages.find((p) => p.url === state.pageUrl) : null;
     const noteBox =
       page &&
-      h(
-        'div',
-        { class: 'page-extras' },
-        pageNoteBox(page.note, {
-          query: state.query,
-          onSave: (note) => setPageNote(page.url, page.title, note),
-          onEditingChange: setEditing,
-        }),
-        snapshotBar(state.snapshots.get(page.url) ?? [], {
-          onOpen: () => openSnapshot(page.url),
-          emptyHint: t('snapshotNoneDashboard'),
-        }),
-      );
+      pageNoteBox(page.note, {
+        query: state.query,
+        onSave: (note) => setPageNote(page.url, page.title, note),
+        onEditingChange: setEditing,
+      });
     if (state.view === 'page' && !page) {
       content.replaceChildren(emptyPanel('globe', t('emptyPageGoneTitle'), t('emptyPageGoneText')));
     } else if (items.length === 0) {
@@ -746,15 +678,6 @@ function render() {
   renderBulkBar();
 }
 
-async function loadSnapshots() {
-  const grouped = new Map();
-  for (const meta of await allSnapshotMeta().catch(() => [])) {
-    if (!grouped.has(meta.url)) grouped.set(meta.url, []);
-    grouped.get(meta.url).push(meta);
-  }
-  state.snapshots = grouped;
-}
-
 function applyPageChanges(changes) {
   const byUrl = new Map(state.pages.map((p) => [p.url, p]));
   for (const [url, page] of changes) {
@@ -765,7 +688,7 @@ function applyPageChanges(changes) {
 }
 
 async function refresh() {
-  [state.pages] = await Promise.all([listPages(), loadSnapshots()]);
+  state.pages = await listPages();
   if (state.editing) state.dirty = true;
   else render();
 }
@@ -856,7 +779,6 @@ async function init() {
     if (pages.size) applyPageChanges(pages);
     if (pages.size || (settings && state.view !== 'settings')) redraw();
   });
-  onSnapshotsChange(() => loadSnapshots().then(redraw));
 }
 
 init();

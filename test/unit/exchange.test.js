@@ -31,8 +31,7 @@ const page = (url, annotations, extra = {}) => ({ url, title: 'Title', updatedAt
 
 test('backup round-trips and drops device-local fields', () => {
   const pages = [page('https://a.com/', [annotation('1', { lostAt: 9, position: { start: 0, end: 7 } })], { note: 'n', noteUpdatedAt: 3 })];
-  const { pages: parsed, snapshots } = parseBackup(JSON.stringify(createBackup(pages, { now: 0 })));
-  assert.deepEqual(snapshots, []);
+  const { pages: parsed } = parseBackup(JSON.stringify(createBackup(pages, { now: 0 })));
   assert.equal(parsed.length, 1);
   assert.equal(parsed[0].annotations[0].lostAt, undefined);
   assert.deepEqual(parsed[0].annotations[0].position, { start: 0, end: 7 });
@@ -58,11 +57,11 @@ test('rejects foreign files and sanitizes entries', () => {
   assert.equal(parsed[0].annotations[0].color, 'yellow');
 });
 
-test('backup carries snapshots and drops broken ones', () => {
-  const good = { id: 's1', url: 'https://a.com/?utm_source=x', title: 'A', capturedAt: 5, hash: 'ab', html: '<p>hi</p>' };
-  const backup = createBackup([], { now: 0, snapshots: [good, { id: 's2', url: 'https://a.com/', html: 1 }, { ...good, id: 's3', url: 'ftp://x' }] });
-  const { snapshots } = parseBackup(JSON.stringify(backup));
-  assert.deepEqual(snapshots, [{ id: 's1', url: 'https://a.com/', title: 'A', capturedAt: 5, hash: 'ab', size: 9, auto: false, html: '<p>hi</p>' }]);
+test('a backup with page snapshots in it still imports its notes', () => {
+  const backup = { ...createBackup([page('https://a.com/', [annotation('1')])], { now: 0 }), snapshots: [{ id: 's1', url: 'https://a.com/', html: '<p>hi</p>' }] };
+  const parsed = parseBackup(JSON.stringify(backup));
+  assert.equal(parsed.pages.length, 1);
+  assert.equal(parsed.snapshots, undefined);
 });
 
 test('merge adds new, keeps newer, and reports counts', () => {

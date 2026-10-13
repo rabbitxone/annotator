@@ -1,6 +1,6 @@
 import { api } from '../../shared/api.js';
 import { h } from '../../shared/dom.js';
-import { formatBytes, t } from '../../shared/i18n.js';
+import { t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 import { setSiteRule, updateSettings } from '../../shared/store.js';
 import { fileAccessKeys } from '../../shared/file-access.js';
@@ -176,7 +176,7 @@ export function shortcutsPanel() {
   return panel;
 }
 
-export function dataPanel({ settings, snapshots, onExport, onImport, onRelocate, onCleanSnapshots }) {
+export function dataPanel({ onExport, onImport, onRelocate }) {
   const file = h('input', {
     type: 'file',
     accept: '.json,application/json',
@@ -206,26 +206,6 @@ export function dataPanel({ settings, snapshots, onExport, onImport, onRelocate,
       t('dataRelocate'),
       t('dataRelocateHint'),
       h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: onRelocate }, t('dataRelocateAction')),
-    ),
-    settingItem(
-      'camera',
-      t('settingAutoSnapshot'),
-      t('settingAutoSnapshotHint'),
-      toggle(settings.autoSnapshot, t('settingAutoSnapshot'), (autoSnapshot) => updateSettings({ autoSnapshot })),
-    ),
-    settingItem(
-      'archive',
-      t('dataSnapshots'),
-      snapshots.count
-        ? t('dataSnapshotsHint', [String(snapshots.count), formatBytes(snapshots.bytes)])
-        : t('dataSnapshotsNone'),
-      snapshots.unused > 0 &&
-      h(
-        'button',
-        { class: 'btn btn-outline btn-sm', type: 'button', onclick: onCleanSnapshots },
-        icon('delete', { size: 14 }),
-        t('dataSnapshotsClean', String(snapshots.unused)),
-      ),
     ),
   );
 }

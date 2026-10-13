@@ -14,7 +14,6 @@ import {
   updateAnnotation,
 } from '../shared/store.js';
 import { isFileUrl, isPdfUrl, hostnameOf, normalizeUrl, siteKey, displayAddress, unwrapReaderUrl } from '../shared/url.js';
-import { listSnapshots, onSnapshotsChange, snapshotPageUrl } from '../shared/snapshots.js';
 import { deleteWithUndo } from './components/actions.js';
 import { annotationCard } from './components/card.js';
 import { fileAccessNotice } from './components/file-access.js';
@@ -22,7 +21,6 @@ import { notice } from './components/notice.js';
 import { fileAccessAllowed, mayBeBlockedFile } from '../shared/file-access.js';
 import { applyCategories } from '../shared/apply-categories.js';
 import { pageNoteBox } from './components/page-note.js';
-import { snapshotBar } from './components/snapshot-bar.js';
 import { privacyNote, settingsPanel } from './components/settings.js';
 import { toast } from './components/toast.js';
 import { whatsNewBanner } from './components/whats-new.js';
@@ -39,7 +37,6 @@ const state = {
   page: null,
   pages: null, // every page with notes: read only when the Recent tab is opened
   orphans: new Set(),
-  snapshots: [],
   fileAccess: null,
   fileNotice: null,
   whatsNew: null,
@@ -85,17 +82,6 @@ function card(annotation, page, extra) {
     onEditingChange: setEditing,
     ...extra,
   });
-}
-
-function openSnapshot(annotationId) {
-  api.tabs.create({ url: snapshotPageUrl({ url: state.pageUrl, annotationId }) });
-  window.close();
-}
-
-async function loadSnapshots() {
-  if (!state.pageUrl) return;
-  state.snapshots = await listSnapshots(state.pageUrl).catch(() => []);
-  if (!state.editing) render();
 }
 
 async function reanchor(id) {
@@ -155,33 +141,21 @@ function renderPageTab() {
   });
   state.readerHint ??= state.inReader ? notice({ iconName: 'info', text: t('readerViewHint') }) : null;
   const readerHint = state.readerHint;
-  const snapshot = snapshotBar(state.snapshots, {
-    onOpen: () => openSnapshot(),
-    onSave: state.inReader ? null : async () => {
-      const result = await api.runtime
-        .sendMessage({ type: 'tab-command', tabId: state.tabId, message: { type: 'save-snapshot-now' } })
-        .catch(() => null);
-      if (result?.ok) await loadSnapshots();
-      return result;
-    },
-  });
   const annotations = [...page.annotations].sort((a, b) => b.createdAt - a.createdAt);
   if (annotations.length === 0) {
-    return [...lead, readerHint, noteBox, snapshot, emptyState('highlighter', t('emptyPageTitle'), t('emptyPageText'))].filter(Boolean);
+    return [...lead, readerHint, noteBox, emptyState('highlighter', t('emptyPageTitle'), t('emptyPageText'))].filter(Boolean);
   }
   const visible = annotations.filter((a) => matches(a, page));
-  if (visible.length === 0) return [...lead, readerHint, noteBox, snapshot, emptyState('search', t('emptySearchTitle'), t('emptySearchText'))].filter(Boolean);
+  if (visible.length === 0) return [...lead, readerHint, noteBox, emptyState('search', t('emptySearchTitle'), t('emptySearchText'))].filter(Boolean);
   return [
     ...lead,
     readerHint,
     noteBox,
-    snapshot,
     ...visible.map((a) =>
       card(a, page, {
         orphan: state.orphans.has(a.id),
         onGo: state.orphans.has(a.id) || state.inReader ? null : () => goToOnThisPage(a.id),
         onReanchor: () => reanchor(a.id),
-        onSnapshot: state.snapshots.length ? () => openSnapshot(a.id) : null,
       }),
     ),
   ].filter(Boolean);
@@ -326,8 +300,6 @@ async function init() {
   state.whatsNew = await whatsNewBanner(state.settings, { compact: true, onDismiss: () => (state.whatsNew = null) });
   await refresh();
   loadOrphans();
-  loadSnapshots();
-  onSnapshotsChange(loadSnapshots);
 
   for (const btn of document.querySelectorAll('[role="tab"]')) {
     btn.addEventListener('click', () => {

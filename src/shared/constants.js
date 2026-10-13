@@ -87,7 +87,6 @@ export const DEFAULT_SETTINGS = {
   defaultColor: 'yellow',
   categories: null,
   quickKeys: false,
-  autoSnapshot: true,
   siteRules: {},
 };
 
