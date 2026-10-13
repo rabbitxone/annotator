@@ -6,6 +6,7 @@ import {
   createBackup,
   csvCell,
   escapeMarkdown,
+  hasFormulaText,
   localDate,
   localDateTime,
   mergePage,
@@ -269,3 +270,9 @@ test('a backup can carry the settings, and only well-formed ones come back', () 
   assert.equal(parseBackup(JSON.stringify({ ...createBackup([], { now: 0 }), settings: { highlightStyle: 'neon' } })).settings, null);
 });
 
+
+test('the formula note is only needed when some cell would get the apostrophe', () => {
+  assert.equal(hasFormulaText(sampleGroups()), false);
+  assert.equal(hasFormulaText([{ page: page('https://a.com/', []), annotations: [annotation('1', { quote: { exact: '=SUM(A1)' } })] }]), true);
+  assert.equal(hasFormulaText([{ page: page('https://a.com/', []), annotations: [annotation('1', { note: '-12.5' })] }]), false, 'a plain number stays as it is');
+});

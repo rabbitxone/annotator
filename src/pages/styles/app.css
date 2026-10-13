@@ -1590,7 +1590,13 @@ body:has(.bulk-bar[data-open]) .toast {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 2px 12px;
+  gap: 12px;
+}
+
+.option-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
 }
 
 .option-label {
@@ -1601,10 +1607,6 @@ body:has(.bulk-bar[data-open]) .toast {
   width: auto;
   min-width: 150px;
   height: 32px;
-}
-
-.option-hint {
-  grid-column: 1 / -1;
 }
 
 .option-check {

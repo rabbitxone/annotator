@@ -325,6 +325,21 @@ export function csvCell(value, separator = ',') {
  * One row per highlight. A page note gets a row of its own, "(whole page)" in place of the
  * highlighted text, ahead of the page's highlights, instead of repeating on every one of them.
  */
+const startsFormula = (text) => {
+  const value = String(text ?? '');
+  return FORMULA_START.test(value) && !PLAIN_NUMBER.test(value);
+};
+
+/** Whether a CSV of these pages would have any cell guarded against running as a formula. */
+export function hasFormulaText(groups) {
+  return groups.some(
+    ({ page, annotations, includePageNote = true }) =>
+      startsFormula(pageName(page)) ||
+      (includePageNote && startsFormula(page.note?.trim())) ||
+      annotations.some((a) => startsFormula(a.quote?.exact) || startsFormula(a.note)),
+  );
+}
+
 export function toCsv(groups, { separator = ',', labels = {} } = {}) {
   const L = { ...DEFAULT_LABELS, ...labels };
   const rows = [L.csvHeaders];

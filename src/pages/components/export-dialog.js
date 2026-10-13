@@ -1,4 +1,5 @@
 import { h } from '../../shared/dom.js';
+import { hasFormulaText } from '../../shared/exchange.js';
 import { buildDialog, closeDialog, showDialog } from './dialog.js';
 import { dropdown } from './dropdown.js';
 import { toggle } from './toggle.js';
@@ -27,13 +28,13 @@ function choice(name, value, checked, onPick, title, hint, badge) {
   );
 }
 
+// The label with its hint right under it on the left, the control beside them
 function field(label, control, hint) {
   return h(
     'div',
     { class: 'option-row' },
-    h('span', { class: 'option-label' }, label),
+    h('div', { class: 'option-text' }, h('span', { class: 'option-label' }, label), hint && h('span', { class: 'choice-hint' }, hint)),
     control,
-    hint && h('span', { class: 'choice-hint option-hint' }, hint),
   );
 }
 
@@ -61,12 +62,10 @@ export function exportDialog({ scopes, initial }) {
       const rows = [];
       if (state.format === 'json') {
         rows.push(
-          h(
-            'div',
-            { class: 'option-row' },
-            h('span', { class: 'option-label' }, t('exportIncludeSettings')),
+          field(
+            t('exportIncludeSettings'),
             toggle(!!state.settings, t('exportIncludeSettings'), (on) => (state.settings = on)),
-            h('span', { class: 'choice-hint option-hint' }, t('exportIncludeSettingsHint')),
+            t('exportIncludeSettingsHint'),
           ),
         );
       }
@@ -85,8 +84,9 @@ export function exportDialog({ scopes, initial }) {
             select([['comma', t('exportSeparatorComma')], ['semicolon', t('exportSeparatorSemicolon')]], state.separator, (v) => (state.separator = v), t('exportSeparator')),
             t('exportSeparatorHint'),
           ),
-          h('p', { class: 'choice-hint' }, t('exportCsvFormulaHint')),
         );
+        // Only worth saying when something in this export would get the apostrophe
+        if (hasFormulaText(scope.groups)) rows.push(h('p', { class: 'choice-hint' }, t('exportCsvFormulaHint')));
       }
       options.replaceChildren(...rows);
       options.hidden = rows.length === 0;
