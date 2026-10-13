@@ -564,8 +564,7 @@ export function createUi(handlers) {
           'div',
           { class: 'confirm-card' },
           h('p', { class: 'confirm-title' }, t('confirmDeleteTitle')),
-          h('div', { class: 'confirm-panel' }, h('p', { class: 'confirm-text' }, t('confirmDeleteText'))),
-          h('div', { class: 'confirm-actions' }, cancel, remove),
+          h('div', { class: 'confirm-panel' }, h('p', { class: 'confirm-text' }, t('confirmDeleteText')), h('div', { class: 'confirm-actions' }, cancel, remove)),
         ),
       );
       for (const child of box.children) child.inert = true;

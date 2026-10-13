@@ -1371,20 +1371,14 @@ body:has(.bulk-bar[data-open]) .toast {
   line-height: 24px;
 }
 
-/* Two white blocks on the frame: the content, then the buttons. Where they meet, the corners
-   are only slightly rounded. */
-.dialog-panel,
-.dialog-actions {
-  border: 1px solid var(--border);
-  background: var(--surface-raised);
-}
-
 .dialog-panel {
   display: flex;
   flex: 1;
   flex-direction: column;
   min-height: 0;
-  border-radius: var(--radius-md) var(--radius-md) var(--radius-xs) var(--radius-xs);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
   overflow: hidden;
 }
 
@@ -1407,15 +1401,13 @@ body:has(.bulk-bar[data-open]) .toast {
   flex-shrink: 0;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 1px;
   padding: 10px 12px;
-  border-radius: var(--radius-xs) var(--radius-xs) var(--radius-md) var(--radius-md);
+  border-top: 1px solid var(--border);
 }
 
-/* Without content the buttons are the only block */
-.dialog-head + .dialog-actions {
-  margin-top: 0;
-  border-radius: var(--radius-md);
+/* Without content the buttons have the panel to themselves */
+.dialog-actions:only-child {
+  border-top: 0;
 }
 
 .dialog-confirm {

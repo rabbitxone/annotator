@@ -485,32 +485,28 @@ textarea::placeholder {
   line-height: 18px;
 }
 
-.confirm-panel,
-.confirm-actions {
+.confirm-panel {
   background: var(--surface-raised);
   border: 1px solid var(--border);
-}
-
-.confirm-panel {
-  padding: 10px 12px;
-  border-radius: var(--radius-md) var(--radius-md) var(--radius-xs) var(--radius-xs);
+  border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
 .confirm-text {
   margin: 0;
+  padding: 10px 12px;
   color: var(--muted);
   font-size: 12px;
   line-height: 17px;
 }
 
-/* The buttons sit on their own block, just under the text */
+/* The buttons under a thin line */
 .confirm-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 1px;
   padding: 8px;
-  border-radius: var(--radius-xs) var(--radius-xs) var(--radius-md) var(--radius-md);
+  border-top: 1px solid var(--border);
 }
 
 .btn-outline,
