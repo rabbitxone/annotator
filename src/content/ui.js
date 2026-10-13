@@ -3,6 +3,7 @@ import { colorById, getCategories } from '../shared/constants.js';
 import { h } from '../shared/dom.js';
 import { relativeTime, t } from '../shared/i18n.js';
 import { icon } from '../shared/icons.js';
+import { formatKeys } from '../shared/platform.js';
 import tokensCss from '../shared/tokens.css';
 import uiCss from './ui.css';
 import { UI_HOST_TAG } from './anchoring.js';
@@ -12,7 +13,7 @@ const END_GAP = 4;
 const POPOVER_GAP = 10;
 const ARROW_INSET = 20;
 const EDGE = 8;
-const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+const SAVE_KEYS = formatKeys(['mod', 'Enter']);
 const TOOLBAR_SWATCHES = 6;
 const POPOVER_SWATCHES = 5;
 const keyHint = (category, index) =>
@@ -438,7 +439,7 @@ export function createUi(handlers) {
         h(
           'div',
           { class: 'foot-actions' },
-          h('kbd', null, isMac ? '⌘ ↵' : 'Ctrl + ↵'),
+          h('kbd', null, SAVE_KEYS),
           h(
             'button',
             {

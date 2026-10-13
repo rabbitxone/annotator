@@ -47,7 +47,17 @@ function alive() {
 
 if (window.top === window && !globalThis.__annotatorAlive?.()) {
   globalThis.__annotatorAlive = alive;
-  main();
+  if (document.contentType === 'application/pdf') answerForPdf();
+  else main();
+}
+
+// Chrome runs content scripts around its PDF viewer, but the text inside is out of reach.
+// Say so to whoever asks, so the popup and the toolbar icon can explain it.
+function answerForPdf() {
+  api.runtime.onMessage.addListener((_message, _sender, sendResponse) => {
+    sendResponse({ pdf: true, url: normalizeUrl(location.href) });
+    return false;
+  });
 }
 
 function main() {

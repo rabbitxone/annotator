@@ -90,6 +90,15 @@ export function hostnameOf(url) {
 
 export const isFileUrl = (url) => typeof url === 'string' && url.startsWith('file:');
 
+/** A PDF opens in the browser's own viewer, where extensions can't reach the text. */
+export function isPdfUrl(url) {
+  try {
+    return /\.pdf$/i.test(new URL(url).pathname);
+  } catch {
+    return false;
+  }
+}
+
 const decode = (text) => {
   try {
     return decodeURIComponent(text);

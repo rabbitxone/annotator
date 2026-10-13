@@ -13,11 +13,12 @@ import {
   setPageNote,
   updateAnnotation,
 } from '../shared/store.js';
-import { isFileUrl, hostnameOf, normalizeUrl, siteKey, displayAddress, unwrapReaderUrl } from '../shared/url.js';
+import { isFileUrl, isPdfUrl, hostnameOf, normalizeUrl, siteKey, displayAddress, unwrapReaderUrl } from '../shared/url.js';
 import { listSnapshots, onSnapshotsChange, snapshotPageUrl } from '../shared/snapshots.js';
 import { deleteWithUndo } from './components/actions.js';
 import { annotationCard } from './components/card.js';
 import { fileAccessNotice } from './components/file-access.js';
+import { notice } from './components/notice.js';
 import { fileAccessAllowed, mayBeBlockedFile } from '../shared/file-access.js';
 import { applyCategories } from '../shared/apply-categories.js';
 import { pageNoteBox } from './components/page-note.js';
@@ -25,6 +26,7 @@ import { snapshotBar } from './components/snapshot-bar.js';
 import { privacyNote, settingsPanel } from './components/settings.js';
 import { toast } from './components/toast.js';
 import { whatsNewBanner } from './components/whats-new.js';
+import { enter } from '../shared/motion.js';
 
 const RECENT_LIMIT = 30;
 
@@ -39,6 +41,9 @@ const state = {
   orphans: new Set(),
   snapshots: [],
   fileAccess: null,
+  fileNotice: null,
+  whatsNew: null,
+  pdf: false,
   tabHidden: false,
   appLike: false,
   settings: null,
@@ -123,21 +128,33 @@ async function openElsewhere(page, id) {
   window.close();
 }
 
+// Built once, so a re-render (typing in search, a store change) doesn't play their entrance again
+function fileNotice() {
+  state.fileNotice ??= fileAccessNotice();
+  return state.fileNotice;
+}
+
 function renderPageTab() {
+  const lead = [state.whatsNew];
   if (!state.pageUrl) {
     const maybeFile = mayBeBlockedFile({ allowed: state.fileAccess, pageUrl: null, tabUrl: state.tabHidden ? null : undefined });
     return [
-      maybeFile && fileAccessNotice({ compact: true }),
+      maybeFile && fileNotice(),
+      ...lead,
       emptyState('alert', t('emptyUnsupportedTitle'), t('emptyUnsupportedText')),
     ].filter(Boolean);
   }
+  if (state.pdf) return [...lead, emptyState('alert', t('pdfTitle'), t('pdfText'))].filter(Boolean);
+  // Some browsers show a blocked file's address; the page just never answers.
+  if (isFileUrl(state.pageUrl) && state.fileAccess === false) lead.unshift(fileNotice());
   const page = state.page ?? { url: state.pageUrl, title: state.tabTitle, annotations: [] };
   const noteBox = pageNoteBox(page.note, {
     query: state.query,
     onSave: (note) => setPageNote(page.url, page.title || state.tabTitle, note),
     onEditingChange: setEditing,
   });
-  const readerHint = state.inReader && h('p', { class: 'reader-hint' }, icon('info', { size: 14 }), t('readerViewHint'));
+  state.readerHint ??= state.inReader ? notice({ iconName: 'info', text: t('readerViewHint') }) : null;
+  const readerHint = state.readerHint;
   const snapshot = snapshotBar(state.snapshots, {
     onOpen: () => openSnapshot(),
     onSave: state.inReader ? null : async () => {
@@ -150,11 +167,12 @@ function renderPageTab() {
   });
   const annotations = [...page.annotations].sort((a, b) => b.createdAt - a.createdAt);
   if (annotations.length === 0) {
-    return [readerHint, noteBox, snapshot, emptyState('highlighter', t('emptyPageTitle'), t('emptyPageText'))].filter(Boolean);
+    return [...lead, readerHint, noteBox, snapshot, emptyState('highlighter', t('emptyPageTitle'), t('emptyPageText'))].filter(Boolean);
   }
   const visible = annotations.filter((a) => matches(a, page));
-  if (visible.length === 0) return [readerHint, noteBox, snapshot, emptyState('search', t('emptySearchTitle'), t('emptySearchText'))].filter(Boolean);
+  if (visible.length === 0) return [...lead, readerHint, noteBox, snapshot, emptyState('search', t('emptySearchTitle'), t('emptySearchText'))].filter(Boolean);
   return [
+    ...lead,
     readerHint,
     noteBox,
     snapshot,
@@ -216,6 +234,8 @@ function renderSettingsTab() {
   ];
 }
 
+let renderedTab = null;
+
 function render() {
   state.dirty = false;
   for (const btn of document.querySelectorAll('[role="tab"]')) {
@@ -223,11 +243,16 @@ function render() {
   }
   const count = state.page?.annotations.length ?? 0;
   document.getElementById('page-count').textContent = count > 0 ? String(count) : '';
-  searchWrap.hidden = state.tab === 'settings';
+  searchWrap.hidden = state.tab === 'settings' || (state.tab === 'page' && (!state.pageUrl || state.pdf));
   search.placeholder = t(state.tab === 'recent' ? 'searchAllPlaceholder' : 'searchPagePlaceholder');
 
   const content = state.tab === 'page' ? renderPageTab() : state.tab === 'recent' ? renderRecentTab() : renderSettingsTab();
   view.replaceChildren(...content);
+  if (renderedTab !== null && renderedTab !== state.tab) {
+    view.scrollTop = 0;
+    enter(view, [{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], 200);
+  }
+  renderedTab = state.tab;
 }
 
 async function refresh() {
@@ -261,7 +286,16 @@ async function loadOrphans() {
   if (!state.tabId || !state.pageUrl) return;
   try {
     const status = await api.tabs.sendMessage(state.tabId, { type: 'status' }, { frameId: 0 });
-    if (status?.url === state.pageUrl) {
+    if (status?.pdf) {
+      state.pdf = true;
+      document.getElementById('open-panel').hidden = true;
+      if (!state.editing) render();
+    } else if (status?.url === state.pageUrl) {
+      // The page answered, so the browser lets us in, whatever its setting says
+      if (isFileUrl(state.pageUrl) && state.fileAccess === false) {
+        state.fileAccess = true;
+        document.getElementById('open-panel').hidden = state.inReader;
+      }
       state.orphans = new Set(status.orphans);
       state.appLike = !!status.appLike;
       if (!state.editing) render();
@@ -286,8 +320,10 @@ async function init() {
   state.fileAccess = await fileAccessAllowed();
   state.inReader = unwrapReaderUrl(tab?.url) !== tab?.url;
   state.pageUrl = tab?.url ? normalizeUrl(unwrapReaderUrl(tab.url)) : null;
-  document.getElementById('open-panel').hidden = !state.pageUrl || state.inReader;
-  whatsNewBanner(state.settings, { compact: true }).then((banner) => banner && document.getElementById('whats-new').append(banner));
+  state.pdf = isPdfUrl(state.pageUrl);
+  document.getElementById('open-panel').hidden =
+    !state.pageUrl || state.inReader || state.pdf || (isFileUrl(state.pageUrl) && state.fileAccess === false);
+  state.whatsNew = await whatsNewBanner(state.settings, { compact: true, onDismiss: () => (state.whatsNew = null) });
   await refresh();
   loadOrphans();
   loadSnapshots();

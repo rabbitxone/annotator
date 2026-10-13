@@ -1,4 +1,5 @@
 import { h } from '../../shared/dom.js';
+import { closeDialog, showDialog } from './dialog.js';
 import { formatNumber, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 import { planRelocation } from '../../shared/relocate.js';
@@ -25,7 +26,7 @@ export function relocateDialog({ urls }) {
     const to = input(t('relocateTo'), 'D:\\archive\\papers');
     const preview = h('p', { class: 'relocate-preview', 'aria-live': 'polite' });
     const resolved = h('p', { class: 'relocate-resolved' });
-    const submit = h('button', { class: 'btn btn-primary', type: 'button', disabled: true, onclick: () => dialog.close('confirm') }, icon('folder', { size: 14 }), t('relocateAction'));
+    const submit = h('button', { class: 'btn btn-primary', type: 'button', disabled: true, onclick: () => closeDialog(dialog, 'confirm') }, icon('folder', { size: 14 }), t('relocateAction'));
 
     function update() {
       const fromAddress = toAddress(from.value);
@@ -72,7 +73,7 @@ export function relocateDialog({ urls }) {
       h(
         'div',
         { class: 'dialog-actions' },
-        h('button', { class: 'btn btn-outline', type: 'button', onclick: () => dialog.close('cancel') }, t('actionCancel')),
+        h('button', { class: 'btn btn-outline', type: 'button', onclick: () => closeDialog(dialog, 'cancel') }, t('actionCancel')),
         submit,
       ),
     );
@@ -82,8 +83,7 @@ export function relocateDialog({ urls }) {
       resolve(confirmed ? plan : null);
     });
     update();
-    document.body.append(dialog);
-    dialog.showModal();
+    showDialog(dialog);
     from.focus();
   });
 }

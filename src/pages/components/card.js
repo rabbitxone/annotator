@@ -3,6 +3,7 @@ import { h } from '../../shared/dom.js';
 import { formatDate, relativeTime, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 import { highlightHits, renderMarkdown } from '../../shared/markdown.js';
+import { formatKeys } from '../../shared/platform.js';
 import { isFileUrl, pageName, siteLabel } from '../../shared/url.js';
 import { armOnce } from './confirm.js';
 
@@ -253,7 +254,7 @@ export function annotationCard(annotation, page, options) {
             'div',
             { class: 'card-actions', style: { opacity: '1' } },
             h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => finish(false) }, t('actionCancel')),
-            h('button', { class: 'btn btn-primary btn-sm', type: 'button', onclick: () => finish(true) }, t('actionSave')),
+            h('button', { class: 'btn btn-primary btn-sm', type: 'button', title: `${t('actionSave')} (${formatKeys(['mod', 'Enter'])})`, onclick: () => finish(true) }, t('actionSave')),
           ),
         ),
       ),

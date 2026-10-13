@@ -54,6 +54,7 @@ import { snapshotBar } from './components/snapshot-bar.js';
 import { categoriesPanel, dataPanel, privacyNote, settingsPanel, shortcutsPanel } from './components/settings.js';
 import { toast } from './components/toast.js';
 import { whatsNewBanner } from './components/whats-new.js';
+import { enter } from '../shared/motion.js';
 
 const REPO_URL = 'https://github.com/RabbitXOne/annotator';
 
@@ -664,6 +665,7 @@ function renderHeader() {
   const title = $('view-title');
   const subtitle = $('view-subtitle');
   $('back').hidden = state.view !== 'page';
+  document.body.dataset.view = state.view;
   $('sidebar-privacy').hidden = state.view === 'settings';
   $('search-wrap').hidden = state.view === 'settings';
   $('export').hidden = state.view === 'settings';
@@ -781,7 +783,8 @@ async function init() {
   whatsNewBanner(state.settings).then((banner) => banner && $('whats-new').append(banner));
   state.fileAccess = await fileAccessAllowed();
   renderNotices();
-  // Back from Chrome's extension settings: pick up the change without a reload
+  if (state.view === 'settings' && !state.editing) render();
+  // Back from the browser's extension settings: pick up the change without a reload
   window.addEventListener('focus', async () => {
     const allowed = await fileAccessAllowed();
     if (allowed === state.fileAccess) return;
@@ -796,6 +799,7 @@ async function init() {
     state.editing = false;
     render();
     window.scrollTo({ top: 0 });
+    enter($('content'));
   });
 
   let searchTimer = null;

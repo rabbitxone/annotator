@@ -55,7 +55,7 @@ function manifestFor(target) {
     manifest.browser_specific_settings = {
       gecko: {
         id: '{9086e877-a103-44dc-b269-7f9cbdf60f1d}',
-        strict_min_version: '142.0',
+        strict_min_version: '153.0',
         data_collection_permissions: { required: ['none'] },
       },
     };

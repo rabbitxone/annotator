@@ -238,10 +238,22 @@ export function createPanel({ shadowRoot, handlers }) {
     render();
   }
 
+  function slideOut(panel) {
+    panel.style.pointerEvents = 'none';
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      panel.remove();
+      return;
+    }
+    panel.dataset.closing = '';
+    const finish = () => panel.remove();
+    panel.addEventListener('animationend', (e) => e.target === panel && finish());
+    setTimeout(finish, 250);
+  }
+
   function close() {
     if (!el) return;
     saveNote();
-    el.remove();
+    slideOut(el);
     el = null;
     refs = null;
     handlers.onClose?.();

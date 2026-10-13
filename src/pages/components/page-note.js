@@ -2,6 +2,7 @@ import { h } from '../../shared/dom.js';
 import { t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 import { highlightHits, renderMarkdown } from '../../shared/markdown.js';
+import { formatKeys } from '../../shared/platform.js';
 
 export function pageNoteBox(note, { onSave, onEditingChange, query = '' }) {
   const box = h('section', { class: 'page-note' });
@@ -72,7 +73,7 @@ export function pageNoteBox(note, { onSave, onEditingChange, query = '' }) {
           'div',
           { class: 'card-actions', style: { opacity: '1' } },
           h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => finish(false) }, t('actionCancel')),
-          h('button', { class: 'btn btn-primary btn-sm', type: 'button', onclick: () => finish(true) }, t('actionSave')),
+          h('button', { class: 'btn btn-primary btn-sm', type: 'button', title: `${t('actionSave')} (${formatKeys(['mod', 'Enter'])})`, onclick: () => finish(true) }, t('actionSave')),
         ),
       ),
     );

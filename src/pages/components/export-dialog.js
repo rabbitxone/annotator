@@ -1,4 +1,5 @@
 import { h } from '../../shared/dom.js';
+import { closeDialog, showDialog } from './dialog.js';
 import { formatBytes, formatNumber, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 
@@ -54,7 +55,7 @@ export function exportDialog({ scopes, initial }) {
     const isEmpty = (scope) => scope.notes + scope.pageNotes === 0;
 
     const options = h('div', { class: 'export-options' });
-    const submit = h('button', { class: 'btn btn-primary', type: 'button', onclick: () => dialog.close('confirm') }, icon('download', { size: 14 }), t('exportAction'));
+    const submit = h('button', { class: 'btn btn-primary', type: 'button', onclick: () => closeDialog(dialog, 'confirm') }, icon('download', { size: 14 }), t('exportAction'));
     const empty = h('p', { class: 'choice-hint export-empty' }, t('exportEmpty'));
 
     function renderOptions() {
@@ -140,7 +141,7 @@ export function exportDialog({ scopes, initial }) {
       h(
         'div',
         { class: 'dialog-actions' },
-        h('button', { class: 'btn btn-outline', type: 'button', onclick: () => dialog.close('cancel') }, t('actionCancel')),
+        h('button', { class: 'btn btn-outline', type: 'button', onclick: () => closeDialog(dialog, 'cancel') }, t('actionCancel')),
         submit,
       ),
     );
@@ -161,8 +162,7 @@ export function exportDialog({ scopes, initial }) {
     });
 
     renderOptions();
-    document.body.append(dialog);
-    dialog.showModal();
+    showDialog(dialog);
     dialog.querySelector('input[name="export-format"]:checked')?.focus();
   });
 }

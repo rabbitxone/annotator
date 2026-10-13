@@ -1,18 +1,30 @@
 import { h } from '../../shared/dom.js';
 import { t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
-import { openFileAccessSettings } from '../../shared/file-access.js';
+import { fileAccessKeys, openFileAccessSettings } from '../../shared/file-access.js';
+import { notice } from './notice.js';
+import { toast } from './toast.js';
 
-export function fileAccessNotice({ compact = false } = {}) {
+/** Opens the browser's switch, or (Firefox) copies where to find it and says so. */
+export async function showFileAccessSettings() {
+  if ((await openFileAccessSettings()) === 'copied') toast(t('toastFileAccessCopied'));
+}
+
+export function fileAccessButton({ primary = false } = {}) {
   return h(
-    'section',
-    { class: ['notice', 'notice-warning', compact && 'compact'], role: 'status' },
-    h('p', { class: 'notice-title' }, icon('alert', { size: 14 }), t('fileAccessTitle')),
-    h('p', { class: 'notice-text' }, t('fileAccessText')),
-    h(
-      'div',
-      { class: 'notice-actions' },
-      h('button', { class: 'btn btn-primary btn-sm', type: 'button', onclick: () => openFileAccessSettings() }, icon('open', { size: 14 }), t('fileAccessOpen')),
-    ),
+    'button',
+    { class: ['btn', 'btn-sm', primary ? 'btn-primary' : 'btn-outline'], type: 'button', onclick: showFileAccessSettings },
+    icon(fileAccessKeys.icon, { size: 14 }),
+    t(fileAccessKeys.action),
   );
+}
+
+export function fileAccessNotice() {
+  return notice({
+    tone: 'warning',
+    iconName: 'alert',
+    title: t('fileAccessTitle'),
+    text: t(fileAccessKeys.text),
+    actions: fileAccessButton({ primary: true }),
+  });
 }

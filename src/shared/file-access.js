@@ -1,15 +1,18 @@
 import { api } from './api.js';
+import { copyText } from './clipboard.js';
+import { isFirefox } from './platform.js';
 import { isFileUrl } from './url.js';
 
 /**
- * Chrome keeps extensions out of local files until the person turns on "Allow access to file URLs".
- * Resolves to true or false there, and to null where the browser has no such switch (Firefox).
+ * Both browsers keep extensions out of local files until the person allows it: Chrome with
+ * "Allow access to file URLs", Firefox (153 and later) with "Access local files on your computer".
+ * Resolves to true or false, and to null where the browser can't tell.
  */
 export function fileAccessAllowed({ timeout = 1500 } = {}) {
   const check = api.extension?.isAllowedFileSchemeAccess;
   if (typeof check !== 'function') return Promise.resolve(null);
   return new Promise((resolve) => {
-    // Chrome answers through the callback, Firefox's promise-style API may ignore it: take
+    // Chrome answers through the callback, Firefox's promise-style API ignores it: take
     // whichever comes first, and never leave a popup waiting.
     const timer = setTimeout(() => resolve(null), timeout);
     const finish = (value) => {
@@ -34,6 +37,20 @@ export function mayBeBlockedFile({ allowed, pageUrl, tabUrl }) {
   return isFileUrl(pageUrl) || isFileUrl(tabUrl) || (!pageUrl && !tabUrl);
 }
 
-export function openFileAccessSettings() {
-  return api.tabs.create({ url: `chrome://extensions/?id=${api.runtime.id}` });
+/** Text keys for this browser's wording of the switch. */
+export const fileAccessKeys = isFirefox
+  ? { text: 'fileAccessTextFirefox', off: 'settingFileAccessOffFirefox', action: 'fileAccessCopy', icon: 'copy' }
+  : { text: 'fileAccessText', off: 'settingFileAccessOff', action: 'fileAccessOpen', icon: 'open' };
+
+/**
+ * Chrome's switch is one click away. Firefox won't let an extension open about:addons, so the
+ * address goes to the clipboard instead; resolves to "copied" then.
+ */
+export async function openFileAccessSettings() {
+  if (!isFirefox) {
+    await api.tabs.create({ url: `chrome://extensions/?id=${api.runtime.id}` });
+    return 'opened';
+  }
+  await copyText('about:addons');
+  return 'copied';
 }

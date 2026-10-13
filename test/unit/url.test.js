@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { hostnameOf, normalizeUrl } from '../../src/shared/url.js';
+import { hostnameOf, isPdfUrl, normalizeUrl } from '../../src/shared/url.js';
 
 test('normalizeUrl strips tracking params and plain hashes, keeps hash routes', () => {
   assert.equal(normalizeUrl('https://a.com/p?b=2&utm_source=x&a=1#section'), 'https://a.com/p?a=1&b=2');
@@ -72,4 +72,11 @@ test('relocating replaces the beginning of an address and nothing else', () => {
   assert.equal(relocateUrl('https://old.org/page?x=1', 'https://old.org/page', 'https://old.org/renamed'), 'https://old.org/renamed?x=1');
   assert.equal(isUnder('https://old.org/', 'https://old.org'), true);
   assert.equal(isUnder('https://old.org.evil/', 'https://old.org'), false);
+});
+
+test('PDFs are told apart by their address', () => {
+  assert.equal(isPdfUrl('file:///C:/papers/Study.PDF'), true);
+  assert.equal(isPdfUrl('https://a.com/report.pdf?page=2#p4'), true);
+  assert.equal(isPdfUrl('https://a.com/pdf/guide.html'), false);
+  assert.equal(isPdfUrl(null), false);
 });

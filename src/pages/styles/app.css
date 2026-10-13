@@ -574,90 +574,115 @@ textarea.input {
   gap: 6px;
 }
 
-.whats-new {
+.notice {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 8px;
-  padding: 12px 12px 10px 14px;
-  border: 1px solid var(--accent);
+  padding: 12px 14px;
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: var(--accent-soft);
+  background: var(--surface-raised);
   color: var(--on-surface);
   font-size: 13px;
   line-height: 19px;
 }
 
-.whats-new-head {
+.notice[data-enter] {
+  animation: notice-in 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notice-accent {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: var(--accent-soft);
+}
+
+.notice-warning {
+  border-color: color-mix(in srgb, var(--warning) 45%, transparent);
+  background: var(--warning-bg);
+}
+
+.notice-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin: -4px -4px -4px 0;
+  min-height: 20px;
 }
 
-.whats-new-title {
-  color: var(--accent-on-soft);
+.notice-close {
+  margin: -6px -8px -6px 0;
+}
+
+.notice-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
   font-weight: 700;
 }
 
-.whats-new-list {
+.notice-title .icon {
+  flex-shrink: 0;
+}
+
+.notice-accent .notice-title {
+  color: var(--accent-on-soft);
+}
+
+.notice-warning .notice-title {
+  color: var(--warning);
+}
+
+.notice-body {
+  display: grid;
+  gap: 4px;
+}
+
+.notice-body:empty {
+  display: none;
+}
+
+.notice-muted,
+.notice-neutral .notice-text {
+  color: var(--muted);
+}
+
+/* Without a title: icon and text on one line */
+.notice-plain {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+}
+
+.notice-plain > .icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--muted);
+}
+
+.notice-list {
   display: grid;
   gap: 2px;
   margin: 0;
   padding-left: 18px;
 }
 
-.whats-new-text {
-  color: var(--muted);
-}
-
-.whats-new-actions {
+.notice-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+  margin-top: 2px;
 }
 
-.whats-new-done {
+.notice-done {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   color: var(--accent-on-soft);
   font-weight: 600;
-}
-
-.notice {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface-raised);
-  font-size: 13px;
-  line-height: 19px;
-}
-
-.notice-warning {
-  border-color: var(--warning);
-  background: var(--warning-bg);
-}
-
-.notice-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--warning);
-  font-weight: 700;
-}
-
-.notice-text {
-  color: var(--on-surface);
-}
-
-.notice-actions {
-  display: flex;
-  gap: 6px;
-  margin-top: 2px;
 }
 
 .category-intro {
@@ -978,6 +1003,15 @@ body:has(.bulk-bar[data-open]) .toast {
   flex-wrap: wrap;
 }
 
+/* Text across the whole row, the control under it, lined up with the text */
+.setting-stacked .setting-info {
+  flex-basis: 100%;
+}
+
+.setting-stacked > :not(.setting-info) {
+  margin-left: 40px;
+}
+
 .setting-callout {
   display: flex;
   flex: 1 0 100%;
@@ -1108,22 +1142,10 @@ body:has(.bulk-bar[data-open]) .toast {
   outline-offset: 2px;
 }
 
-.privacy-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px;
-  border-radius: var(--radius-md);
-  background: var(--accent-soft);
+.privacy-note .notice-text {
   color: var(--accent-on-soft);
   font-size: 12px;
   line-height: 17px;
-}
-
-.privacy-note strong {
-  display: block;
-  font-size: 13px;
-  margin-bottom: 2px;
 }
 
 .empty {
@@ -1187,13 +1209,23 @@ body:has(.bulk-bar[data-open]) .toast {
 .dialog[open] {
   display: flex;
   flex-direction: column;
-  animation: slide-up 180ms ease-out;
+  animation: dialog-in 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dialog[data-closing] {
+  animation: dialog-out 160ms ease-in forwards;
 }
 
 .dialog::backdrop {
   background: rgba(17, 24, 39, 0.45);
   backdrop-filter: blur(2px);
+  animation: fade-in 220ms ease-out;
 }
+
+.dialog[data-closing]::backdrop {
+  animation: fade-out 160ms ease-in forwards;
+}
+
 
 .dialog-body {
   flex: 1;
@@ -1460,6 +1492,57 @@ body:has(.bulk-bar[data-open]) .toast {
     opacity: 1;
   }
 }
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+    filter: blur(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes dialog-out {
+  from {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.94);
+    filter: blur(6px);
+  }
+}
+
 
 @media (prefers-reduced-motion: reduce) {
 

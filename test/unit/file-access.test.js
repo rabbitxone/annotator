@@ -9,7 +9,7 @@ test('only a blocked browser can hide a local file', () => {
   assert.equal(mayBeBlockedFile({ allowed: false, tabUrl: undefined, pageUrl: null }), true, 'tab without an address');
   assert.equal(mayBeBlockedFile({ allowed: false, pageUrl: 'https://a.com/', tabUrl: 'https://a.com/' }), false);
   assert.equal(mayBeBlockedFile({ allowed: true, pageUrl: 'file:///C:/x.html' }), false);
-  assert.equal(mayBeBlockedFile({ allowed: null, tabUrl: undefined, pageUrl: null }), false, 'Firefox has no such switch');
+  assert.equal(mayBeBlockedFile({ allowed: null, tabUrl: undefined, pageUrl: null }), false, 'the browser can’t tell');
 });
 
 test('reading the setting copes with Chrome, other browsers and failures', async () => {

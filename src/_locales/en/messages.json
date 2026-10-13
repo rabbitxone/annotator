@@ -786,6 +786,27 @@
   "settingFileAccessOff": {
     "message": "Chrome blocks Annotator on files saved on your computer. Turn on “Allow access to file URLs” in the extension's settings."
   },
+  "fileAccessTextFirefox": {
+    "message": "Firefox keeps extensions out of pages saved on your computer until you allow it. Open about:addons, choose Annotator, then on the “Permissions and data” tab turn on “Access local files on your computer” and reload the page."
+  },
+  "settingFileAccessOffFirefox": {
+    "message": "Firefox blocks Annotator on files saved on your computer. In about:addons, open Annotator's “Permissions and data” tab and turn on “Access local files on your computer”."
+  },
+  "fileAccessCopy": {
+    "message": "Copy about:addons"
+  },
+  "toastFileAccessCopied": {
+    "message": "Copied. Paste it into the address bar."
+  },
+  "pdfTitle": {
+    "message": "PDFs can't be annotated"
+  },
+  "pdfText": {
+    "message": "Your browser opens PDFs in its own viewer, which extensions can't reach. Notes work on web pages and on HTML files saved on your computer."
+  },
+  "pdfBadge": {
+    "message": "Annotator: PDFs open in the browser's own viewer, which extensions can't reach."
+  },
   "settingFileAccessAllowed": {
     "message": "Allowed"
   },

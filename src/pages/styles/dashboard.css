@@ -144,6 +144,11 @@ body {
   display: none;
 }
 
+/* Same width as the settings beneath them */
+body[data-view='settings'] :is(#notices, #whats-new) {
+  max-width: 680px;
+}
+
 .toolbar-row {
   display: flex;
   align-items: center;

@@ -1,4 +1,5 @@
 import { h } from '../../shared/dom.js';
+import { closeDialog, showDialog } from './dialog.js';
 import { formatNumber, t } from '../../shared/i18n.js';
 
 /** Resolves to { moveTo } (the category that takes over its notes, if any) or null when cancelled. */
@@ -23,8 +24,8 @@ export function categoryDeleteDialog({ category, others, count }) {
       h(
         'div',
         { class: 'dialog-actions' },
-        h('button', { class: 'btn btn-outline', type: 'button', onclick: () => dialog.close('cancel') }, t('actionCancel')),
-        h('button', { class: 'btn btn-danger', type: 'button', onclick: () => dialog.close('confirm') }, t('actionDelete')),
+        h('button', { class: 'btn btn-outline', type: 'button', onclick: () => closeDialog(dialog, 'cancel') }, t('actionCancel')),
+        h('button', { class: 'btn btn-danger', type: 'button', onclick: () => closeDialog(dialog, 'confirm') }, t('actionDelete')),
       ),
     );
     dialog.addEventListener('close', () => {
@@ -33,7 +34,6 @@ export function categoryDeleteDialog({ category, others, count }) {
       dialog.remove();
       resolve(confirmed ? { moveTo: count > 0 ? moveTo : null } : null);
     });
-    document.body.append(dialog);
-    dialog.showModal();
+    showDialog(dialog);
   });
 }

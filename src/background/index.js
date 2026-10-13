@@ -4,7 +4,7 @@ import { fileAccessAllowed, mayBeBlockedFile } from '../shared/file-access.js';
 import { rolloutOnInstall } from '../shared/rollout.js';
 import { ensureMigrated, updateSettings } from '../shared/store.js';
 import { listSnapshots, saveSnapshot, snapshotPageUrl } from '../shared/snapshots.js';
-import { normalizeUrl } from '../shared/url.js';
+import { isPdfUrl, normalizeUrl } from '../shared/url.js';
 
 const MENU_ID = 'annotator-create';
 
@@ -60,19 +60,29 @@ async function sendToTab(tabId, message) {
   }
 }
 
-// Nothing happens when the page can't run the extension. For a local file that Chrome has
-// closed to extensions, say so on the icon instead of failing silently.
-async function explainFailure(tabId, pageUrl, tabUrl) {
-  const allowed = await fileAccessAllowed();
-  if (!mayBeBlockedFile({ allowed, pageUrl, tabUrl })) return;
+// Nothing happens when the page can't run the extension. For a PDF, or a local file the browser
+// has closed to extensions, say so on the icon instead of failing silently.
+async function explainFailure(tabId, pageUrl, tabUrl, { pdf = false } = {}) {
+  let title = null;
+  if (pdf || isPdfUrl(pageUrl) || isPdfUrl(tabUrl)) title = t('pdfBadge');
+  else if (mayBeBlockedFile({ allowed: await fileAccessAllowed(), pageUrl, tabUrl })) title = t('fileAccessBadge');
+  if (!title) return;
   api.action.setBadgeText({ tabId, text: '!' }).catch(() => { });
   api.action.setBadgeBackgroundColor({ tabId, color: '#B45309' }).catch(() => { });
-  api.action.setTitle({ tabId, title: t('fileAccessBadge') }).catch(() => { });
+  api.action.setTitle({ tabId, title }).catch(() => { });
+}
+
+// Run a command on the page, or explain on the icon why it can't be done there.
+function commandTab(tabId, message, pageUrl, tabUrl) {
+  sendToTab(tabId, message).then(
+    (response) => response?.pdf && explainFailure(tabId, pageUrl, tabUrl, { pdf: true }),
+    () => explainFailure(tabId, pageUrl, tabUrl),
+  );
 }
 
 api.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId !== MENU_ID || !tab?.id || !info.selectionText?.trim()) return;
-  sendToTab(tab.id, { type: 'create-from-selection' }).catch(() => explainFailure(tab.id, info.pageUrl, tab.url));
+  commandTab(tab.id, { type: 'create-from-selection' }, info.pageUrl, tab.url);
 });
 
 const COMMAND_MESSAGES = {
@@ -86,7 +96,7 @@ api.commands?.onCommand.addListener(async (command, tab) => {
   if (!message) return;
   const target = tab ?? (await api.tabs.query({ active: true, currentWindow: true }))[0];
   if (target?.id == null) return;
-  sendToTab(target.id, message).catch(() => explainFailure(target.id, null, target.url));
+  commandTab(target.id, message, null, target.url);
 });
 
 async function openAndGo(url, id) {

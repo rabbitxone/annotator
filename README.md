@@ -11,7 +11,7 @@ All data is stored locally on your device. It is never sent to the developer or 
 ## Features
 
 - **Side panel on the page** – all highlights in reading order, a note for the whole page, and notes the extension could no longer find (open it from the popup or with a shortcut).
-- **Keyboard shortcuts** – `Ctrl+Shift+L` highlights the selection, `Ctrl+Shift+.` highlights and opens the note, `Ctrl+Shift+,` toggles the side panel. In the color bar, `1`–`9` pick a category by position, `/` searches all categories and `N` adds a note. Shortcuts can be changed in the browser's extension settings.
+- **Keyboard shortcuts** – `Ctrl+Shift+L` (`⇧⌘L` on a Mac) highlights the selection, `Ctrl+Shift+.` (`⇧⌘.`) highlights and opens the note, `Ctrl+Shift+,` (`⇧⌘,`) toggles the side panel. In the color bar, `1`–`9` pick a category by position, `/` searches all categories and `N` adds a note. Shortcuts can be changed in the browser's extension settings.
 - **Your own categories** – in *Settings → Categories* rename the colors after what you mark ("Sample size", "Outcome"…), recolor them, add up to 60 more, reorder them and give each a key. With *Quick keys* on, select text and press a category's key to highlight it at once (never inside text fields). The color bar shows the first six categories and a searchable list for the rest. Exports (CSV *Category* column, Markdown, JSON backup) use your names; deleting a category moves its notes to another one.
 - **Formatting in notes** – `**bold**`, `*italics*`, `` `code` ``, lists and links.
 - **Notes that lost their text** – when a page changes, select the new wording and click *Pin to selection*. The dashboard can filter notes that were not found.
@@ -31,7 +31,10 @@ Annotator stays out of the way in web apps (mail, chat, editors) and turns on fo
 
 Annotator works on HTML files saved on your computer too (handy for collections of papers or saved articles):
 
-- **Chrome** keeps extensions out of local files until you turn on *Allow access to file URLs* in the extension's details (`chrome://extensions`). Annotator checks for this and shows where to switch it on: in the popup, in Settings, and on the icon when you try to highlight.
+- **Chrome** keeps extensions out of local files until you turn on *Allow access to file URLs* in the extension's details (`chrome://extensions`).
+- **Firefox** (153 and later) does the same: in `about:addons`, open Annotator's *Permissions and data* tab and turn on *Access local files on your computer*. Firefox doesn't let extensions open that page, so Annotator copies its address for you.
+- Annotator checks for this and shows where to switch it on: in the popup, in Settings, and on the icon when you try to highlight.
+- PDFs can't be annotated: both browsers open them in their own viewer, which extensions can't reach. The popup and the icon say so instead of failing silently.
 - Local pages are named by their file name and grouped by folder; the CSV export has a *File or site* column with the full path. One *off on this site* rule covers all local files.
 - Notes are stored under the file's path. If you move the files (another folder, drive or computer), use *Settings → Moved your files? → Change location* to point the notes at the new place. It also works for websites that changed their address, and can be undone when no notes had to be combined.
 - Automatic page snapshots skip local files, since they already stay on your computer; you can still save one by hand.

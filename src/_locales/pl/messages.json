@@ -786,6 +786,27 @@
   "settingFileAccessOff": {
     "message": "Chrome blokuje Annotatora na plikach zapisanych na komputerze. Włącz „Zezwalaj na dostęp do adresów URL plików” w ustawieniach rozszerzenia."
   },
+  "fileAccessTextFirefox": {
+    "message": "Firefox nie wpuszcza rozszerzeń na strony zapisane na komputerze, dopóki tego nie dozwolisz. Otwórz about:addons, wybierz Annotatora, na karcie „Uprawnienia i dane” włącz „Dostęp do lokalnych plików na tym komputerze”, a potem odśwież stronę."
+  },
+  "settingFileAccessOffFirefox": {
+    "message": "Firefox blokuje Annotatora na plikach zapisanych na komputerze. W about:addons otwórz kartę „Uprawnienia i dane” Annotatora i włącz „Dostęp do lokalnych plików na tym komputerze”."
+  },
+  "fileAccessCopy": {
+    "message": "Kopiuj about:addons"
+  },
+  "toastFileAccessCopied": {
+    "message": "Skopiowano. Wklej to w pasku adresu."
+  },
+  "pdfTitle": {
+    "message": "Plików PDF nie da się oznaczać"
+  },
+  "pdfText": {
+    "message": "Przeglądarka otwiera pliki PDF we własnym czytniku, do którego rozszerzenia nie mają dostępu. Notatki działają na stronach internetowych i plikach HTML zapisanych na komputerze."
+  },
+  "pdfBadge": {
+    "message": "Annotator: pliki PDF otwierają się we wbudowanym czytniku przeglądarki, do którego rozszerzenia nie mają dostępu."
+  },
   "settingFileAccessAllowed": {
     "message": "Dozwolone"
   },

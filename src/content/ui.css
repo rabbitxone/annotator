@@ -780,6 +780,18 @@ kbd {
   }
 }
 
+@keyframes panel-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
 @keyframes frame-in {
   from {
     opacity: 0;
@@ -826,6 +838,10 @@ kbd {
   to {
     opacity: 0;
   }
+}
+
+.layer.panel[data-closing] {
+  animation: panel-out 160ms ease-in forwards;
 }
 
 .layer[data-closing] {
