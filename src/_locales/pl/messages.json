@@ -398,7 +398,7 @@
     "message": "W pasku kolorów"
   },
   "shortcutToolbarKeysHint": {
-    "message": "1–5 wybiera kolor, N dodaje notatkę."
+    "message": "1–9 wybiera kategorię według pozycji, działa też klawisz kategorii, / przeszukuje listę, N dodaje notatkę."
   },
   "shortcutChangeHint": {
     "message": "Skróty ustawia się w ustawieniach rozszerzeń przeglądarki."
@@ -745,7 +745,7 @@
     "message": "Adres strony"
   },
   "csvColor": {
-    "message": "Kolor"
+    "message": "Kategoria"
   },
   "csvColorCode": {
     "message": "Kod koloru"
@@ -879,5 +879,103 @@
         "content": "$1"
       }
     }
+  },
+  "settingsCategories": {
+    "message": "Kategorie"
+  },
+  "categoriesIntro": {
+    "message": "Nazwij kolory według tego, co zaznaczasz (np. „Wielkość próby” albo „Wynik”), dodaj kolejne i przypisz każdemu klawisz. Przy włączonych szybkich klawiszach wystarczy zaznaczyć tekst i nacisnąć klawisz, by zakreślić go w tej kategorii. Eksporty używają tych nazw."
+  },
+  "categoryName": {
+    "message": "Nazwa"
+  },
+  "categoryKey": {
+    "message": "Klawisz"
+  },
+  "categoryKeyHint": {
+    "message": "Litera lub cyfra. Zaznacz tekst i naciśnij ją, by zakreślić w tej kategorii (wymaga szybkich klawiszy)."
+  },
+  "categoryKeyInvalid": {
+    "message": "Klawisz musi być jedną literą lub cyfrą."
+  },
+  "categoryKeyTaken": {
+    "message": "„$V1$” jest już używany przez „$V2$”.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "categoryColor": {
+    "message": "Kolor"
+  },
+  "categoryCustomColor": {
+    "message": "Własny"
+  },
+  "categoryNotes": {
+    "message": "Notatki w tej kategorii"
+  },
+  "categoryMoveUp": {
+    "message": "Przesuń wyżej"
+  },
+  "categoryMoveDown": {
+    "message": "Przesuń niżej"
+  },
+  "categoryAdd": {
+    "message": "Dodaj kategorię"
+  },
+  "categoryReset": {
+    "message": "Przywróć wbudowane kolory"
+  },
+  "categoryNewName": {
+    "message": "Kategoria $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryChoose": {
+    "message": "Kategoria…"
+  },
+  "categoryDeleteTitle": {
+    "message": "Usunąć „$V1$”?",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryDeleteMove": {
+    "message": "Notatek w tej kategorii: $V1$. Przenieś je do:",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryDeleteMoveTo": {
+    "message": "Przenieś notatki do"
+  },
+  "categoryDeleteUnused": {
+    "message": "Żadna notatka nie używa tej kategorii."
+  },
+  "settingQuickKeys": {
+    "message": "Szybkie klawisze"
+  },
+  "settingQuickKeysHint": {
+    "message": "Zaznacz tekst i naciśnij klawisz kategorii, by od razu go zakreślić. Działa tylko na zaznaczonym tekście poza polami tekstowymi."
+  },
+  "toolbarMore": {
+    "message": "Więcej kategorii"
+  },
+  "pickerTypeToFilter": {
+    "message": "Wpisz, by znaleźć kategorię…"
+  },
+  "pickerNoMatch": {
+    "message": "Żadna kategoria nie pasuje"
   }
 }

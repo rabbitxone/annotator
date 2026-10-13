@@ -19,6 +19,7 @@ import { deleteWithUndo } from './components/actions.js';
 import { annotationCard } from './components/card.js';
 import { fileAccessNotice } from './components/file-access.js';
 import { fileAccessAllowed, mayBeBlockedFile } from '../shared/file-access.js';
+import { applyCategories } from '../shared/apply-categories.js';
 import { pageNoteBox } from './components/page-note.js';
 import { snapshotBar } from './components/snapshot-bar.js';
 import { privacyNote, settingsPanel } from './components/settings.js';
@@ -276,6 +277,7 @@ async function init() {
 
   await ensureMigrated().catch(() => { });
   state.settings = await getSettings();
+  applyCategories(state.settings);
 
   const [tab] = await api.tabs.query({ active: true, currentWindow: true });
   state.tabId = tab?.id ?? null;
@@ -313,7 +315,10 @@ async function init() {
   });
 
   onStoreChange(({ pages, settings }) => {
-    if (settings) state.settings = settings;
+    if (settings) {
+      state.settings = settings;
+      applyCategories(settings);
+    }
     if (pages.size) applyPageChanges(pages);
     if (!pages.size && state.tab === 'settings') return;
     if (state.editing) state.dirty = true;

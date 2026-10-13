@@ -398,7 +398,7 @@
     "message": "In the color bar"
   },
   "shortcutToolbarKeysHint": {
-    "message": "1–5 picks a color, N adds a note."
+    "message": "1–9 pick a category by position, a category's own key works too, / searches the list, N adds a note."
   },
   "shortcutChangeHint": {
     "message": "Shortcuts are set in the browser's extension settings."
@@ -745,7 +745,7 @@
     "message": "Page URL"
   },
   "csvColor": {
-    "message": "Color"
+    "message": "Category"
   },
   "csvColorCode": {
     "message": "Color code"
@@ -879,5 +879,103 @@
         "content": "$1"
       }
     }
+  },
+  "settingsCategories": {
+    "message": "Categories"
+  },
+  "categoriesIntro": {
+    "message": "Name your colors after what you mark (for example “Sample size” or “Outcome”), add more, and give each a key. With quick keys on, select text and press the key to highlight it in that category. Exports use these names."
+  },
+  "categoryName": {
+    "message": "Name"
+  },
+  "categoryKey": {
+    "message": "Key"
+  },
+  "categoryKeyHint": {
+    "message": "A letter or digit. Select text and press it to highlight in this category (needs quick keys)."
+  },
+  "categoryKeyInvalid": {
+    "message": "A key must be a single letter or digit."
+  },
+  "categoryKeyTaken": {
+    "message": "“$V1$” is already used by “$V2$”.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "categoryColor": {
+    "message": "Color"
+  },
+  "categoryCustomColor": {
+    "message": "Custom"
+  },
+  "categoryNotes": {
+    "message": "Notes in this category"
+  },
+  "categoryMoveUp": {
+    "message": "Move up"
+  },
+  "categoryMoveDown": {
+    "message": "Move down"
+  },
+  "categoryAdd": {
+    "message": "Add a category"
+  },
+  "categoryReset": {
+    "message": "Reset the built-in colors"
+  },
+  "categoryNewName": {
+    "message": "Category $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryChoose": {
+    "message": "Category…"
+  },
+  "categoryDeleteTitle": {
+    "message": "Delete “$V1$”?",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryDeleteMove": {
+    "message": "$V1$ notes use this category. Move them to:",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryDeleteMoveTo": {
+    "message": "Move notes to"
+  },
+  "categoryDeleteUnused": {
+    "message": "No notes use this category."
+  },
+  "settingQuickKeys": {
+    "message": "Quick keys"
+  },
+  "settingQuickKeysHint": {
+    "message": "Select text, then press a category's key to highlight it right away. Works only on selected text outside text fields."
+  },
+  "toolbarMore": {
+    "message": "More categories"
+  },
+  "pickerTypeToFilter": {
+    "message": "Type to find a category…"
+  },
+  "pickerNoMatch": {
+    "message": "No category matches"
   }
 }

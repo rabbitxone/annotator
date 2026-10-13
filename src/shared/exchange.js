@@ -1,4 +1,5 @@
-import { COLORS, COLOR_IDS, colorById } from './constants.js';
+import { isValidCategoryId, sanitizeStoredCategories } from './categories.js';
+import { colorById, getCategories } from './constants.js';
 import { normalizeUrl, pageName, siteLabel, sourceOf } from './url.js';
 
 export const BACKUP_FORMAT = 'annotator-backup';
@@ -12,7 +13,7 @@ function cleanAnnotation(raw, now) {
   const createdAt = num(raw.createdAt, now);
   const annotation = {
     id: String(raw.id),
-    color: COLOR_IDS.includes(raw.color) ? raw.color : COLOR_IDS[0],
+    color: isValidCategoryId(raw.color) ? raw.color : 'yellow',
     note: str(raw.note),
     quote: { exact: str(raw.quote.exact), prefix: str(raw.quote.prefix), suffix: str(raw.quote.suffix) },
     createdAt,
@@ -45,13 +46,14 @@ function stripLocal(page) {
   return { ...rest, annotations: annotations.map(({ lostAt, ...annotation }) => annotation) };
 }
 
-export function createBackup(pages, { now = Date.now(), snapshots = [] } = {}) {
+export function createBackup(pages, { now = Date.now(), snapshots = [], categories = null } = {}) {
   const backup = {
     format: BACKUP_FORMAT,
     version: BACKUP_VERSION,
     exportedAt: new Date(now).toISOString(),
     pages: pages.map(stripLocal),
   };
+  if (Array.isArray(categories) && categories.length) backup.categories = categories;
   if (snapshots.length) backup.snapshots = snapshots;
   return backup;
 }
@@ -98,7 +100,7 @@ export function parseBackup(text, now = Date.now()) {
     byUrl.set(page.url, known ? mergePage(known, page).page : page);
   }
   const snapshots = (Array.isArray(data.snapshots) ? data.snapshots : []).map(cleanSnapshot).filter(Boolean);
-  return { pages: [...byUrl.values()], snapshots };
+  return { pages: [...byUrl.values()], snapshots, categories: sanitizeStoredCategories(data.categories) };
 }
 
 export function mergePage(existing, incoming) {
@@ -189,6 +191,15 @@ export function escapeMarkdown(text) {
     .replace(/^(\s*)(-{3,}|={3,})\s*$/gm, '$1\\$2');
 }
 
+// The categories in the order they are set up, then any that notes still use but no longer exist
+function categoriesUsed(groups) {
+  const known = getCategories();
+  const ids = new Set(known.map((c) => c.id));
+  const extra = new Set();
+  for (const { annotations } of groups) for (const a of annotations) if (!ids.has(a.color)) extra.add(a.color);
+  return [...known, ...[...extra].map(colorById)];
+}
+
 const linkTarget = (url) => url.replace(/\(/g, '%28').replace(/\)/g, '%29');
 const mdLink = (text, url) => `[${escapeMarkdown(text)}](${linkTarget(url)})`;
 const blockquote = (text) =>
@@ -202,10 +213,10 @@ export const DEFAULT_LABELS = {
   title: '',
   pageNote: 'Page note',
   pageNotes: 'Page notes',
-  colorName: (id) => id.charAt(0).toUpperCase() + id.slice(1),
+  colorName: (id) => colorById(id).name,
   summary: (notes, pages, date) => `Highlights: ${notes} · pages: ${pages} · exported ${date}`,
   pageSummary: (host, count) => `${host} · highlights: ${count}`,
-  csvHeaders: ['Page title', 'Page URL', 'File or site', 'Color', 'Color code', 'Highlighted text', 'Note', 'Page note', 'Created', 'Modified'],
+  csvHeaders: ['Page title', 'Page URL', 'File or site', 'Category', 'Color code', 'Highlighted text', 'Note', 'Page note', 'Created', 'Modified'],
 };
 
 function highlightItem(heading, annotation) {
@@ -233,26 +244,26 @@ export function toMarkdown(groups, labels = {}, { groupBy = 'page', now = Date.n
   const withTitle = !!L.title;
 
   if (withTitle) {
-    const count = Object.fromEntries(COLORS.map((c) => [c.id, 0]));
+    const count = {};
     let notes = 0;
     for (const { annotations } of groups) {
       for (const a of annotations) {
-        count[colorById(a.color).id]++;
+        count[a.color] = (count[a.color] ?? 0) + 1;
         notes++;
       }
     }
     out.push(`# ${escapeMarkdown(L.title)}`, L.summary(notes, groups.length, localDate(now)));
-    const legend = COLORS.filter((c) => count[c.id] > 0).map((c) => `${c.emoji} ${escapeMarkdown(L.colorName(c.id))} ${count[c.id]}`);
+    const legend = categoriesUsed(groups).filter((c) => count[c.id] > 0).map((c) => `${c.emoji} ${escapeMarkdown(L.colorName(c.id))} ${count[c.id]}`);
     if (legend.length) out.push(legend.join(' · '));
   }
 
   const level = '#'.repeat(withTitle ? 2 : 1);
   if (groupBy === 'color') {
-    for (const color of COLORS) {
+    for (const color of categoriesUsed(groups)) {
       const items = [];
       for (const { page, annotations } of groups) {
         for (const annotation of [...annotations].sort(byTextPosition)) {
-          if (colorById(annotation.color).id === color.id) items.push({ page, annotation });
+          if (annotation.color === color.id) items.push({ page, annotation });
         }
       }
       if (!items.length) continue;
@@ -347,11 +358,11 @@ export const EXPORT_FORMATS = {
   csv: { extension: 'csv', mime: 'text/csv', importable: false },
 };
 
-export function buildExport(format, groups, { labels, snapshots = [], separator = ',', groupBy = 'page', now = Date.now() } = {}) {
+export function buildExport(format, groups, { labels, snapshots = [], categories = null, separator = ',', groupBy = 'page', now = Date.now() } = {}) {
   const meta = EXPORT_FORMATS[format];
   if (!meta) throw new Error(`Unknown export format: ${format}`);
   let text;
-  if (format === 'json') text = JSON.stringify(createBackup(pagesFromGroups(groups), { now, snapshots }), null, 2);
+  if (format === 'json') text = JSON.stringify(createBackup(pagesFromGroups(groups), { now, snapshots, categories }), null, 2);
   else if (format === 'markdown') text = toMarkdown(groups, labels, { groupBy, now });
   else text = '﻿' + toCsv(groups, { separator, labels }); // BOM: Excel otherwise misreads UTF-8
   return { ...meta, text };

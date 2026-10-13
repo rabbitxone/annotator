@@ -134,6 +134,95 @@ button:focus-visible {
   background: var(--surface);
 }
 
+.toolbar-more {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+}
+
+.picker {
+  width: 260px;
+  max-width: calc(100vw - 16px);
+  padding: 6px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  transform-origin: 16px 0;
+  animation: frame-in 150ms ease-out;
+}
+
+.picker-query {
+  margin: 0 0 4px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.picker-query[data-empty='true'] {
+  color: var(--subtle);
+}
+
+.picker-list {
+  display: grid;
+  gap: 1px;
+  max-height: 232px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+
+.picker-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 18px;
+  text-align: left;
+}
+
+.picker-item.active,
+.picker-item:hover {
+  background: var(--surface);
+}
+
+.picker-item .swatch {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.picker-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.picker-empty {
+  padding: 10px 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.popover-categories {
+  padding: 6px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.popover-categories[hidden] {
+  display: none;
+}
+
 .popover {
   --frame-gap: 2px;
   width: 348px;
@@ -754,6 +843,7 @@ kbd {
 @media (prefers-reduced-motion: reduce) {
 
   .toolbar,
+  .picker,
   .handle,
   .popover,
   .confirm,

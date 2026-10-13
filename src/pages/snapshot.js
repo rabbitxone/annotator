@@ -1,5 +1,6 @@
 import { buildIndex, resolve } from '../content/anchoring.js';
 import { applyHighlightStyle, flash, MARK_TAG, setActive, wrapRange } from '../content/highlighter.js';
+import { applyCategories } from '../shared/apply-categories.js';
 import { colorById } from '../shared/constants.js';
 import { h } from '../shared/dom.js';
 import { applyI18n, formatDate, formatNumber, t } from '../shared/i18n.js';
@@ -220,6 +221,7 @@ async function init() {
   hydrateIcons();
   await ensureMigrated().catch(() => { });
   state.settings = await getSettings();
+  applyCategories(state.settings);
   applyHighlightStyle(state.settings.highlightStyle);
   readRoute();
   await load();
@@ -254,7 +256,10 @@ async function init() {
 
   onSnapshotsChange(load);
   onStoreChange(({ pages, settings }) => {
-    if (settings) applyHighlightStyle(settings.highlightStyle);
+    if (settings) {
+      applyCategories(settings);
+      applyHighlightStyle(settings.highlightStyle);
+    }
     if (pages.has(state.url)) load();
   });
 }

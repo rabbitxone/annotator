@@ -1,4 +1,4 @@
-import { COLORS, colorById } from '../../shared/constants.js';
+import { colorById, getCategories } from '../../shared/constants.js';
 import { h } from '../../shared/dom.js';
 import { formatDate, relativeTime, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
@@ -25,18 +25,34 @@ export function siteAvatar(url, size = 32) {
   );
 }
 
+const SWATCH_LIMIT = 8;
+
+// A row of colored dots while there are few categories, a list once there are many.
 export function swatchPicker(selected, onPick) {
+  const categories = getCategories();
+  if (categories.length > SWATCH_LIMIT) {
+    return h(
+      'select',
+      {
+        class: 'input category-select',
+        'aria-label': t('colorLabel'),
+        onchange: (e) => e.target.value && onPick(e.target.value),
+      },
+      selected == null && h('option', { value: '', disabled: true, selected: true }, t('categoryChoose')),
+      categories.map((c) => h('option', { value: c.id, selected: c.id === selected }, `${c.emoji} ${c.name}`)),
+    );
+  }
   const group = h(
     'div',
     { class: 'swatches', role: 'group', 'aria-label': t('colorLabel') },
-    COLORS.map((color) =>
+    categories.map((color) =>
       h(
         'button',
         {
           class: 'swatch-btn',
           type: 'button',
-          title: t(`color_${color.id}`),
-          'aria-label': t(`color_${color.id}`),
+          title: color.name,
+          'aria-label': color.name,
           'aria-pressed': String(color.id === selected),
           dataset: { color: color.id },
           style: { '--swatch': color.swatch },

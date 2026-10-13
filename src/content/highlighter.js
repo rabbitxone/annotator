@@ -1,4 +1,4 @@
-import { COLORS, withAlpha } from '../shared/constants.js';
+import { getCategories, withAlpha } from '../shared/constants.js';
 import { collectTextNodes } from './anchoring.js';
 import { canvasColor, toneFor } from './tone.js';
 
@@ -7,7 +7,7 @@ const STYLE_ID = 'annotator-highlight-style';
 
 const NO_WRAP_PARENTS = new Set(['TABLE', 'THEAD', 'TBODY', 'TFOOT', 'TR', 'UL', 'OL', 'DL', 'SELECT', 'COLGROUP']);
 
-export function highlightCss(style) {
+export function highlightCss(style, categories = getCategories()) {
   const rules = [
     `
 ${MARK_TAG} {
@@ -23,7 +23,14 @@ ${MARK_TAG} {
   const underline = (line) =>
     `background-color: transparent !important; text-decoration: underline 2px ${line} !important; text-underline-offset: 3px !important; text-decoration-skip-ink: none !important;`;
 
-  for (const c of COLORS) {
+  // A highlight whose category is gone still shows, in gray
+  rules.push(
+    style === 'underline'
+      ? `${MARK_TAG} { ${underline('#9CA3AF')} }`
+      : `${MARK_TAG} { background-color: rgba(156, 163, 175, 0.35) !important; }`,
+  );
+
+  for (const c of categories) {
     const light = `${MARK_TAG}[data-color="${c.id}"]`;
     const dark = `${MARK_TAG}[data-tone="dark"][data-color="${c.id}"]`;
     rules.push(

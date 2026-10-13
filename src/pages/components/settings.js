@@ -5,6 +5,7 @@ import { icon } from '../../shared/icons.js';
 import { setSiteRule, updateSettings } from '../../shared/store.js';
 import { openFileAccessSettings } from '../../shared/file-access.js';
 import { swatchPicker } from './card.js';
+import { categoryEditor } from './category-editor.js';
 
 function settingItem(iconName, label, sublabel, trailing, callout) {
   return h(
@@ -142,7 +143,7 @@ export function shortcutsPanel() {
       'highlighter',
       t('shortcutToolbarKeys'),
       t('shortcutToolbarKeysHint'),
-      h('span', { class: 'kbd-group' }, h('kbd', { class: 'kbd' }, '1–5'), h('kbd', { class: 'kbd' }, 'N')),
+      h('span', { class: 'kbd-group' }, h('kbd', { class: 'kbd' }, '1–9'), h('kbd', { class: 'kbd' }, '/'), h('kbd', { class: 'kbd' }, 'N')),
     ),
     h(
       'div',
@@ -221,6 +222,21 @@ export function dataPanel({ settings, snapshots, onExport, onImport, onRelocate,
         icon('delete', { size: 14 }),
         t('dataSnapshotsClean', String(snapshots.unused)),
       ),
+    ),
+  );
+}
+
+export function categoriesPanel(settings, { counts, onChange, onDelete }) {
+  return h(
+    'div',
+    { class: 'settings-panel' },
+    h('p', { class: 'category-intro' }, t('categoriesIntro')),
+    categoryEditor({ counts, onChange, onDelete }),
+    settingItem(
+      'keyboard',
+      t('settingQuickKeys'),
+      t('settingQuickKeysHint'),
+      toggle(settings.quickKeys, t('settingQuickKeys'), (quickKeys) => updateSettings({ quickKeys })),
     ),
   );
 }

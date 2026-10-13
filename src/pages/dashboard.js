@@ -1,6 +1,8 @@
 import { api } from '../shared/api.js';
 import { copyText } from '../shared/clipboard.js';
-import { COLORS, colorById } from '../shared/constants.js';
+import { applyCategories, categoryNameFor } from '../shared/apply-categories.js';
+import { mergeCategories, resolveCategories } from '../shared/categories.js';
+import { colorById, getCategories } from '../shared/constants.js';
 import { h } from '../shared/dom.js';
 import {
   BackupError,
@@ -32,21 +34,24 @@ import {
   listPages,
   onStoreChange,
   relocatePages,
+  recategorize,
   setPageNote,
   updateAnnotation,
   updateMany,
+  updateSettings,
 } from '../shared/store.js';
 import { displayAddress, isFileUrl, pageName, siteLabel } from '../shared/url.js';
 import { deleteWithUndo } from './components/actions.js';
 import { annotationCard, siteAvatar, swatchPicker } from './components/card.js';
 import { exportDialog } from './components/export-dialog.js';
+import { categoryDeleteDialog } from './components/category-delete-dialog.js';
 import { relocateDialog } from './components/relocate-dialog.js';
 import { reverseMoves } from '../shared/relocate.js';
 import { fileAccessNotice } from './components/file-access.js';
 import { fileAccessAllowed } from '../shared/file-access.js';
 import { pageNoteBox } from './components/page-note.js';
 import { snapshotBar } from './components/snapshot-bar.js';
-import { dataPanel, privacyNote, settingsPanel, shortcutsPanel } from './components/settings.js';
+import { categoriesPanel, dataPanel, privacyNote, settingsPanel, shortcutsPanel } from './components/settings.js';
 import { toast } from './components/toast.js';
 import { whatsNewBanner } from './components/whats-new.js';
 
@@ -227,6 +232,7 @@ async function openExport(preferred) {
       snapshots,
       separator: CSV_SEPARATORS[options.separator],
       groupBy: options.groupBy,
+      categories: format === 'json' ? state.settings.categories : null,
     });
     const name = format === 'json' && scope.id === 'all' ? 'annotator-backup' : 'annotator';
     download(`${name}-${dateStamp()}.${file.extension}`, file.text, `${file.mime};charset=utf-8`);
@@ -261,7 +267,12 @@ async function openRelocate() {
 
 async function importBackup(file) {
   try {
-    const { pages, snapshots } = parseBackup(await file.text());
+    const { pages, snapshots, categories } = parseBackup(await file.text());
+    const merged = mergeCategories(state.settings.categories, categories, categoryNameFor);
+    if (merged.added > 0) {
+      state.settings = await updateSettings({ categories: merged.categories });
+      applyCategories(state.settings);
+    }
     const { added, updated } = await importPages(pages);
     const snapshotsAdded = await importSnapshots(snapshots);
     toast(
@@ -297,20 +308,23 @@ function pill(label, pressed, onClick, lead, count) {
 
 function renderFilters(visible) {
   const scope = scopeItems();
-  const counts = Object.fromEntries(COLORS.map((c) => [c.id, 0]));
+  const counts = {};
   let lostCount = 0;
   for (const { annotation } of scope) {
     counts[annotation.color] = (counts[annotation.color] ?? 0) + 1;
     if (annotation.lostAt) lostCount++;
   }
+  // The categories that have notes here, in the order they are set up, then any that no longer exist
+  const known = new Set(getCategories().map((c) => c.id));
+  const inScope = [...getCategories(), ...Object.keys(counts).filter((id) => !known.has(id)).map(colorById)].filter((c) => counts[c.id] > 0);
 
   const pills = h(
     'div',
     { class: 'pills', role: 'group', 'aria-label': t('filterLabel') },
     pill(t('filterAllColors'), state.color == null, () => setFilter({ color: null })),
-    COLORS.filter((c) => counts[c.id] > 0).map((c) =>
+    inScope.map((c) =>
       pill(
-        t(`color_${c.id}`),
+        c.name,
         state.color === c.id,
         () => setFilter({ color: state.color === c.id ? null : c.id }),
         h('span', { class: 'swatch', style: { '--swatch': c.swatch } }),
@@ -564,12 +578,36 @@ function loadMorePages() {
   render();
 }
 
+function categoryCounts() {
+  const counts = new Map();
+  for (const page of state.pages) for (const a of page.annotations) counts.set(a.color, (counts.get(a.color) ?? 0) + 1);
+  return counts;
+}
+
+async function saveCategories(stored) {
+  const patch = { categories: stored };
+  const list = resolveCategories(stored, categoryNameFor);
+  if (!list.some((c) => c.id === state.settings.defaultColor)) patch.defaultColor = list[0].id;
+  state.settings = await updateSettings(patch);
+  applyCategories(state.settings);
+}
+
+async function deleteCategory(category, remaining) {
+  const count = categoryCounts().get(category.id) ?? 0;
+  const result = await categoryDeleteDialog({ category, others: remaining, count });
+  if (!result) return false;
+  if (count > 0) await recategorize(category.id, result.moveTo);
+  return true;
+}
+
 function renderSettings() {
   return h(
     'div',
     { class: 'settings-layout' },
     h('p', { class: 'settings-section-title' }, t('settingsAppearance')),
     settingsPanel(state.settings, { fileAccess: state.fileAccess }),
+    h('p', { class: 'settings-section-title' }, t('settingsCategories')),
+    categoriesPanel(state.settings, { counts: categoryCounts(), onChange: saveCategories, onDelete: deleteCategory }),
     h('p', { class: 'settings-section-title' }, t('settingsShortcuts')),
     shortcutsPanel(),
     h('p', { class: 'settings-section-title' }, t('settingsData')),
@@ -737,6 +775,7 @@ async function init() {
 
   await ensureMigrated().catch((err) => console.error('Annotator: migration failed', err));
   state.settings = await getSettings();
+  applyCategories(state.settings);
   readRoute();
   await refresh();
   whatsNewBanner(state.settings).then((banner) => banner && $('whats-new').append(banner));
@@ -806,7 +845,10 @@ async function init() {
     renderTimer = setTimeout(render, 60);
   };
   onStoreChange(({ pages, settings }) => {
-    if (settings) state.settings = settings;
+    if (settings) {
+      state.settings = settings;
+      applyCategories(settings);
+    }
     if (pages.size) applyPageChanges(pages);
     if (pages.size || (settings && state.view !== 'settings')) redraw();
   });

@@ -660,6 +660,145 @@ textarea.input {
   margin-top: 2px;
 }
 
+.category-intro {
+  margin: 0;
+  padding: 10px 6px 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.category-editor {
+  display: grid;
+  gap: 2px;
+  padding: 0 4px 8px;
+}
+
+.category-head,
+.category-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 54px 40px 92px;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-head {
+  padding: 0 0 2px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.category-block {
+  display: grid;
+  gap: 6px;
+  padding: 3px 0;
+}
+
+.category-color {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  cursor: pointer;
+}
+
+.category-color:hover,
+.category-color[aria-expanded='true'] {
+  border-color: var(--accent);
+}
+
+.category-color .swatch {
+  width: 18px;
+  height: 18px;
+}
+
+.category-name,
+.category-key {
+  height: 34px;
+}
+
+.category-key {
+  padding: 0 4px;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.category-count {
+  color: var(--subtle);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.category-actions {
+  display: flex;
+  gap: 0;
+}
+
+.category-actions .icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.category-palette {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  margin: 0 0 4px 42px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.palette-custom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.palette-custom input[type='color'] {
+  width: 30px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: none;
+  cursor: pointer;
+}
+
+.category-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding-top: 6px;
+}
+
+.category-status {
+  flex-basis: 100%;
+  min-height: 17px;
+  color: var(--warning);
+  font-size: 12px;
+}
+
+.category-select {
+  width: auto;
+  min-width: 160px;
+  height: 32px;
+}
+
 .kbd {
   display: inline-flex;
   align-items: center;

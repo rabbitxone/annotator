@@ -15,6 +15,8 @@ import {
   toCsv,
   toMarkdown,
 } from '../../src/shared/exchange.js';
+import { resolveCategories } from '../../src/shared/categories.js';
+import { setCategories } from '../../src/shared/constants.js';
 
 const annotation = (id, extra = {}) => ({
   id,
@@ -46,7 +48,7 @@ test('rejects foreign files and sanitizes entries', () => {
       version: 1,
       pages: [
         { url: 'javascript:alert(1)', annotations: [annotation('x')] },
-        { url: 'https://b.com/?utm_source=x', annotations: [annotation('y', { color: 'neon' }), { id: 'z' }] },
+        { url: 'https://b.com/?utm_source=x', annotations: [annotation('y', { color: 'Not Valid!' }), { id: 'z' }] },
       ],
     }),
   );
@@ -176,7 +178,7 @@ test('csv has one row per highlight with color name and code, in text order', ()
   assert.equal(
     csv,
     [
-      'Page title,Page URL,File or site,Color,Color code,Highlighted text,Note,Page note,Created,Modified',
+      'Page title,Page URL,File or site,Category,Color code,Highlighted text,Note,Page note,Created,Modified',
       'A [b],https://a.com/x_(1),a.com,YELLOW,#FACC15,"l1\nl2 *x*",,context,2026-10-11 09:15:30,2026-10-11 09:15:30',
       'A [b],https://a.com/x_(1),a.com,GREEN,#22C55E,quote 2,second,context,2026-10-12 09:15:30,2026-10-13 09:15:30',
       'B,https://b.com/,b.com,YELLOW,#FACC15,quote 3,,,2026-10-10 09:15:30,2026-10-10 09:15:30',
@@ -217,4 +219,43 @@ test('local files are named by file name, folder and full path in exports', () =
   assert.equal(csv[1], `study 001.html,${file},C:/papers/trial A/study 001.html,Yellow,#FACC15,quote 1,,,2026-10-10 09:15:30,2026-10-10 09:15:30`);
   const md = toMarkdown(groups, {}, { now: NOW });
   assert.ok(md.startsWith(`# [study 001.html](${file})\n\nC:/papers/trial A · highlights: 1`));
+});
+
+test('a backup carries categories, and importing one keeps only well-formed entries', () => {
+  const backup = createBackup([], {
+    now: 0,
+    categories: [{ id: 'c-1', name: ' Funding ', swatch: '#14b8a6', key: 'F', extra: 'x' }, { id: 'Bad Id' }, { id: 'yellow', name: 'Sample size' }],
+  });
+  assert.equal(backup.categories.length, 3);
+  const { categories } = parseBackup(JSON.stringify(backup));
+  assert.deepEqual(categories, [{ id: 'c-1', name: 'Funding', swatch: '#14B8A6', key: 'f' }, { id: 'yellow', name: 'Sample size' }]);
+  assert.deepEqual(parseBackup(JSON.stringify(createBackup([], { now: 0 }))).categories, []);
+  assert.equal(createBackup([], { categories: [] }).categories, undefined, 'nothing to say, nothing written');
+});
+
+test('custom categories show up by name in markdown and csv, and unknown ones in gray', () => {
+  setCategories(resolveCategories([{ id: 'yellow', name: 'Sample size' }, { id: 'c-1', name: 'Funding', swatch: '#14B8A6' }]));
+  try {
+    const groups = [
+      {
+        page: page('https://a.com/', []),
+        annotations: [
+          annotation('1', { color: 'c-1', createdAt: at(10) }),
+          annotation('2', { color: 'yellow', createdAt: at(10) }),
+          annotation('3', { color: 'gone', createdAt: at(10) }),
+        ],
+      },
+    ];
+    const md = toMarkdown(groups, { title: 'T' }, { now: NOW });
+    assert.ok(md.includes('🟡 Sample size 1 · 🟢 Funding 1 · ⚪ gone 1'), md);
+    assert.ok(md.includes('- 🟢 **Funding** · 2026-10-10'));
+    const byColor = toMarkdown(groups, { title: 'T' }, { now: NOW, groupBy: 'color' });
+    assert.ok(byColor.indexOf('## 🟡 Sample size') < byColor.indexOf('## 🟢 Funding') && byColor.indexOf('## 🟢 Funding') < byColor.indexOf('## ⚪ gone'));
+    const rows = toCsv(groups).split('\r\n');
+    assert.ok(rows[1].includes(',Funding,#14B8A6,'), rows[1]);
+    assert.ok(rows.some((r) => r.includes(',Sample size,#FACC15,')));
+    assert.ok(rows.some((r) => r.includes(',gone,#9CA3AF,')), 'a removed category is exported by its id');
+  } finally {
+    setCategories(null);
+  }
 });

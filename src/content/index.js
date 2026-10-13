@@ -1,5 +1,8 @@
 import { api } from '../shared/api.js';
+import { applyCategories } from '../shared/apply-categories.js';
+import { categoryForKey } from '../shared/categories.js';
 import { copyText } from '../shared/clipboard.js';
+import { getCategories } from '../shared/constants.js';
 import { quoteSnippet, toMarkdown } from '../shared/exchange.js';
 import { exportLabels } from '../shared/export-labels.js';
 import {
@@ -64,7 +67,11 @@ function main() {
   let lastCount = 0;
   let shutDown = false;
 
-  const defaultColor = () => settings?.defaultColor ?? 'yellow';
+  // The default category, or the first one if that was removed
+  const defaultColor = () => {
+    const categories = getCategories();
+    return categories.some((c) => c.id === settings?.defaultColor) ? settings.defaultColor : categories[0].id;
+  };
 
   const ui = createUi({
     onHighlight: (color) => createFromSelection(color, false),
@@ -487,11 +494,32 @@ function main() {
     if (e.shiftKey || e.key === 'Shift') maybeShowHandle(e);
   });
   document.addEventListener('selectionchange', () => {
-    if (['handle', 'toolbar'].includes(ui.openKind) && window.getSelection()?.isCollapsed) ui.close();
+    if (['handle', 'toolbar', 'picker'].includes(ui.openKind) && window.getSelection()?.isCollapsed) ui.close();
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && ['handle', 'toolbar'].includes(ui.openKind)) ui.close();
   });
+
+  // Select some text, press a category's key: highlighted, no clicking. Off unless asked for,
+  // and never while typing in a field or when the page itself uses the key (those pages are
+  // usually apps, which Annotator leaves alone anyway).
+  document.addEventListener(
+    'keydown',
+    (e) => {
+      if (e.defaultPrevented || !settings?.quickKeys || !pageUrl || !checkAlive()) return;
+      if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing || e.repeat || ui.isInside(e)) return;
+      const category = categoryForKey(getCategories(), e.key);
+      if (!category) return;
+      const target = e.target instanceof Element ? e.target : null;
+      if (target?.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"], [role="textbox"]')) return;
+      const range = selectionRange();
+      if (!range || !isSelectionAnnotatable(range) || !siteEnabled()) return;
+      e.preventDefault();
+      e.stopPropagation();
+      createFromSelection(category.id, false);
+    },
+    true,
+  );
 
   api.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     switch (message?.type) {
@@ -523,8 +551,9 @@ function main() {
   onStoreChange(({ pages, settings: nextSettings }) => {
     if (nextSettings) {
       settings = nextSettings;
+      applyCategories(settings);
       if (styleApplied) applyHighlightStyle(settings.highlightStyle);
-      if (['handle', 'toolbar'].includes(ui.openKind) && (!settings.selectionToolbar || !siteEnabled())) ui.close();
+      if (['handle', 'toolbar', 'picker'].includes(ui.openKind) && (!settings.selectionToolbar || !siteEnabled())) ui.close();
       if (reportedEnabled !== null) reportEnabled(siteEnabled());
     }
     if (!pageUrl || !pages.has(pageUrl)) return;
@@ -569,6 +598,7 @@ function main() {
   (async () => {
     await ensureMigrated().catch(() => { });
     settings = await getSettings();
+    applyCategories(settings);
     await loadPage();
     if (document.body) {
       observer.observe(document.body, { childList: true, subtree: true, characterData: true });

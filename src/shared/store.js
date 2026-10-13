@@ -205,6 +205,27 @@ export async function relocatePages(moves) {
   return { moved, merged };
 }
 
+/** Moves every note in category `from` to `to` (when a category is deleted). Returns how many moved. */
+export async function recategorize(from, to) {
+  const all = await storage().get(null);
+  const writes = {};
+  const now = Date.now();
+  let moved = 0;
+  for (const [key, page] of Object.entries(all)) {
+    if (!key.startsWith(PAGE_KEY_PREFIX) || !Array.isArray(page?.annotations)) continue;
+    let touched = false;
+    const annotations = page.annotations.map((a) => {
+      if (a.color !== from) return a;
+      touched = true;
+      moved++;
+      return { ...a, color: to, updatedAt: now };
+    });
+    if (touched) writes[key] = { ...page, annotations };
+  }
+  if (moved) await storage().set(writes);
+  return moved;
+}
+
 export async function importPages(pages) {
   let added = 0;
   let updated = 0;

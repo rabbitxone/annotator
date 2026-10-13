@@ -1,4 +1,5 @@
-import { COLORS, colorById } from '../shared/constants.js';
+import { categoryForKey } from '../shared/categories.js';
+import { colorById, getCategories } from '../shared/constants.js';
 import { h } from '../shared/dom.js';
 import { relativeTime, t } from '../shared/i18n.js';
 import { icon } from '../shared/icons.js';
@@ -12,6 +13,10 @@ const POPOVER_GAP = 10;
 const ARROW_INSET = 20;
 const EDGE = 8;
 const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+const TOOLBAR_SWATCHES = 6;
+const POPOVER_SWATCHES = 5;
+const keyHint = (category, index) =>
+  [category.key?.toUpperCase(), index < 9 ? String(index + 1) : null].filter(Boolean).join(' / ');
 
 function place(el, getRect, prefer, gap) {
   const rect = getRect();
@@ -144,8 +149,8 @@ export function createUi(handlers) {
       {
         class: 'swatch-btn',
         type: 'button',
-        title: hint ? `${t(`color_${color.id}`)} (${hint})` : t(`color_${color.id}`),
-        'aria-label': t(`color_${color.id}`),
+        title: hint ? `${color.name} (${hint})` : color.name,
+        'aria-label': color.name,
         'aria-pressed': String(pressed),
         dataset: { color: color.id },
         style: { '--swatch': color.swatch },
@@ -178,18 +183,111 @@ export function createUi(handlers) {
     mount({ kind: 'handle', el, getRect, prefer: 'end', gap: END_GAP });
   }
 
+  function categoryItem(category, index, { active, onPick, onHover }) {
+    return h(
+      'li',
+      { role: 'presentation' },
+      h(
+        'button',
+        {
+          class: ['picker-item', active && 'active'],
+          type: 'button',
+          role: 'option',
+          'aria-selected': String(!!active),
+          dataset: { id: category.id },
+          style: { '--swatch': category.swatch },
+          onclick: () => onPick(category.id),
+          onmouseenter: onHover,
+        },
+        h('span', { class: 'swatch' }),
+        h('span', { class: 'picker-name' }, category.name),
+        keyHint(category, index) && h('kbd', null, keyHint(category, index)),
+      ),
+    );
+  }
+
+  // A list you filter by typing. It never takes focus, so the selection on the page stays put.
+  function showPicker(getRect) {
+    let query = '';
+    let active = 0;
+    const list = h('ul', { class: 'picker-list', role: 'listbox' });
+    const label = h('div', { class: 'picker-query' });
+    const matches = () => {
+      const q = query.trim().toLowerCase();
+      return getCategories()
+        .map((category, index) => ({ category, index }))
+        .filter(({ category }) => !q || category.name.toLowerCase().includes(q));
+    };
+    function render() {
+      const items = matches();
+      active = Math.min(active, Math.max(0, items.length - 1));
+      label.textContent = query || t('pickerTypeToFilter');
+      label.dataset.empty = query ? '' : 'true';
+      list.replaceChildren(
+        ...(items.length
+          ? items.map(({ category, index }, i) =>
+            categoryItem(category, index, {
+              active: i === active,
+              onPick: (id) => handlers.onHighlight(id),
+              onHover: () => {
+                active = i;
+                for (const [n, row] of [...list.children].entries()) row.firstChild.classList.toggle('active', n === i);
+              },
+            }),
+          )
+          : [h('li', { class: 'picker-empty' }, t('pickerNoMatch'))]),
+      );
+      list.children[active]?.scrollIntoView({ block: 'nearest' });
+    }
+    const handleKey = (e) => {
+      const items = matches();
+      if (e.key === 'Escape') close();
+      else if (e.key === 'Enter') items[active] && handlers.onHighlight(items[active].category.id);
+      else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        active = items.length ? (active + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length : 0;
+        render();
+      } else if (e.key === 'Backspace') {
+        query = query.slice(0, -1);
+        render();
+      } else if (e.key.length === 1) {
+        query += e.key;
+        active = 0;
+        render();
+      } else return false;
+      return true;
+    };
+    const el = h('div', { class: 'layer picker', role: 'dialog', 'aria-label': t('toolbarMore') }, label, list);
+    keepSelection(el);
+    mount({ kind: 'picker', el, getRect, prefer: 'end', gap: END_GAP, handleKey });
+    render();
+  }
+
   function showToolbar(getRect) {
+    const categories = getCategories();
+    const noteKeyTaken = !!categoryForKey(categories, 'n');
     const el = h(
       'div',
       { class: 'layer toolbar', role: 'toolbar', 'aria-label': t('extName') },
-      COLORS.map((color, i) => swatchButton(color, false, (id) => handlers.onHighlight(id), String(i + 1))),
+      categories.slice(0, TOOLBAR_SWATCHES).map((color, i) => swatchButton(color, false, (id) => handlers.onHighlight(id), keyHint(color, i))),
+      categories.length > TOOLBAR_SWATCHES &&
+      h(
+        'button',
+        {
+          class: 'icon-btn toolbar-more',
+          type: 'button',
+          title: `${t('toolbarMore')} (/)`,
+          'aria-label': t('toolbarMore'),
+          onclick: () => showPicker(getRect),
+        },
+        icon('more', { size: 16 }),
+      ),
       h('span', { class: 'divider' }),
       h(
         'button',
         {
           class: 'toolbar-note',
           type: 'button',
-          title: `${t('toolbarAddNote')} (N)`,
+          title: noteKeyTaken ? t('toolbarAddNote') : `${t('toolbarAddNote')} (N)`,
           onclick: () => handlers.onHighlightWithNote(),
         },
         icon('noteEdit', { size: 16 }),
@@ -216,18 +314,49 @@ export function createUi(handlers) {
     };
     textarea.addEventListener('input', autosize);
 
-    const swatches = h(
-      'div',
-      { class: 'swatches', role: 'group', 'aria-label': t('colorLabel') },
-      COLORS.map((c) =>
-        swatchButton(c, c.id === color, (id) => {
-          color = id;
-          for (const btn of swatches.children) btn.setAttribute('aria-pressed', String(btn.dataset.color === id));
-          quote.style.setProperty('--swatch', colorById(id).swatch);
-          handlers.onColorChange(annotation.id, id);
-        }),
-      ),
-    );
+    const swatches = h('div', { class: 'swatches', role: 'group', 'aria-label': t('colorLabel') });
+    const categoryMenu = h('ul', { class: 'picker-list popover-categories', role: 'listbox', hidden: true });
+
+    function pickCategory(id) {
+      color = id;
+      quote.style.setProperty('--swatch', colorById(id).swatch);
+      categoryMenu.hidden = true;
+      renderSwatches();
+      handlers.onColorChange(annotation.id, id);
+      reposition();
+    }
+
+    function renderSwatches() {
+      const categories = getCategories();
+      let shown = categories.slice(0, POPOVER_SWATCHES);
+      if (!shown.some((c) => c.id === color)) shown = [...shown, colorById(color)];
+      swatches.replaceChildren(
+        ...shown.map((c) => swatchButton(c, c.id === color, pickCategory)),
+        ...(categories.length > POPOVER_SWATCHES
+          ? [
+            h(
+              'button',
+              {
+                class: 'icon-btn',
+                type: 'button',
+                title: t('toolbarMore'),
+                'aria-label': t('toolbarMore'),
+                'aria-expanded': String(!categoryMenu.hidden),
+                onclick: () => {
+                  categoryMenu.hidden = !categoryMenu.hidden;
+                  categoryMenu.replaceChildren(
+                    ...categories.map((c, i) => categoryItem(c, i, { active: c.id === color, onPick: pickCategory, onHover: () => { } })),
+                  );
+                  renderSwatches();
+                  reposition();
+                },
+              },
+              icon('more', { size: 16 }),
+            ),
+          ]
+          : []),
+      );
+    }
 
     const deleteBtn = h(
       'button',
@@ -267,6 +396,8 @@ export function createUi(handlers) {
       annotation.quote?.exact || '',
     );
 
+    renderSwatches();
+
     const edited = annotation.updatedAt - annotation.createdAt > 1000;
     const box = h(
       'div',
@@ -293,6 +424,7 @@ export function createUi(handlers) {
           ),
         ),
       ),
+      categoryMenu,
       quote,
       textarea,
       h(
@@ -406,10 +538,21 @@ export function createUi(handlers) {
   document.addEventListener(
     'keydown',
     (e) => {
-      if (current?.kind !== 'toolbar' || e.ctrlKey || e.metaKey || e.altKey) return;
-      const index = Number(e.key) - 1;
-      if (Number.isInteger(index) && COLORS[index]) handlers.onHighlight(COLORS[index].id);
+      if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing) return;
+      if (current?.kind === 'picker') {
+        if (current.handleKey(e)) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        return;
+      }
+      if (current?.kind !== 'toolbar') return;
+      const categories = getCategories();
+      const byKey = categoryForKey(categories, e.key);
+      const byDigit = /^[1-9]$/.test(e.key) ? categories[Number(e.key) - 1] : null;
+      if (byKey || byDigit) handlers.onHighlight((byKey ?? byDigit).id);
       else if (e.key === 'n' || e.key === 'N') handlers.onHighlightWithNote();
+      else if (e.key === '/' && categories.length > TOOLBAR_SWATCHES) showPicker(current.getRect);
       else return;
       e.preventDefault();
       e.stopPropagation();
