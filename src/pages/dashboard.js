@@ -15,6 +15,7 @@ import {
   quoteSnippet,
   toMarkdown,
 } from '../shared/exchange.js';
+import { burnPages } from '../shared/burn-files.js';
 import { exportLabels } from '../shared/export-labels.js';
 import { applyI18n, formatNumber, plural, relativeTime, t, uiLanguage } from '../shared/i18n.js';
 import { hydrateIcons, icon } from '../shared/icons.js';
@@ -33,10 +34,13 @@ import {
   updateSettings,
 } from '../shared/store.js';
 import { displayAddress, isFileUrl, pageName, siteLabel } from '../shared/url.js';
+import { zip } from '../shared/zip.js';
 import { confirmAndDelete, openNote } from './components/actions.js';
 import { masonry } from './components/masonry.js';
 import { annotationCard, siteAvatar, swatchPicker } from './components/card.js';
+import { burnResultDialog } from './components/burn-result-dialog.js';
 import { exportDialog } from './components/export-dialog.js';
+import { chooseFolder } from './components/folder-access.js';
 import { categoryDeleteDialog } from './components/category-delete-dialog.js';
 import { relocateDialog } from './components/relocate-dialog.js';
 import { reverseMoves } from '../shared/relocate.js';
@@ -172,6 +176,7 @@ function exportScopes() {
     notes: groups.reduce((n, g) => n + g.annotations.length, 0),
     pages: groups.length,
     pageNotes: groups.filter((g) => g.includePageNote !== false && g.page.note?.trim()).length,
+    files: groups.filter((g) => isFileUrl(g.page.url)).length,
   });
   const everything = [...state.pages]
     .sort((a, b) => b.updatedAt - a.updatedAt)
@@ -201,6 +206,7 @@ async function openExport(preferred) {
   saveExportPrefs(result.remember);
 
   const { scope, format, options } = result;
+  if (format === 'html') return saveIntoFiles(scope);
   try {
     const file = buildExport(format, scope.groups, {
       labels: exportLabels(),
@@ -215,6 +221,24 @@ async function openExport(preferred) {
   } catch (err) {
     console.error('Annotator: export failed', err);
     toast(t('toastExportFailed'));
+  }
+}
+
+// Writes the notes into the HTML files themselves, so a git repository of them tracks the notes
+// too. Every file gets all of its page's notes (the scope only says which files), and what the
+// file had from an earlier save is replaced, so deleting a note here takes it out of the file.
+async function saveIntoFiles(scope) {
+  const pages = scope.groups.map((g) => g.page).filter((page) => isFileUrl(page.url));
+  try {
+    const folder = await chooseFolder();
+    if (!folder) return;
+    const result = await burnPages(folder, pages, { categories: getCategories(), style: state.settings.highlightStyle });
+    // Firefox can't write into a folder, so the changed files come as one zip to copy over the originals
+    if (result.outputs.length) download(`annotator-files-${dateStamp()}.zip`, zip(result.outputs), 'application/zip');
+    await burnResultDialog({ result, downloaded: result.outputs.length > 0 });
+  } catch (err) {
+    console.error('Annotator: saving into files failed', err);
+    toast(t('toastBurnFailed'));
   }
 }
 

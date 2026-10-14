@@ -40,6 +40,18 @@ export async function getPage(url) {
   return result[key] ?? null;
 }
 
+// Which version of a file's burned-in notes this browser has already looked at (see content/annotator.js)
+const burnedKey = (url) => `burned:${url}`;
+
+export async function getBurnedVersion(url) {
+  const key = burnedKey(url);
+  return (await storage().get(key))[key] ?? null;
+}
+
+export function setBurnedVersion(url, version) {
+  return storage().set({ [burnedKey(url)]: version });
+}
+
 export async function listPages() {
   const all = await storage().get(null);
   return Object.entries(all)

@@ -438,6 +438,9 @@
   "whatsNewBackup": {
     "message": "Backups you can import on another device, and Markdown export."
   },
+  "whatsNewFiles": {
+    "message": "Save highlights into your HTML files (Export → HTML files), so Git can track them."
+  },
   "whatsNewDismiss": {
     "message": "Got it"
   },
@@ -506,6 +509,12 @@
   "exportCsvHint": {
     "message": "One row per highlight: page, color, text, note and dates. Opens in Excel, Google Sheets and LibreOffice."
   },
+  "exportHtml": {
+    "message": "HTML files"
+  },
+  "exportHtmlHint": {
+    "message": "Writes highlights and notes into the files themselves, so Git can track them and nothing depends on the browser's storage. Files on your computer only."
+  },
   "exportReimportable": {
     "message": "Can be imported again"
   },
@@ -533,8 +542,28 @@
   "exportCsvFormulaHint": {
     "message": "Text that starts with = + - or @ gets a leading apostrophe, so Excel never runs it as a formula."
   },
+  "exportHtmlSteps": {
+    "message": "Next you choose the folder that holds the files, or a folder above it. Only the notes are added to them; the rest of each file stays exactly as it was."
+  },
+  "exportHtmlStepsDownload": {
+    "message": "Next you choose the folder that holds the files, or a folder above it. Firefox can't write into folders, so the updated files come as a zip to copy over the originals."
+  },
+  "exportHtmlScope": {
+    "message": "Local files here: $V1$. Each one gets all of its notes, and anything an earlier save wrote into it is replaced.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportHtmlEmpty": {
+    "message": "None of these notes are on local files. Only files on this computer can be updated."
+  },
   "exportAction": {
     "message": "Export"
+  },
+  "exportActionHtml": {
+    "message": "Choose folder…"
   },
   "exportPageNotes": {
     "message": "Page notes"
@@ -577,6 +606,85 @@
   },
   "toastExportFailed": {
     "message": "Couldn't create the export. Try again."
+  },
+  "toastBurnFailed": {
+    "message": "Couldn't save into the files. Try again."
+  },
+  "burnResultTitle": {
+    "message": "Saved into files"
+  },
+  "burnDone": {
+    "message": "Files updated: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnDownloaded": {
+    "message": "Files updated: $V1$, downloaded as a zip.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnDownloadedHint": {
+    "message": "Copy them over the originals. Inside the zip each one keeps its folder."
+  },
+  "burnUnchanged": {
+    "message": "Already up to date: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnUpToDate": {
+    "message": "Everything was already up to date."
+  },
+  "burnUnplaced": {
+    "message": "Notes that could not be marked in the text because it is no longer there: $V1$. They are still saved in the files.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnNotFound": {
+    "message": "Not found in that folder ($V1$):",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnSkipped": {
+    "message": "Left alone because they are not UTF-8 text ($V1$):",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnFailed": {
+    "message": "Could not be written ($V1$):",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnMore": {
+    "message": "…and $V1$ more",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnNothing": {
+    "message": "Nothing to save: none of these notes are on local files."
   },
   "csvPageTitle": {
     "message": "Page title"

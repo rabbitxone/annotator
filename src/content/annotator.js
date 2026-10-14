@@ -1,13 +1,14 @@
 import { api } from '../shared/api.js';
-import { applyCategories } from '../shared/apply-categories.js';
-import { categoryForKey } from '../shared/categories.js';
+import { applyCategories, categoryNameFor } from '../shared/apply-categories.js';
+import { categoryForKey, mergeCategories } from '../shared/categories.js';
 import { copyText } from '../shared/clipboard.js';
 import { getCategories } from '../shared/constants.js';
 import { quoteSnippet, toMarkdown } from '../shared/exchange.js';
 import { exportLabels } from '../shared/export-labels.js';
-import { normalizeUrl, siteKey } from '../shared/url.js';
+import { isFileUrl, normalizeUrl, siteKey } from '../shared/url.js';
 import { uuid } from '../shared/uuid.js';
 import { buildIndex, describeRange, resolve, UI_HOST_TAG } from './anchoring.js';
+import { readBurned, unwrapBurnedMarks } from './burned.js';
 import { collectSignals, isAppLike, isSelectionAnnotatable } from './context.js';
 import {
   applyHighlightStyle,
@@ -45,13 +46,17 @@ export function startAnnotator(env) {
     addAnnotation,
     deleteAnnotations,
     ensureMigrated,
+    getBurnedVersion,
     getPage,
     getSettings,
+    importPages,
     onStoreChange,
     reanchorAnnotation,
+    setBurnedVersion,
     setLost,
     setPageNote,
     updateAnnotation,
+    updateSettings,
   } = env.store;
   const address = env.address ?? (() => normalizeUrl(location.href));
   const allows = env.allows ?? (() => true);
@@ -260,6 +265,29 @@ export function startAnnotator(env) {
     return false;
   }
 
+  // A local file can carry its own highlights (see shared/burn.js). Annotator draws them from what
+  // it has stored, so the file's marks come off the live page. And the notes in the file are merged
+  // into what is stored the first time this browser sees that version of the file: after the
+  // browser's data was cleared, on another computer, or when a teammate saved newer notes into it.
+  // Merging only adds and updates. A note deleted here stays deleted, because the same version of
+  // the file isn't merged twice; the next save from here takes it out of the file too.
+  async function restoreFromFile() {
+    if (!isFileUrl(pageUrl) || !importPages || !setBurnedVersion) return;
+    const burned = readBurned(pageUrl);
+    if (!burned) return;
+    withoutObserver(unwrapBurnedMarks);
+    const version = burned.page.updatedAt;
+    if ((await getBurnedVersion(pageUrl)) === version) return;
+
+    const merged = mergeCategories(settings.categories, burned.categories, categoryNameFor);
+    if (merged.added > 0 && updateSettings) {
+      settings = await updateSettings({ categories: merged.categories });
+      applyCategories(settings);
+    }
+    await importPages([burned.page]);
+    await setBurnedVersion(pageUrl, version);
+  }
+
   async function loadPage() {
     pageUrl = address();
     orphanRetries = 0;
@@ -268,6 +296,7 @@ export function startAnnotator(env) {
       panel.close();
       return;
     }
+    await restoreFromFile();
     const page = await getPage(pageUrl);
     annotations = page?.annotations ?? [];
     pageNote = page?.note ?? '';

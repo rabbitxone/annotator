@@ -197,3 +197,14 @@ test('a <pre> that opens with character references is mapped by its content', ()
   assert.ok(!html.includes('&gt<mark'), 'no tag lands inside a character reference');
   assert.equal(stripBurned(html), source);
 });
+
+test('the file records when the notes last changed, and nothing else that varies', () => {
+  const page = { annotations: [ann('a1', 'brown fox')], updatedAt: 1234 };
+  const { html } = burnIntoHtml(PAGE, page, { categories });
+  assert.equal(parseBurned(findBurnedData(html), 'file:///a.html').page.updatedAt, 1234);
+  // Saving the same notes again, later, writes the same file: no churn in git
+  assert.equal(burnIntoHtml(html, page, { categories }).changed, false);
+  // A file from before the date was kept never counts as news
+  const old = html.replace('"updatedAt": 1234,\n', '');
+  assert.equal(parseBurned(findBurnedData(old), 'file:///a.html').page.updatedAt, 0);
+});

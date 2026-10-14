@@ -1,6 +1,7 @@
 import { h } from '../../shared/dom.js';
 import { hasFormulaText } from '../../shared/exchange.js';
 import { buildDialog, closeDialog, showDialog } from './dialog.js';
+import { canWriteInPlace } from './folder-access.js';
 import { dropdown } from './dropdown.js';
 import { toggle } from './toggle.js';
 import { formatNumber, t } from '../../shared/i18n.js';
@@ -10,9 +11,10 @@ const FORMATS = [
   { id: 'json', ext: '.json', importable: true },
   { id: 'markdown', ext: '.md' },
   { id: 'csv', ext: '.csv' },
+  { id: 'html', ext: '.html' },
 ];
 
-const FORMAT_KEYS = { json: 'exportJson', markdown: 'exportMarkdown', csv: 'exportCsv' };
+const FORMAT_KEYS = { json: 'exportJson', markdown: 'exportMarkdown', csv: 'exportCsv', html: 'exportHtml' };
 
 function choice(name, value, checked, onPick, title, hint, badge) {
   return h(
@@ -43,7 +45,7 @@ function select(options, value, onChange, ariaLabel) {
 }
 
 /**
- * scopes: [{ id, label, notes, pages, pageNotes }]
+ * scopes: [{ id, label, notes, pages, pageNotes, files }]  (files: how many of the pages are local files)
  * initial: { scope, format, groupBy, separator, settings }
  * Resolves to { scope, format, options } or null when cancelled.
  */
@@ -51,10 +53,13 @@ export function exportDialog({ scopes, initial }) {
   return new Promise((resolve) => {
     const state = { ...initial, scope: scopes.some((s) => s.id === initial.scope) ? initial.scope : scopes[0].id };
     const current = () => scopes.find((s) => s.id === state.scope);
-    const isEmpty = (scope) => scope.notes + scope.pageNotes === 0;
+    // Saving into files only concerns pages that are files on this computer
+    const isEmpty = (scope) => (state.format === 'html' ? scope.files === 0 : scope.notes + scope.pageNotes === 0);
 
     const options = h('div', { class: 'export-options' });
-    const submit = h('button', { class: 'btn btn-primary', type: 'button', onclick: () => closeDialog(dialog, 'confirm') }, icon('download', { size: 14 }), t('exportAction'));
+    const submitIcon = icon('download', { size: 14 });
+    const submitLabel = h('span', null, t('exportAction'));
+    const submit = h('button', { class: 'btn btn-primary', type: 'button', onclick: () => closeDialog(dialog, 'confirm') }, submitIcon, submitLabel);
     const empty = h('p', { class: 'choice-hint export-empty' }, t('exportEmpty'));
 
     function renderOptions() {
@@ -88,10 +93,16 @@ export function exportDialog({ scopes, initial }) {
         // Only worth saying when something in this export would get the apostrophe
         if (hasFormulaText(scope.groups)) rows.push(h('p', { class: 'choice-hint' }, t('exportCsvFormulaHint')));
       }
+      if (state.format === 'html') {
+        rows.push(h('p', { class: 'choice-hint' }, t(canWriteInPlace ? 'exportHtmlSteps' : 'exportHtmlStepsDownload')));
+        if (scope.files > 0) rows.push(h('p', { class: 'choice-hint' }, t('exportHtmlScope', [formatNumber(scope.files)])));
+      }
       options.replaceChildren(...rows);
       options.hidden = rows.length === 0;
       submit.disabled = isEmpty(scope);
       empty.hidden = !isEmpty(scope);
+      empty.textContent = t(state.format === 'html' ? 'exportHtmlEmpty' : 'exportEmpty');
+      submitLabel.textContent = t(state.format === 'html' ? 'exportActionHtml' : 'exportAction');
     }
 
     const scopeChoices = scopes.map((scope) =>
@@ -104,7 +115,7 @@ export function exportDialog({ scopes, initial }) {
           renderOptions();
         },
         scope.label,
-        isEmpty(scope) ? t('exportEmptyScope') : t('exportScopeCount', [formatNumber(scope.notes), formatNumber(scope.pages)]),
+        t(scope.notes + scope.pageNotes === 0 ? 'exportEmptyScope' : 'exportScopeCount', [formatNumber(scope.notes), formatNumber(scope.pages)]),
       ),
     );
 

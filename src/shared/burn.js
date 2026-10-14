@@ -1,8 +1,8 @@
 import { decodeHTML } from 'entities';
 import { parse } from 'parse5';
 import { findQuote, normalizeWithMap } from '../content/anchoring-core.js';
-import { isValidCategoryId, sanitizeStoredCategories } from './categories.js';
-import { cleanPage } from './exchange.js';
+import { BURN_FORMAT, BURN_VERSION } from './burned-data.js';
+import { isValidCategoryId } from './categories.js';
 
 /**
  * Burning highlights into an HTML file: the notes become part of the file itself, so git can track
@@ -16,13 +16,12 @@ import { cleanPage } from './exchange.js';
  * inserted at the positions the parser reports in the source, nothing is re-serialized.
  */
 
-export const BURN_FORMAT = 'annotator-file';
-export const BURN_VERSION = 1;
+export { BURN_FORMAT, BURN_VERSION, findBurnedData, parseBurned } from './burned-data.js';
+
 export const BLOCK_NOTE = 'highlights and notes from the Annotator extension; rewritten each time they are saved into this file';
 const BLOCK_BEGIN = `<!-- annotator:begin (${BLOCK_NOTE}) -->`;
 const BLOCK_END = '<!-- annotator:end -->';
 const BLOCK_PATTERN = /<!-- annotator:begin\b[\s\S]*?<!-- annotator:end -->(?:\r\n|\n)?/g;
-const DATA_PATTERN = /<script\b[^>]*\bdata-annotator\b[^>]*>([\s\S]*?)<\/script>/i;
 
 // The same text the extension reads in the browser (see content/anchoring.js)
 const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE', 'TEXTAREA', 'SELECT', 'OPTION', 'IFRAME', 'SVG']);
@@ -258,7 +257,7 @@ function plan(source, annotations) {
     }
     close();
   }
-  return { edits, found, placed, missing, body, source };
+  return { edits, found, placed, body };
 }
 
 // ---- The block --------------------------------------------------------------------------------
@@ -275,6 +274,11 @@ function highlightRules(categories, style) {
   return rules;
 }
 
+// A fixed order of keys, so what the file holds reads the same whichever storage it came from
+function canonical({ id, color, note, quote, position, createdAt, updatedAt }) {
+  return { id, color, note, quote: { exact: quote.exact, prefix: quote.prefix, suffix: quote.suffix }, ...(position ? { position } : {}), createdAt, updatedAt };
+}
+
 function buildBlock({ page, annotations, categories, style, eol }) {
   const used = new Set(annotations.map((a) => (isValidCategoryId(a.color) ? a.color : 'yellow')));
   const known = categories.filter((c) => used.has(c.id));
@@ -282,8 +286,10 @@ function buildBlock({ page, annotations, categories, style, eol }) {
     format: BURN_FORMAT,
     version: BURN_VERSION,
     page: {
+      // When the notes last changed: what tells another browser that this file has news
+      updatedAt: Number.isFinite(page.updatedAt) ? page.updatedAt : 0,
       ...(page.note?.trim() ? { note: page.note, noteUpdatedAt: page.noteUpdatedAt } : {}),
-      annotations: annotations.map(({ lostAt, ...rest }) => rest),
+      annotations: annotations.map(canonical),
     },
     categories: known.map(({ id, name, swatch }) => ({ id, name, swatch })),
   };
@@ -322,7 +328,7 @@ function burnBody(source, page, { categories = [], style = 'background' }) {
   const hasNote = !!page.note?.trim();
   if (annotations.length === 0 && !hasNote) return { html: clean, total: 0, marked: 0, unplaced: 0, cleaned: true };
 
-  const { edits, found, placed, missing, body } = plan(clean, annotations);
+  const { edits, found, placed, body } = plan(clean, annotations);
   const eol = eolOf(clean);
   const ordered = [...annotations].sort((a, b) => {
     const [ra, rb] = [found.get(a)?.start ?? Infinity, found.get(b)?.start ?? Infinity];
@@ -356,28 +362,4 @@ export function burnBytes(bytes, page, options) {
 
   const result = burnIntoHtml(source, page, options);
   return { ...result, bytes: result.changed ? new TextEncoder().encode(result.html) : bytes };
-}
-
-// ---- Reading it back --------------------------------------------------------------------------
-
-/** The JSON text of the notes inside a file's source, or null when none were burned in. */
-export function findBurnedData(source) {
-  return DATA_PATTERN.exec(source)?.[1] ?? null;
-}
-
-/**
- * Validates what was burned into a file and gives it the address it is opened under.
- * Returns { page, categories } or null. `text` is the JSON from findBurnedData, or the
- * textContent of the file's <script data-annotator>.
- */
-export function parseBurned(text, url, now = Date.now()) {
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    return null;
-  }
-  if (data?.format !== BURN_FORMAT || !data.page || typeof data.page !== 'object') return null;
-  const page = cleanPage({ ...data.page, url }, now);
-  return page ? { page, categories: sanitizeStoredCategories(data.categories) } : null;
 }

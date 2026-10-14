@@ -438,6 +438,9 @@
   "whatsNewBackup": {
     "message": "Kopie zapasowe do przeniesienia na inne urządzenie i eksport do Markdown."
   },
+  "whatsNewFiles": {
+    "message": "Zapisuj zakreślenia w plikach HTML (Eksport → Pliki HTML), żeby Git mógł je śledzić."
+  },
   "whatsNewDismiss": {
     "message": "Rozumiem"
   },
@@ -506,6 +509,12 @@
   "exportCsvHint": {
     "message": "Jeden wiersz na zakreślenie: strona, kolor, tekst, notatka i daty. Otwiera się w Excelu, Arkuszach Google i LibreOffice."
   },
+  "exportHtml": {
+    "message": "Pliki HTML"
+  },
+  "exportHtmlHint": {
+    "message": "Zapisuje zakreślenia i notatki w samych plikach, więc Git może je śledzić, a nic nie zależy od pamięci przeglądarki. Tylko pliki na tym komputerze."
+  },
   "exportReimportable": {
     "message": "Można zaimportować ponownie"
   },
@@ -533,8 +542,28 @@
   "exportCsvFormulaHint": {
     "message": "Tekst zaczynający się od = + - lub @ dostaje na początku apostrof, żeby Excel nigdy nie wykonał go jako formuły."
   },
+  "exportHtmlSteps": {
+    "message": "Potem wskażesz folder z plikami albo folder nadrzędny. Do plików dopisywane są tylko notatki; reszta każdego pliku zostaje bez zmian."
+  },
+  "exportHtmlStepsDownload": {
+    "message": "Potem wskażesz folder z plikami albo folder nadrzędny. Firefox nie pozwala zapisywać w folderach, więc zaktualizowane pliki dostaniesz w archiwum zip do skopiowania nad oryginały."
+  },
+  "exportHtmlScope": {
+    "message": "Plików lokalnych tutaj: $V1$. Każdy dostaje wszystkie swoje notatki, a to, co wcześniejszy zapis w nim zostawił, jest zastępowane.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportHtmlEmpty": {
+    "message": "Żadna z tych notatek nie należy do pliku lokalnego. Można zaktualizować tylko pliki na tym komputerze."
+  },
   "exportAction": {
     "message": "Eksportuj"
+  },
+  "exportActionHtml": {
+    "message": "Wybierz folder…"
   },
   "exportPageNotes": {
     "message": "Notatki do stron"
@@ -577,6 +606,85 @@
   },
   "toastExportFailed": {
     "message": "Nie udało się utworzyć eksportu. Spróbuj ponownie."
+  },
+  "toastBurnFailed": {
+    "message": "Nie udało się zapisać w plikach. Spróbuj ponownie."
+  },
+  "burnResultTitle": {
+    "message": "Zapisano w plikach"
+  },
+  "burnDone": {
+    "message": "Zaktualizowane pliki: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnDownloaded": {
+    "message": "Zaktualizowane pliki: $V1$, pobrane jako zip.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnDownloadedHint": {
+    "message": "Skopiuj je nad oryginały. W archiwum każdy zachowuje swój folder."
+  },
+  "burnUnchanged": {
+    "message": "Już aktualne: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnUpToDate": {
+    "message": "Wszystko było już aktualne."
+  },
+  "burnUnplaced": {
+    "message": "Notatki, których nie udało się zaznaczyć w tekście, bo już go tam nie ma: $V1$. W plikach są mimo to zapisane.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnNotFound": {
+    "message": "Nie znaleziono w tym folderze ($V1$):",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnSkipped": {
+    "message": "Pominięte, bo nie są tekstem UTF-8 ($V1$):",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnFailed": {
+    "message": "Nie udało się zapisać ($V1$):",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnMore": {
+    "message": "…i jeszcze $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "burnNothing": {
+    "message": "Nie ma czego zapisać: żadna z tych notatek nie należy do pliku lokalnego."
   },
   "csvPageTitle": {
     "message": "Tytuł strony"

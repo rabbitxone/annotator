@@ -15,7 +15,7 @@ export async function whatsNewBanner(settings, { compact = false, onDismiss } = 
     text: compact ? t('whatsNewShort') : null,
     body:
       !compact &&
-      h('ul', { class: 'notice-list' }, ['whatsNewPanel', 'whatsNewShortcuts', 'whatsNewCategories', 'whatsNewBackup'].map((key) => h('li', null, t(key)))),
+      h('ul', { class: 'notice-list' }, ['whatsNewPanel', 'whatsNewShortcuts', 'whatsNewCategories', 'whatsNewBackup', 'whatsNewFiles'].map((key) => h('li', null, t(key)))),
     actions: h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => banner.dismiss() }, t('whatsNewDismiss')),
     onDismiss: () => {
       api.storage.local.remove('whatsNew').catch(() => { });

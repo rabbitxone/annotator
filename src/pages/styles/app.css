@@ -1465,6 +1465,43 @@ body:has(.bulk-bar[data-open]) .toast {
   color: var(--muted);
 }
 
+.burn-dialog {
+  width: min(480px, calc(100vw - 32px));
+}
+
+.burn-dialog .dialog-body {
+  display: grid;
+  gap: 12px;
+}
+
+.burn-dialog .burn-main {
+  color: var(--on-surface);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.burn-heading {
+  margin-bottom: 4px;
+  color: var(--on-surface);
+  font-weight: 600;
+}
+
+.burn-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 18px;
+  word-break: break-all;
+}
+
+.burn-list .burn-more {
+  margin-left: -18px;
+  list-style: none;
+  font-family: var(--font-body);
+}
+
 .export-field {
   min-width: 0;
   margin: 0 0 16px;

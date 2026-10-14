@@ -24,6 +24,7 @@ All data is stored locally on your device. It is never sent to the developer or 
   - **CSV** – one row per highlight (page, URL, color name and code, text, note, dates) that opens in Excel, Google Sheets or LibreOffice. Text starting with `=`, `+`, `-` or `@` gets a leading apostrophe so spreadsheets never run it as a formula.
 
   Only JSON files can be imported back.
+- **Highlights inside your HTML files** – for local files, *Export → HTML files* writes the highlights and notes into the files themselves, so a Git repository of your project tracks them and clearing the browser's data can't lose them. See [Notes in your files](#notes-in-your-files-and-git) below.
 - **Dashboard tools** – sort by text order, group pages by site, recolor, copy or export a selection, and undo deletions.
 
 Annotator stays out of the way in web apps (mail, chat, editors) and turns on for articles. To tell them apart it uses the same check Firefox uses to offer Reader View ([Mozilla Readability](https://github.com/mozilla/readability), Apache-2.0), together with the page's own `og:type`/schema.org article markup.
@@ -38,7 +39,28 @@ Annotator works on HTML files saved on your computer too (handy for collections 
 - PDFs can't be annotated: both browsers open them in their own viewer, which extensions can't reach. The popup and the icon say so instead of failing silently.
 - Local pages are named by their file name and grouped by folder; the CSV export has a *File or site* column with the full path. One *off on this site* rule covers all local files.
 - Notes are stored under the file's path. If you move the files (another folder, drive or computer), use *Settings → Moved your files? → Change location* to point the notes at the new place. It also works for websites that changed their address, and can be undone when no notes had to be combined.
+- Notes can also live in the files themselves, for Git and for sharing with a team: [see below](#notes-in-your-files-and-git).
 - Lists draw in batches, so the dashboard stays fast with tens of thousands of notes (tested with 100,000 highlights across 20,000 files).
+
+### Notes in your files (and Git)
+
+Notes are kept in the browser's storage, which is private and fast, but a cleared browser takes them with it and Git can't see them. For local HTML files they can be written into the files too:
+
+1. In the dashboard, open **Export**, choose what to export and pick **HTML files**.
+2. Choose the folder that holds the files (or any folder above it). Chrome writes the changes straight into the files; Firefox can't write into folders, so it downloads a zip of the updated files to copy over the originals.
+3. Every file gets all of its notes. Saving again updates the file: edits show up, and a note you deleted is taken out. Only files on this computer count; web pages are left alone.
+
+What changes in a file: each highlighted passage is wrapped in a `<mark>` (so the file looks highlighted in any browser, with or without Annotator), and one block before `</body>` holds the notes as JSON plus a few lines of CSS. Nothing else is touched: line endings, encoding, spacing and the rest of the markup stay as they were, so a `git diff` shows just the notes. Only UTF-8 files are changed (other encodings are skipped and listed), and a passage whose text is no longer in the file is not marked, but its note is still kept in the block.
+
+When you open such a file, Annotator merges what the file holds into the browser the first time it sees that version: after the browser's data was cleared, on another computer or in a teammate's clone of the repository, or when a teammate saved newer notes. Merging adds and updates but never deletes, and one version of a file is merged only once, so a note you delete stays deleted until you save into the file again. If two people edit the same file, Git merges the notes like any other text.
+
+The same thing from a terminal, for Firefox, scripts or a pre-commit hook, working from a JSON backup:
+
+```sh
+node scripts/burn.mjs backup.json                    # files at the paths the notes were made under
+node scripts/burn.mjs backup.json --root ~/papers    # files below a folder, wherever it is on this computer
+node scripts/burn.mjs backup.json --dry-run          # only say what would change
+```
 
 ## Development
 
@@ -46,6 +68,7 @@ Annotator works on HTML files saved on your computer too (handy for collections 
 npm install
 npm run build   # dist/chrome and dist/firefox
 npm test        # unit tests
+node scripts/burn.mjs --help   # write notes from a backup into HTML files
 ```
 
 ## Screenshots
