@@ -25,7 +25,7 @@ function cleanAnnotation(raw, now) {
   return annotation;
 }
 
-function cleanPage(raw, now) {
+export function cleanPage(raw, now) {
   const url = raw && typeof raw === 'object' ? normalizeUrl(str(raw.url)) : null;
   if (!url) return null;
   const page = {
