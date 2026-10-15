@@ -45,11 +45,12 @@ npm test        # unit tests
 
 ## Screenshots
 
-<img width="1400" height="875" alt="01-highlight-note-wikipedia" src="https://github.com/user-attachments/assets/730fb439-908c-4d47-a739-e6019f7055a6" />
-<img width="1488" height="930" alt="02-highlight-note-forbes" src="https://github.com/user-attachments/assets/bbb7cc32-ee30-480f-938a-cb5eb3c39270" />
-<img width="1816" height="1135" alt="03-highlight-in-article" src="https://github.com/user-attachments/assets/297d57bf-f108-4b0d-806e-c0ee0bc43322" />
-<img width="1776" height="1110" alt="04-extension-popup" src="https://github.com/user-attachments/assets/dd16b06c-659c-4886-bdec-b0c6812eb702" />
-<img width="2784" height="1740" alt="05-all-notes-dashboard" src="https://github.com/user-attachments/assets/8b261b81-68bd-4403-9128-396f10769d3d" />
+<img width="2784" height="1740" alt="01-note" src="https://github.com/user-attachments/assets/21553593-0332-42c7-a7d3-d797a8579775" />
+<img width="2784" height="1740" alt="02-panel" src="https://github.com/user-attachments/assets/ed83d8c1-82c0-4f04-a425-e5b5d77524c7" />
+<img width="2784" height="1740" alt="03-toolbar" src="https://github.com/user-attachments/assets/752a13bf-f2a7-4884-9be9-25533cad76cf" />
+<img width="2784" height="1740" alt="04-dashboard" src="https://github.com/user-attachments/assets/c682e7a5-b25b-4902-9804-71f695d78eae" />
+<img width="2784" height="1740" alt="05-export" src="https://github.com/user-attachments/assets/a85fa7f5-9142-41b5-9e1c-ba0c6fb00b17" />
+<img width="2784" height="1740" alt="06-categories" src="https://github.com/user-attachments/assets/71b3961e-6f75-4c8f-aa7a-7ef03b35682d" />
 
 ---
 
