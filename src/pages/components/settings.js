@@ -1,13 +1,20 @@
+import { api } from '../../shared/api.js';
 import { h } from '../../shared/dom.js';
 import { t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 import { setSiteRule, updateSettings } from '../../shared/store.js';
+import { fileAccessKeys } from '../../shared/file-access.js';
+import { shortcutNode } from '../../shared/keys.js';
 import { swatchPicker } from './card.js';
+import { categoryEditor } from './category-editor.js';
+import { fileAccessButton } from './file-access.js';
+import { notice } from './notice.js';
+import { toggle } from './toggle.js';
 
-function settingItem(iconName, label, sublabel, trailing, callout) {
+function settingItem(iconName, label, sublabel, trailing, callout, { stacked = false } = {}) {
   return h(
     'div',
-    { class: 'setting-item' },
+    { class: ['setting-item', stacked && 'setting-stacked'] },
     h(
       'div',
       { class: 'setting-info' },
@@ -35,8 +42,8 @@ function segmented(options, value, onChange) {
         {
           type: 'button',
           'aria-pressed': String(opt.value === value),
-          title: opt.label,
-          'aria-label': opt.label,
+          title: opt.showLabel === false ? opt.label : null,
+          'aria-label': opt.showLabel === false ? opt.label : null,
           dataset: { value: opt.value },
           onclick: () => {
             for (const btn of group.children) btn.setAttribute('aria-pressed', String(btn.dataset.value === opt.value));
@@ -51,22 +58,7 @@ function segmented(options, value, onChange) {
   return group;
 }
 
-function toggle(checked, label, onChange) {
-  return h(
-    'label',
-    { class: 'toggle' },
-    h('input', {
-      type: 'checkbox',
-      role: 'switch',
-      checked,
-      'aria-label': label,
-      onchange: (e) => onChange(e.target.checked),
-    }),
-    h('span', { class: 'toggle-track' }),
-  );
-}
-
-export function settingsPanel(settings, { compact = false, site = null, siteAppLike = false } = {}) {
+export function settingsPanel(settings, { compact = false, site = null, siteName = null, siteAppLike = false, siteUnavailable = null, fileAccess = null } = {}) {
   const save = (patch) => updateSettings(patch);
 
   return h(
@@ -82,16 +74,30 @@ export function settingsPanel(settings, { compact = false, site = null, siteAppL
     settingItem(
       'globe',
       t('settingSiteDisable'),
-      site,
-      siteAppLike
-        ? toggle(settings.siteRules?.[site] !== 'always', t('settingSite'), (on) => setSiteRule(site, on ? 'auto' : 'always'))
-        : toggle(settings.siteRules?.[site] === 'never', t('settingSite'), (on) => setSiteRule(site, on ? 'never' : 'auto')),
-      siteAppLike ? t('settingSiteAppHint') : null,
+      siteName ?? site,
+      siteUnavailable
+        ? toggle(false, t('settingSite'), () => { }, { disabled: true })
+        : siteAppLike
+          ? toggle(settings.siteRules?.[site] !== 'always', t('settingSite'), (on) => setSiteRule(site, on ? 'auto' : 'always'))
+          : toggle(settings.siteRules?.[site] === 'never', t('settingSite'), (on) => setSiteRule(site, on ? 'never' : 'auto')),
+      siteUnavailable ?? (siteAppLike ? t('settingSiteAppHint') : null),
+    ),
+    fileAccess !== null &&
+    !(compact && fileAccess) &&
+    settingItem(
+      'folder',
+      t('settingFileAccess'),
+      fileAccess ? t('settingFileAccessOn') : t(fileAccessKeys.off),
+      fileAccess
+        ? h('span', { class: 'badge badge-accent' }, icon('tick', { size: 12 }), t('settingFileAccessAllowed'))
+        : fileAccessButton(),
+      null,
+      { stacked: !fileAccess },
     ),
     settingItem(
       'underline',
       t('settingStyle'),
-      compact ? null : t('settingStyleHint'),
+      null,
       segmented(
         [
           { value: 'background', label: t('styleBackground') },
@@ -110,11 +116,100 @@ export function settingsPanel(settings, { compact = false, site = null, siteAppL
   );
 }
 
-export function privacyNote() {
+const COMMANDS = ['highlight', 'highlight-note', 'toggle-panel'];
+
+export function openShortcutSettings() {
+  if (api.commands?.openShortcutSettings) api.commands.openShortcutSettings();
+  else api.tabs.create({ url: 'chrome://extensions/shortcuts' });
+}
+
+export function shortcutsPanel() {
+  const rows = h('div');
+  const panel = h(
+    'div',
+    { class: 'settings-panel' },
+    rows,
+    settingItem(
+      'highlighter',
+      t('shortcutToolbarKeys'),
+      t('shortcutToolbarKeysHint'),
+      h('span', { class: 'kbd-group' }, h('kbd', { class: 'kbd' }, '1–9'), h('kbd', { class: 'kbd' }, '/'), h('kbd', { class: 'kbd' }, 'N')),
+    ),
+    h(
+      'div',
+      { class: 'setting-item setting-actions' },
+      h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: openShortcutSettings }, icon('keyboard', { size: 14 }), t('shortcutChange')),
+    ),
+  );
+
+  Promise.resolve(api.commands?.getAll?.())
+    .then((commands = []) => {
+      const known = new Map(commands.map((c) => [c.name, c.shortcut]));
+      rows.replaceWith(
+        ...COMMANDS.map((name) => {
+          const shortcut = known.get(name);
+          return settingItem(
+            name === 'toggle-panel' ? 'panel' : name === 'highlight' ? 'highlighter' : 'noteEdit',
+            t(`cmd_${name.replace(/-/g, '_')}`),
+            null,
+            shortcut ? shortcutNode(shortcut, { className: 'kbd', size: 13 }) : h('kbd', { class: 'kbd kbd-empty' }, t('shortcutNone')),
+          );
+        }),
+      );
+    })
+    .catch(() => { });
+  return panel;
+}
+
+export function dataPanel({ onExport, onImport, onRelocate }) {
+  const file = h('input', {
+    type: 'file',
+    accept: '.json,application/json',
+    hidden: true,
+    onchange: () => {
+      if (file.files[0]) onImport(file.files[0]);
+      file.value = '';
+    },
+  });
   return h(
     'div',
-    { class: 'privacy-note' },
-    icon('shield', { size: 18 }),
-    h('div', null, h('strong', null, t('privacyTitle')), t('privacyText')),
+    { class: 'settings-panel' },
+    settingItem(
+      'download',
+      t('dataBackup'),
+      t('dataBackupHint'),
+      h(
+        'div',
+        { class: 'setting-buttons' },
+        h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: onExport }, icon('download', { size: 14 }), t('actionExport')),
+        h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: () => file.click() }, icon('upload', { size: 14 }), t('dataImport')),
+        file,
+      ),
+    ),
+    settingItem(
+      'folder',
+      t('dataRelocate'),
+      t('dataRelocateHint'),
+      h('button', { class: 'btn btn-outline btn-sm', type: 'button', onclick: onRelocate }, t('dataRelocateAction')),
+    ),
   );
+}
+
+export function categoriesPanel(settings, { counts, onChange, onDelete }) {
+  return h(
+    'div',
+    { class: 'settings-panel' },
+    h('p', { class: 'category-intro' }, t('categoriesIntro')),
+    categoryEditor({ counts, onChange, onDelete }),
+    settingItem(
+      'keyboard',
+      t('settingQuickKeys'),
+      t('settingQuickKeysHint'),
+      toggle(settings.quickKeys, t('settingQuickKeys'), (quickKeys) => updateSettings({ quickKeys })),
+    ),
+  );
+}
+
+export function privacyNote() {
+  return notice({ tone: 'accent', iconName: 'shield', title: t('privacyTitle'), text: t('privacyText'), className: 'privacy-note' });
 }

@@ -1,6 +1,9 @@
 import { api } from '../shared/api.js';
 import { t } from '../shared/i18n.js';
+import { fileAccessAllowed, mayBeBlockedFile } from '../shared/file-access.js';
+import { rolloutOnInstall } from '../shared/rollout.js';
 import { ensureMigrated } from '../shared/store.js';
+import { isFileUrl, isPdfUrl, normalizeUrl, unwrapReaderUrl } from '../shared/url.js';
 
 const MENU_ID = 'annotator-create';
 
@@ -30,12 +33,19 @@ async function injectIntoOpenTabs() {
   );
 }
 
-api.runtime.onInstalled.addListener(() => {
-  createMenus();
-  injectIntoOpenTabs().catch(() => { });
+async function applyRollout(details) {
+  const plan = rolloutOnInstall(details);
+  if (plan) await api.storage.local.set({ whatsNew: plan.whatsNew });
+}
+
+api.runtime.onInstalled.addListener(async (details) => {
+  createMenus().catch(() => { });
   ensureMigrated().catch((err) => console.error('Annotator: migration failed', err));
+  await applyRollout(details).catch((err) => console.error('Annotator: rollout failed', err));
+  if (details.reason === 'install') api.tabs.create({ url: api.runtime.getURL('guide.html') }).catch(() => { });
+  injectIntoOpenTabs().catch(() => { });
 });
-api.runtime.onStartup.addListener(createMenus);
+api.runtime.onStartup.addListener(() => createMenus().catch(() => { }));
 
 async function sendToTab(tabId, message) {
   try {
@@ -46,32 +56,99 @@ async function sendToTab(tabId, message) {
   }
 }
 
+async function explainFailure(tabId, pageUrl, tabUrl, { pdf = false } = {}) {
+  let title = null;
+  if (pdf || isPdfUrl(pageUrl) || isPdfUrl(tabUrl)) title = t('pdfBadge');
+  else if (mayBeBlockedFile({ allowed: await fileAccessAllowed(), pageUrl, tabUrl })) title = t('fileAccessBadge');
+  if (!title) return;
+  api.action.setBadgeText({ tabId, text: '!' }).catch(() => { });
+  api.action.setBadgeBackgroundColor({ tabId, color: '#B45309' }).catch(() => { });
+  api.action.setTitle({ tabId, title }).catch(() => { });
+}
+
+function commandTab(tabId, message, pageUrl, tabUrl) {
+  sendToTab(tabId, message).then(
+    (response) => response?.pdf && explainFailure(tabId, pageUrl, tabUrl, { pdf: true }),
+    () => explainFailure(tabId, pageUrl, tabUrl),
+  );
+}
+
 api.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId !== MENU_ID || !tab?.id || !info.selectionText?.trim()) return;
-  sendToTab(tab.id, { type: 'create-from-selection' }).catch(() => {
-    // Restricted page
-  });
+  commandTab(tab.id, { type: 'create-from-selection' }, info.pageUrl, tab.url);
 });
 
-async function openAndGo(url, id) {
-  const tab = await api.tabs.create({ url });
-  const deadline = Date.now() + 20000;
+const COMMAND_MESSAGES = {
+  highlight: { type: 'create-from-selection', withNote: false, fromCommand: true },
+  'highlight-note': { type: 'create-from-selection', withNote: true, fromCommand: true },
+  'toggle-panel': { type: 'toggle-panel' },
+};
 
-  const onUpdated = async (tabId, change) => {
-    if (tabId !== tab.id || change.status !== 'complete') return;
+api.commands?.onCommand.addListener(async (command, tab) => {
+  const message = COMMAND_MESSAGES[command];
+  if (!message) return;
+  const target = tab ?? (await api.tabs.query({ active: true, currentWindow: true }))[0];
+  if (target?.id == null) return;
+  commandTab(target.id, message, null, target.url);
+});
+
+async function goWhenReady(tabId, id) {
+  const deadline = Date.now() + 20000;
+  while (Date.now() < deadline) {
+    try {
+      await sendToTab(tabId, { type: 'go-to', id });
+      return;
+    } catch { }
+    await new Promise((r) => setTimeout(r, 300));
+  }
+}
+
+function whenLoaded(tabId, then) {
+  const onUpdated = (updatedId, change) => {
+    if (updatedId !== tabId || change.status !== 'complete') return;
     api.tabs.onUpdated.removeListener(onUpdated);
-    while (Date.now() < deadline) {
-      try {
-        await sendToTab(tab.id, { type: 'go-to', id });
-        return;
-      } catch {
-        await new Promise((r) => setTimeout(r, 300));
-      }
-    }
+    then();
   };
   api.tabs.onUpdated.addListener(onUpdated);
   setTimeout(() => api.tabs.onUpdated.removeListener(onUpdated), 20000);
 }
+
+const PENDING_KEY = 'pendingGoTo';
+const PENDING_FOR = 15 * 60 * 1000;
+const pendingStore = () => api.storage.session ?? api.storage.local;
+
+// Firefox won't open local files from an extension; the note is shown once the person opens the file.
+async function openAndGo(url, id) {
+  const target = normalizeUrl(url);
+  if (!target) return { ok: false };
+  const tabs = await api.tabs.query({}).catch(() => []);
+  const open = tabs.find((tab) => tab.url && normalizeUrl(unwrapReaderUrl(tab.url)) === target);
+  if (open) {
+    await api.tabs.update(open.id, { active: true });
+    await api.windows?.update(open.windowId, { focused: true }).catch(() => { });
+    if (open.status === 'complete') goWhenReady(open.id, id);
+    else whenLoaded(open.id, () => goWhenReady(open.id, id));
+    return { ok: true };
+  }
+  let tab;
+  try {
+    tab = await api.tabs.create({ url: target });
+  } catch (err) {
+    if (!isFileUrl(target)) throw err;
+    await pendingStore().set({ [PENDING_KEY]: { url: target, id, at: Date.now() } });
+    return { manual: true };
+  }
+  whenLoaded(tab.id, () => goWhenReady(tab.id, id));
+  return { ok: true };
+}
+
+api.tabs.onUpdated.addListener(async (tabId, change, tab) => {
+  if (change.status !== 'complete' || !isFileUrl(tab.url)) return;
+  const { [PENDING_KEY]: pending } = await pendingStore().get(PENDING_KEY).catch(() => ({}));
+  if (!pending || normalizeUrl(tab.url) !== pending.url) return;
+  await pendingStore().remove(PENDING_KEY);
+  if (Date.now() - pending.at < PENDING_FOR) goWhenReady(tabId, pending.id);
+});
 
 function setBadge(tabId, count) {
   const text = count > 0 ? (count > 99 ? '99+' : String(count)) : '';
@@ -80,10 +157,12 @@ function setBadge(tabId, count) {
   api.action.setBadgeTextColor?.({ tabId, color: '#FFFFFF' })?.catch?.(() => { });
 }
 
+const fromExtensionPage = (sender) => sender.id === api.runtime.id && !!sender.url?.startsWith(api.runtime.getURL(''));
+
 api.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message?.type) {
     case 'count':
-      if (sender.tab?.id != null) setBadge(sender.tab.id, message.count);
+      if (sender.tab?.id != null) setBadge(sender.tab.id, Number(message.count) || 0);
       return false;
     case 'enabled':
       if (sender.tab?.id != null) {
@@ -92,10 +171,18 @@ api.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (sender.tab.active) syncMenuFor(sender.tab.id);
       }
       return false;
-    case 'open-and-go':
-      openAndGo(message.url, message.id).then(
-        () => sendResponse(true),
+    case 'tab-command':
+      if (!fromExtensionPage(sender) || !Number.isInteger(message.tabId)) return false;
+      sendToTab(message.tabId, message.message).then(
+        (response) => sendResponse(response ?? true),
         () => sendResponse(false),
+      );
+      return true;
+    case 'open-and-go':
+      if (!fromExtensionPage(sender)) return false;
+      openAndGo(message.url, message.id).then(
+        (result) => sendResponse(result),
+        () => sendResponse({ ok: false }),
       );
       return true;
     default:

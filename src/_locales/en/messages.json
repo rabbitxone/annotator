@@ -38,9 +38,6 @@
   "actionDelete": {
     "message": "Delete"
   },
-  "actionDeleteConfirm": {
-    "message": "Sure?"
-  },
   "actionClose": {
     "message": "Close"
   },
@@ -100,7 +97,7 @@
     "message": "Not found"
   },
   "orphanHint": {
-    "message": "This text is no longer on the page, or the page hasn't finished loading."
+    "message": "The text changed or the page is still loading."
   },
   "tabPage": {
     "message": "This page"
@@ -124,13 +121,13 @@
     "message": "Notes aren't available here"
   },
   "emptyUnsupportedText": {
-    "message": "Browser pages and extension stores can't be annotated. Open any website to start."
+    "message": "Browser pages and extension stores can't be annotated."
   },
   "emptyPageTitle": {
     "message": "No notes on this page yet"
   },
   "emptyPageText": {
-    "message": "Select some text, click the small button at its end and pick a color, or right-click and choose “Highlight and add a note”."
+    "message": "Select text and pick a color with the button at its end."
   },
   "emptySearchTitle": {
     "message": "Nothing found"
@@ -148,19 +145,16 @@
     "message": "No notes for this page"
   },
   "emptyPageGoneText": {
-    "message": "They may have been deleted. Go back to see your other pages."
+    "message": "They may have been deleted."
   },
   "settingToolbar": {
     "message": "Selection handle"
   },
   "settingToolbarHint": {
-    "message": "A small button at the end of selected text that opens the colours."
+    "message": "A button at the end of selected text."
   },
   "settingStyle": {
     "message": "Highlight style"
-  },
-  "settingStyleHint": {
-    "message": "How highlighted text looks on websites."
   },
   "styleBackground": {
     "message": "Fill"
@@ -169,40 +163,40 @@
     "message": "Underline"
   },
   "settingDefaultColor": {
-    "message": "Default colour"
+    "message": "Default color"
   },
   "settingDefaultColorHint": {
-    "message": "Used for notes created from the menu."
+    "message": "For notes created from the menu."
   },
   "privacyTitle": {
     "message": "Stored only on this device"
   },
   "privacyText": {
-    "message": "Your highlights and notes stay on-device and will never leave your browser."
+    "message": "Highlights and notes never leave your browser."
   },
   "navAll": {
     "message": "All notes"
   },
   "navAllSubtitle": {
-    "message": "Everything you've highlighted, newest first."
+    "message": "From all websites."
   },
   "navPages": {
     "message": "Pages"
   },
   "navPagesSubtitle": {
-    "message": "Your notes grouped by website."
+    "message": "Grouped by website."
   },
   "navSettings": {
     "message": "Settings"
   },
   "navSettingsSubtitle": {
-    "message": "Appearance and behaviour on websites."
+    "message": "Appearance, categories, shortcuts and data."
   },
   "filterLabel": {
     "message": "Filters"
   },
   "filterAllColors": {
-    "message": "All colours"
+    "message": "All colors"
   },
   "filterWithNote": {
     "message": "With a note"
@@ -224,17 +218,6 @@
       }
     }
   },
-  "bulkDeleteTitle": {
-    "message": "Delete $VALUE$ selected notes?",
-    "placeholders": {
-      "value": {
-        "content": "$1"
-      }
-    }
-  },
-  "bulkDeleteText": {
-    "message": "The highlights will also disappear from the pages. This can't be undone."
-  },
   "settingsAppearance": {
     "message": "Appearance & behavior"
   },
@@ -251,7 +234,7 @@
     "message": "Delete this note?"
   },
   "confirmDeleteText": {
-    "message": "The highlight will disappear from the page. This can't be undone."
+    "message": "This can't be undone."
   },
   "settingSite": {
     "message": "Turn Annotator off on this site"
@@ -260,6 +243,800 @@
     "message": "Turn Annotator off on this site"
   },
   "settingSiteAppHint": {
-    "message": "Annotator is off by default on web apps"
+    "message": "Off by default in web apps."
+  },
+  "cmd_highlight": {
+    "message": "Highlight the selection"
+  },
+  "cmd_highlight_note": {
+    "message": "Highlight the selection and add a note"
+  },
+  "cmd_toggle_panel": {
+    "message": "Show or hide the notes panel"
+  },
+  "actionCopy": {
+    "message": "Copy"
+  },
+  "actionCopyQuote": {
+    "message": "Copy quote with link"
+  },
+  "actionUndo": {
+    "message": "Undo"
+  },
+  "actionReanchor": {
+    "message": "Pin to selection"
+  },
+  "actionReanchorHint": {
+    "message": "Select the new text first"
+  },
+  "actionOpenPanel": {
+    "message": "Panel"
+  },
+  "panelOpenHint": {
+    "message": "Show the notes panel on this page"
+  },
+  "panelTitle": {
+    "message": "Notes on this page"
+  },
+  "panelSaved": {
+    "message": "Saved"
+  },
+  "panelCopyAll": {
+    "message": "Copy all as Markdown"
+  },
+  "panelEmpty": {
+    "message": "No highlights yet."
+  },
+  "panelOrphansTitle": {
+    "message": "Not found on the page ($V1$)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "panelOrphansHint": {
+    "message": "Select the new text and click “Pin to selection”."
+  },
+  "pageNoteLabel": {
+    "message": "Page note"
+  },
+  "pageNotePlaceholder": {
+    "message": "Notes about the whole page…"
+  },
+  "pageNoteAdd": {
+    "message": "Add a note about the whole page"
+  },
+  "markdownHint": {
+    "message": "Supports **bold**, *italics*, `code`, lists and links."
+  },
+  "toastCopied": {
+    "message": "Copied to clipboard"
+  },
+  "toastCopyFailed": {
+    "message": "Couldn't copy to the clipboard"
+  },
+  "toastDeleted": {
+    "message": "Deleted notes: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastRecolored": {
+    "message": "Changed color of notes: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastImported": {
+    "message": "Imported. New notes: $V1$, updated: $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "toastImportedNothing": {
+    "message": "Nothing new to import"
+  },
+  "toastImportInvalid": {
+    "message": "This isn't an Annotator backup file"
+  },
+  "toastImportFailed": {
+    "message": "Import failed. Try again."
+  },
+  "toastReanchored": {
+    "message": "Note pinned to the new text"
+  },
+  "toastReanchorNoSelection": {
+    "message": "Select the new text on the page first"
+  },
+  "exportTitle": {
+    "message": "Annotator notes"
+  },
+  "filterLost": {
+    "message": "Not found"
+  },
+  "sortPosition": {
+    "message": "In text order"
+  },
+  "groupLabel": {
+    "message": "Grouping"
+  },
+  "groupRecent": {
+    "message": "Recent"
+  },
+  "groupDomain": {
+    "message": "By site"
+  },
+  "settingsShortcuts": {
+    "message": "Keyboard shortcuts"
+  },
+  "settingsData": {
+    "message": "Data"
+  },
+  "shortcutNone": {
+    "message": "Not set"
+  },
+  "shortcutToolbarKeys": {
+    "message": "In the color bar"
+  },
+  "shortcutToolbarKeysHint": {
+    "message": "1–9 or a category's key: pick · /: search · N: note"
+  },
+  "shortcutChange": {
+    "message": "Change shortcuts"
+  },
+  "dataBackup": {
+    "message": "Export and backup"
+  },
+  "dataBackupHint": {
+    "message": "JSON, Markdown or CSV. Only JSON can be imported."
+  },
+  "dataImport": {
+    "message": "Import"
+  },
+  "bulkRecolor": {
+    "message": "Change color"
+  },
+  "bulkCopyHint": {
+    "message": "Copy selected notes as Markdown"
+  },
+  "whatsNewTitle": {
+    "message": "New in Annotator $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "whatsNewShort": {
+    "message": "Side panel, keyboard shortcuts, your own categories and backups."
+  },
+  "whatsNewPanel": {
+    "message": "A side panel on every page with your highlights, a page note and notes whose text has moved."
+  },
+  "whatsNewShortcuts": {
+    "message": "Keyboard shortcuts, formatting in notes, and copying quotes with a link."
+  },
+  "whatsNewCategories": {
+    "message": "Your own categories: name the colors after what you mark, add more and give each a key."
+  },
+  "whatsNewBackup": {
+    "message": "Backups you can import on another device, and Markdown export."
+  },
+  "whatsNewDismiss": {
+    "message": "Got it"
+  },
+  "readerViewHint": {
+    "message": "Highlights work on the original page, not in Reader View."
+  },
+  "actionExport": {
+    "message": "Export"
+  },
+  "exportDialogTitle": {
+    "message": "Export notes"
+  },
+  "exportScopeLabel": {
+    "message": "What to export"
+  },
+  "exportScopeAll": {
+    "message": "All notes"
+  },
+  "exportScopeThisPage": {
+    "message": "This page"
+  },
+  "exportScopeFiltered": {
+    "message": "Current list"
+  },
+  "exportScopeSelected": {
+    "message": "Selected notes"
+  },
+  "exportScopeCount": {
+    "message": "Notes: $V1$ · pages: $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "exportEmptyScope": {
+    "message": "Nothing to export here"
+  },
+  "exportEmpty": {
+    "message": "Nothing to export."
+  },
+  "exportFormatLabel": {
+    "message": "Format"
+  },
+  "exportJson": {
+    "message": "JSON"
+  },
+  "exportJsonHint": {
+    "message": "Full backup with categories."
+  },
+  "exportMarkdown": {
+    "message": "Markdown"
+  },
+  "exportMarkdownHint": {
+    "message": "A readable document for Obsidian, Notion or GitHub."
+  },
+  "exportCsv": {
+    "message": "CSV (Excel)"
+  },
+  "exportCsvHint": {
+    "message": "One row per highlight, for Excel or Google Sheets."
+  },
+  "exportReimportable": {
+    "message": "Can be imported again"
+  },
+  "exportGroupBy": {
+    "message": "Organize by"
+  },
+  "exportGroupByPage": {
+    "message": "Page"
+  },
+  "exportGroupByColor": {
+    "message": "Color"
+  },
+  "exportSeparator": {
+    "message": "Column separator"
+  },
+  "exportSeparatorComma": {
+    "message": "Comma ( , )"
+  },
+  "exportSeparatorSemicolon": {
+    "message": "Semicolon ( ; )"
+  },
+  "exportSeparatorHint": {
+    "message": "Everything in one column in Excel? Pick the other one."
+  },
+  "exportCsvFormulaHint": {
+    "message": "Text starting with = + - @ gets an apostrophe so it isn't run as a formula."
+  },
+  "exportAction": {
+    "message": "Export"
+  },
+  "exportPageNotes": {
+    "message": "Page notes"
+  },
+  "exportSummary": {
+    "message": "Highlights: $V1$ · pages: $V2$ · exported $V3$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      },
+      "v3": {
+        "content": "$3"
+      }
+    }
+  },
+  "exportPageSummary": {
+    "message": "$V1$ · highlights: $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "toastExported": {
+    "message": "Exported $V1$ as $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "toastExportFailed": {
+    "message": "Export failed. Try again."
+  },
+  "csvPageTitle": {
+    "message": "Page title"
+  },
+  "csvPageUrl": {
+    "message": "Page URL"
+  },
+  "csvColor": {
+    "message": "Category"
+  },
+  "csvColorCode": {
+    "message": "Color code"
+  },
+  "csvQuote": {
+    "message": "Highlighted text"
+  },
+  "csvNote": {
+    "message": "Note"
+  },
+  "csvCreated": {
+    "message": "Created"
+  },
+  "csvModified": {
+    "message": "Modified"
+  },
+  "fileAccessTitle": {
+    "message": "Is this a file on your computer?"
+  },
+  "fileAccessBadge": {
+    "message": "Annotator: allow access to local files"
+  },
+  "fileAccessText": {
+    "message": "Turn on “Allow access to file URLs” in Annotator's settings, then reload the page."
+  },
+  "fileAccessOpen": {
+    "message": "Open settings"
+  },
+  "settingFileAccess": {
+    "message": "Local files"
+  },
+  "settingFileAccessOn": {
+    "message": "Works on HTML files on your computer."
+  },
+  "settingFileAccessOff": {
+    "message": "Turn on “Allow access to file URLs” in the extension's settings."
+  },
+  "fileAccessTextFirefox": {
+    "message": "In about:addons, open Annotator's “Permissions and data” tab, turn on “Access local files on your computer” (not “Run on sites with restrictions”) and reload the page."
+  },
+  "settingFileAccessOffFirefox": {
+    "message": "In about:addons, open Annotator's “Permissions and data” tab and turn on “Access local files on your computer” (not “Run on sites with restrictions”)."
+  },
+  "fileAccessCopy": {
+    "message": "Copy about:addons"
+  },
+  "toastFileAccessCopied": {
+    "message": "Copied. Paste it into the address bar."
+  },
+  "pdfTitle": {
+    "message": "PDFs can't be annotated"
+  },
+  "pdfText": {
+    "message": "The browser's PDF viewer is closed to extensions."
+  },
+  "pdfBadge": {
+    "message": "Annotator: PDFs can't be annotated"
+  },
+  "settingFileAccessAllowed": {
+    "message": "Allowed"
+  },
+  "siteLocalFiles": {
+    "message": "All local files"
+  },
+  "csvSource": {
+    "message": "File or site"
+  },
+  "dataRelocate": {
+    "message": "Moved your files?"
+  },
+  "dataRelocateHint": {
+    "message": "Point your notes at a new folder or address."
+  },
+  "dataRelocateAction": {
+    "message": "Change location…"
+  },
+  "relocateTitle": {
+    "message": "Update note locations"
+  },
+  "relocateIntro": {
+    "message": "A folder, network path or web address."
+  },
+  "relocateFrom": {
+    "message": "Old location"
+  },
+  "relocateTo": {
+    "message": "New location"
+  },
+  "relocateHint": {
+    "message": "Notes will move to the new location."
+  },
+  "relocateInvalid": {
+    "message": "That doesn't look like a folder, file or web address."
+  },
+  "relocateNone": {
+    "message": "No notes found at the old location."
+  },
+  "relocateSame": {
+    "message": "The old and new locations are the same."
+  },
+  "relocateCount": {
+    "message": "Pages to move: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "relocateMerge": {
+    "message": "$V1$ of them already have notes there; they'll be merged.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "relocateReminder": {
+    "message": "Files themselves aren't changed."
+  },
+  "relocateAction": {
+    "message": "Move notes"
+  },
+  "toastRelocated": {
+    "message": "Moved: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastRelocateFailed": {
+    "message": "Couldn't move the notes. Try again."
+  },
+  "listShowMore": {
+    "message": "Show more ($V1$ left)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "listLoading": {
+    "message": "Loading…"
+  },
+  "actionSelectAllCount": {
+    "message": "Select all $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "settingsCategories": {
+    "message": "Categories"
+  },
+  "categoriesIntro": {
+    "message": "Name colors after what you mark, e.g. “Sample size”. Exports use these names."
+  },
+  "categoryName": {
+    "message": "Name"
+  },
+  "categoryKey": {
+    "message": "Key"
+  },
+  "categoryKeyHint": {
+    "message": "Letter or digit (needs quick keys)"
+  },
+  "categoryKeyInvalid": {
+    "message": "A key must be a single letter or digit."
+  },
+  "categoryKeyTaken": {
+    "message": "“$V1$” is already used by “$V2$”.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "categoryColor": {
+    "message": "Color"
+  },
+  "categoryCustomColor": {
+    "message": "Custom"
+  },
+  "categoryMoveUp": {
+    "message": "Move up"
+  },
+  "categoryMoveDown": {
+    "message": "Move down"
+  },
+  "categoryAdd": {
+    "message": "Add a category"
+  },
+  "categoryReset": {
+    "message": "Reset the built-in colors"
+  },
+  "categoryNewName": {
+    "message": "Category $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryChoose": {
+    "message": "Category…"
+  },
+  "categoryDeleteTitle": {
+    "message": "Delete “$V1$”?",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryDeleteMove": {
+    "message": "In this category: $V1$. Move them to:",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryDeleteMoveTo": {
+    "message": "Move notes to"
+  },
+  "categoryDeleteUnused": {
+    "message": "No notes use this category."
+  },
+  "settingQuickKeys": {
+    "message": "Quick keys"
+  },
+  "settingQuickKeysHint": {
+    "message": "Select text and press a category's key to highlight it."
+  },
+  "toolbarMore": {
+    "message": "More categories"
+  },
+  "pickerTypeToFilter": {
+    "message": "Type to filter…"
+  },
+  "pickerNoMatch": {
+    "message": "No matches"
+  },
+  "confirmDeleteManyTitle": {
+    "message": "Delete $COUNT$?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "confirmDeleteUndoText": {
+    "message": "You can undo it right after."
+  },
+  "categoryResetTitle": {
+    "message": "Reset the built-in colors?"
+  },
+  "categoryResetText": {
+    "message": "Built-in names, colors and keys return to default. Your own categories stay."
+  },
+  "categoryResetAction": {
+    "message": "Reset"
+  },
+  "settingSitePdf": {
+    "message": "This is a PDF: Annotator can't run here."
+  },
+  "csvWholePage": {
+    "message": "(whole page)"
+  },
+  "exportIncludeSettings": {
+    "message": "Include Annotator's settings"
+  },
+  "exportIncludeSettingsHint": {
+    "message": "Appearance, quick keys and site rules."
+  },
+  "toastImportedSettings": {
+    "message": "Settings restored."
+  },
+  "navGuide": {
+    "message": "How it works"
+  },
+  "guideTitle": {
+    "message": "How to use Annotator"
+  },
+  "guideIntro": {
+    "message": "Highlight, take notes and find it all later. Everything stays on this device."
+  },
+  "guideTryTitle": {
+    "message": "Try it here"
+  },
+  "guideTryOptional": {
+    "message": "Optional"
+  },
+  "guideTryHint": {
+    "message": "Nothing here is saved."
+  },
+  "guideTryReset": {
+    "message": "Start over"
+  },
+  "guideDemo1": {
+    "message": "Good notes start with careful reading. Select this sentence, click the small button at its end and pick a color: that's a highlight."
+  },
+  "guideDemo2": {
+    "message": "Now try a shortcut: select any part of this paragraph and press the one shown on the left. With the color bar open, the digits 1–9 pick a category too."
+  },
+  "guideDemo3": {
+    "message": "Click a highlight to write a note about it or to change its color. Then open the side panel to see everything you marked on this page in one list."
+  },
+  "guideStepHighlightTitle": {
+    "message": "Highlight"
+  },
+  "guideStepHighlightText": {
+    "message": "Select text and pick a color with the button at its end, or use a shortcut:"
+  },
+  "guideStepNoteTitle": {
+    "message": "Add notes"
+  },
+  "guideStepNoteText": {
+    "message": "Click a highlight to add a note, recolor or delete it. Highlight and start a note at once:"
+  },
+  "guideStepKeysTitle": {
+    "message": "Pick with keys"
+  },
+  "guideStepKeysText": {
+    "message": "In the color bar: 1–9 pick a category, / searches, N adds a note. With quick keys on, a category's key highlights right away."
+  },
+  "guideStepPanelTitle": {
+    "message": "Side panel"
+  },
+  "guideStepPanelText": {
+    "message": "Page highlights in reading order, plus a note for the whole page."
+  },
+  "guideStepCategoriesTitle": {
+    "message": "Your own categories"
+  },
+  "guideStepCategoriesText": {
+    "message": "Settings → Categories: name colors, add more, assign keys."
+  },
+  "guideStepAllTitle": {
+    "message": "Everything in one place"
+  },
+  "guideStepAllText": {
+    "message": "Search, filter and export notes from every page."
+  },
+  "guideStepFilesTitle": {
+    "message": "Files on your computer"
+  },
+  "guideOpenDashboard": {
+    "message": "Go to all notes"
+  },
+  "noteCount_one": {
+    "message": "$COUNT$ note",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "noteCount_other": {
+    "message": "$COUNT$ notes",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageCount_one": {
+    "message": "$COUNT$ page",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageCount_other": {
+    "message": "$COUNT$ pages",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastOpenFileYourself": {
+    "message": "Address copied to clipboard. Paste it into the address bar."
+  },
+  "categoryBulkOpen": {
+    "message": "Add several"
+  },
+  "categoryBulkTitle": {
+    "message": "Add several categories"
+  },
+  "categoryBulkIntro": {
+    "message": "One name per line. Existing names are skipped."
+  },
+  "categoryBulkPlaceholder": {
+    "message": "Sample size\nIntervention\nOutcome"
+  },
+  "categoryBulkHint": {
+    "message": "Nothing to add yet."
+  },
+  "categoryBulkCount": {
+    "message": "To add: $V1$.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryBulkLimit": {
+    "message": "Over the limit, left out: $V1$.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryBulkAction": {
+    "message": "Add"
+  },
+  "categoryBulkAdded": {
+    "message": "Added: $V1$.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryCount_one": {
+    "message": "$COUNT$ category",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryCount_other": {
+    "message": "$COUNT$ categories",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryDrag": {
+    "message": "Drag or use arrow keys to reorder"
+  },
+  "toastSaveFailed": {
+    "message": "Couldn't save. Try again."
+  },
+  "toastUndone": {
+    "message": "Undone"
+  },
+  "toastUndoFailed": {
+    "message": "Couldn't undo"
+  },
+  "toastOpenFailed": {
+    "message": "Couldn't open the page"
   }
 }

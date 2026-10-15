@@ -38,9 +38,6 @@
   "actionDelete": {
     "message": "Usuń"
   },
-  "actionDeleteConfirm": {
-    "message": "Na pewno?"
-  },
   "actionClose": {
     "message": "Zamknij"
   },
@@ -100,7 +97,7 @@
     "message": "Nie znaleziono"
   },
   "orphanHint": {
-    "message": "Tego tekstu nie ma już na stronie albo strona jeszcze się nie załadowała."
+    "message": "Tekst się zmienił albo strona jeszcze się ładuje."
   },
   "tabPage": {
     "message": "Ta strona"
@@ -124,13 +121,13 @@
     "message": "Tutaj nie można robić notatek"
   },
   "emptyUnsupportedText": {
-    "message": "Stron przeglądarki i sklepów z rozszerzeniami nie da się oznaczać. Otwórz dowolną stronę, aby zacząć."
+    "message": "Stron przeglądarki i sklepów z rozszerzeniami nie da się oznaczać."
   },
   "emptyPageTitle": {
     "message": "Brak notatek na tej stronie"
   },
   "emptyPageText": {
-    "message": "Zaznacz fragment tekstu, kliknij mały przycisk na jego końcu i wybierz kolor albo kliknij prawym przyciskiem i wybierz „Zaznacz i dodaj notatkę”."
+    "message": "Zaznacz tekst i wybierz kolor przyciskiem na jego końcu."
   },
   "emptySearchTitle": {
     "message": "Nic nie znaleziono"
@@ -148,19 +145,16 @@
     "message": "Brak notatek dla tej strony"
   },
   "emptyPageGoneText": {
-    "message": "Mogły zostać usunięte. Wróć, aby zobaczyć pozostałe strony."
+    "message": "Mogły zostać usunięte."
   },
   "settingToolbar": {
     "message": "Uchwyt przy zaznaczeniu"
   },
   "settingToolbarHint": {
-    "message": "Mały przycisk na końcu zaznaczonego tekstu, który otwiera kolory."
+    "message": "Przycisk na końcu zaznaczonego tekstu."
   },
   "settingStyle": {
     "message": "Styl zaznaczenia"
-  },
-  "settingStyleHint": {
-    "message": "Jak wygląda zaznaczony tekst na stronach."
   },
   "styleBackground": {
     "message": "Tło"
@@ -172,31 +166,31 @@
     "message": "Domyślny kolor"
   },
   "settingDefaultColorHint": {
-    "message": "Używany dla notatek tworzonych z menu."
+    "message": "Dla notatek tworzonych z menu."
   },
   "privacyTitle": {
     "message": "Zapisane tylko na tym urządzeniu"
   },
   "privacyText": {
-    "message": "Zaznaczenia i notatki zostają na Twoim urządzeniu i nie nigdy opuszczają przeglądarki."
+    "message": "Zaznaczenia i notatki nigdy nie opuszczają przeglądarki."
   },
   "navAll": {
     "message": "Wszystkie notatki"
   },
   "navAllSubtitle": {
-    "message": "Wszystkie zaznaczenia, od najnowszych."
+    "message": "Ze wszystkich stron."
   },
   "navPages": {
     "message": "Strony"
   },
   "navPagesSubtitle": {
-    "message": "Notatki pogrupowane według stron."
+    "message": "Pogrupowane według stron."
   },
   "navSettings": {
     "message": "Ustawienia"
   },
   "navSettingsSubtitle": {
-    "message": "Wygląd i działanie na stronach."
+    "message": "Wygląd, kategorie, skróty i dane."
   },
   "filterLabel": {
     "message": "Filtry"
@@ -224,17 +218,6 @@
       }
     }
   },
-  "bulkDeleteTitle": {
-    "message": "Usunąć zaznaczone notatki ($VALUE$)?",
-    "placeholders": {
-      "value": {
-        "content": "$1"
-      }
-    }
-  },
-  "bulkDeleteText": {
-    "message": "Zaznaczenia znikną też ze stron. Tej operacji nie można cofnąć."
-  },
   "settingsAppearance": {
     "message": "Wygląd i działanie"
   },
@@ -251,7 +234,7 @@
     "message": "Usunąć tę notatkę?"
   },
   "confirmDeleteText": {
-    "message": "Zaznaczenie zniknie ze strony. Tej operacji nie można cofnąć."
+    "message": "Tej operacji nie można cofnąć."
   },
   "settingSite": {
     "message": "Wyłącz Annotatora na tej stronie"
@@ -260,6 +243,848 @@
     "message": "Wyłącz Annotatora na tej stronie"
   },
   "settingSiteAppHint": {
-    "message": "W aplikacjach webowych Annotator jest domyślnie wyłączony"
+    "message": "W aplikacjach webowych domyślnie wyłączony."
+  },
+  "cmd_highlight": {
+    "message": "Zakreśl zaznaczony tekst"
+  },
+  "cmd_highlight_note": {
+    "message": "Zakreśl i dodaj notatkę"
+  },
+  "cmd_toggle_panel": {
+    "message": "Pokaż lub ukryj panel notatek"
+  },
+  "actionCopy": {
+    "message": "Kopiuj"
+  },
+  "actionCopyQuote": {
+    "message": "Kopiuj cytat z linkiem"
+  },
+  "actionUndo": {
+    "message": "Cofnij"
+  },
+  "actionReanchor": {
+    "message": "Przypnij do zaznaczenia"
+  },
+  "actionReanchorHint": {
+    "message": "Najpierw zaznacz nowy tekst"
+  },
+  "actionOpenPanel": {
+    "message": "Panel"
+  },
+  "panelOpenHint": {
+    "message": "Pokaż panel notatek na tej stronie"
+  },
+  "panelTitle": {
+    "message": "Notatki na tej stronie"
+  },
+  "panelSaved": {
+    "message": "Zapisano"
+  },
+  "panelCopyAll": {
+    "message": "Kopiuj wszystko jako Markdown"
+  },
+  "panelEmpty": {
+    "message": "Brak zaznaczeń."
+  },
+  "panelOrphansTitle": {
+    "message": "Nie znaleziono na stronie ($V1$)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "panelOrphansHint": {
+    "message": "Zaznacz nowy tekst i kliknij „Przypnij do zaznaczenia”."
+  },
+  "pageNoteLabel": {
+    "message": "Notatka do strony"
+  },
+  "pageNotePlaceholder": {
+    "message": "Notatka do całej strony…"
+  },
+  "pageNoteAdd": {
+    "message": "Dodaj notatkę do całej strony"
+  },
+  "markdownHint": {
+    "message": "Obsługuje **pogrubienie**, *kursywę*, `kod`, listy i linki."
+  },
+  "toastCopied": {
+    "message": "Skopiowano do schowka"
+  },
+  "toastCopyFailed": {
+    "message": "Nie udało się skopiować do schowka"
+  },
+  "toastDeleted": {
+    "message": "Usunięte notatki: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastRecolored": {
+    "message": "Zmieniono kolor notatek: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastImported": {
+    "message": "Zaimportowano. Nowe notatki: $V1$, zaktualizowane: $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "toastImportedNothing": {
+    "message": "Nic nowego do zaimportowania"
+  },
+  "toastImportInvalid": {
+    "message": "To nie jest plik kopii zapasowej Annotatora"
+  },
+  "toastImportFailed": {
+    "message": "Import się nie udał. Spróbuj ponownie."
+  },
+  "toastReanchored": {
+    "message": "Notatka przypięta do nowego tekstu"
+  },
+  "toastReanchorNoSelection": {
+    "message": "Najpierw zaznacz nowy fragment tekstu na stronie"
+  },
+  "exportTitle": {
+    "message": "Notatki z Annotatora"
+  },
+  "filterLost": {
+    "message": "Nieodnalezione"
+  },
+  "sortPosition": {
+    "message": "Kolejność w tekście"
+  },
+  "groupLabel": {
+    "message": "Grupowanie"
+  },
+  "groupRecent": {
+    "message": "Ostatnie"
+  },
+  "groupDomain": {
+    "message": "Według witryny"
+  },
+  "settingsShortcuts": {
+    "message": "Skróty klawiszowe"
+  },
+  "settingsData": {
+    "message": "Dane"
+  },
+  "shortcutNone": {
+    "message": "Nie ustawiono"
+  },
+  "shortcutToolbarKeys": {
+    "message": "W pasku kolorów"
+  },
+  "shortcutToolbarKeysHint": {
+    "message": "1–9 lub klawisz kategorii: wybór · /: szukaj · N: notatka"
+  },
+  "shortcutChange": {
+    "message": "Zmień skróty"
+  },
+  "dataBackup": {
+    "message": "Eksport i kopia zapasowa"
+  },
+  "dataBackupHint": {
+    "message": "JSON, Markdown lub CSV. Zaimportować można tylko JSON."
+  },
+  "dataImport": {
+    "message": "Importuj"
+  },
+  "bulkRecolor": {
+    "message": "Zmień kolor"
+  },
+  "bulkCopyHint": {
+    "message": "Kopiuj zaznaczone notatki jako Markdown"
+  },
+  "whatsNewTitle": {
+    "message": "Nowości w Annotatorze $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "whatsNewShort": {
+    "message": "Panel boczny, skróty klawiszowe, własne kategorie i kopie zapasowe."
+  },
+  "whatsNewPanel": {
+    "message": "Panel boczny na każdej stronie: zakreślenia, notatka do strony i notatki, których tekst się przesunął."
+  },
+  "whatsNewShortcuts": {
+    "message": "Skróty klawiszowe, formatowanie w notatkach i kopiowanie cytatów z linkiem."
+  },
+  "whatsNewCategories": {
+    "message": "Własne kategorie: nazwij kolory według tego, co zaznaczasz, dodaj kolejne i przypisz im klawisze."
+  },
+  "whatsNewBackup": {
+    "message": "Kopie zapasowe do przeniesienia na inne urządzenie i eksport do Markdown."
+  },
+  "whatsNewDismiss": {
+    "message": "Rozumiem"
+  },
+  "readerViewHint": {
+    "message": "Zakreślenia działają na oryginalnej stronie, nie w trybie czytania."
+  },
+  "actionExport": {
+    "message": "Eksportuj"
+  },
+  "exportDialogTitle": {
+    "message": "Eksportuj notatki"
+  },
+  "exportScopeLabel": {
+    "message": "Co wyeksportować"
+  },
+  "exportScopeAll": {
+    "message": "Wszystkie notatki"
+  },
+  "exportScopeThisPage": {
+    "message": "Ta strona"
+  },
+  "exportScopeFiltered": {
+    "message": "Bieżąca lista"
+  },
+  "exportScopeSelected": {
+    "message": "Zaznaczone notatki"
+  },
+  "exportScopeCount": {
+    "message": "Notatki: $V1$ · strony: $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "exportEmptyScope": {
+    "message": "Nie ma tu nic do wyeksportowania"
+  },
+  "exportEmpty": {
+    "message": "Nic do wyeksportowania."
+  },
+  "exportFormatLabel": {
+    "message": "Format"
+  },
+  "exportJson": {
+    "message": "JSON"
+  },
+  "exportJsonHint": {
+    "message": "Pełna kopia zapasowa z kategoriami."
+  },
+  "exportMarkdown": {
+    "message": "Markdown"
+  },
+  "exportMarkdownHint": {
+    "message": "Czytelny dokument do Obsidiana, Notiona czy GitHuba."
+  },
+  "exportCsv": {
+    "message": "CSV (Excel)"
+  },
+  "exportCsvHint": {
+    "message": "Wiersz na zakreślenie, do Excela lub Arkuszy Google."
+  },
+  "exportReimportable": {
+    "message": "Można zaimportować ponownie"
+  },
+  "exportGroupBy": {
+    "message": "Uporządkuj według"
+  },
+  "exportGroupByPage": {
+    "message": "Stron"
+  },
+  "exportGroupByColor": {
+    "message": "Kolorów"
+  },
+  "exportSeparator": {
+    "message": "Separator kolumn"
+  },
+  "exportSeparatorComma": {
+    "message": "Przecinek ( , )"
+  },
+  "exportSeparatorSemicolon": {
+    "message": "Średnik ( ; )"
+  },
+  "exportSeparatorHint": {
+    "message": "Wszystko w jednej kolumnie w Excelu? Wybierz drugi."
+  },
+  "exportCsvFormulaHint": {
+    "message": "Tekst zaczynający się od = + - @ dostaje apostrof, by nie działał jak formuła."
+  },
+  "exportAction": {
+    "message": "Eksportuj"
+  },
+  "exportPageNotes": {
+    "message": "Notatki do stron"
+  },
+  "exportSummary": {
+    "message": "Zakreślenia: $V1$ · strony: $V2$ · wyeksportowano $V3$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      },
+      "v3": {
+        "content": "$3"
+      }
+    }
+  },
+  "exportPageSummary": {
+    "message": "$V1$ · zakreślenia: $V2$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "toastExported": {
+    "message": "Wyeksportowano: $V1$ ($V2$)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "toastExportFailed": {
+    "message": "Eksport się nie udał. Spróbuj ponownie."
+  },
+  "csvPageTitle": {
+    "message": "Tytuł strony"
+  },
+  "csvPageUrl": {
+    "message": "Adres strony"
+  },
+  "csvColor": {
+    "message": "Kategoria"
+  },
+  "csvColorCode": {
+    "message": "Kod koloru"
+  },
+  "csvQuote": {
+    "message": "Zakreślony tekst"
+  },
+  "csvNote": {
+    "message": "Notatka"
+  },
+  "csvCreated": {
+    "message": "Utworzono"
+  },
+  "csvModified": {
+    "message": "Zmieniono"
+  },
+  "fileAccessTitle": {
+    "message": "Czy to plik z Twojego komputera?"
+  },
+  "fileAccessBadge": {
+    "message": "Annotator: zezwól na dostęp do plików lokalnych"
+  },
+  "fileAccessText": {
+    "message": "Włącz „Zezwalaj na dostęp do adresów URL plików” w ustawieniach Annotatora i odśwież stronę."
+  },
+  "fileAccessOpen": {
+    "message": "Otwórz ustawienia"
+  },
+  "settingFileAccess": {
+    "message": "Pliki lokalne"
+  },
+  "settingFileAccessOn": {
+    "message": "Działa na plikach HTML z komputera."
+  },
+  "settingFileAccessOff": {
+    "message": "Włącz „Zezwalaj na dostęp do adresów URL plików” w ustawieniach rozszerzenia."
+  },
+  "fileAccessTextFirefox": {
+    "message": "W about:addons otwórz kartę „Uprawnienia i dane” Annotatora, włącz „Dostęp do lokalnych plików na tym komputerze” (nie „Działanie na witrynach z ograniczeniami”) i odśwież stronę."
+  },
+  "settingFileAccessOffFirefox": {
+    "message": "W about:addons otwórz kartę „Uprawnienia i dane” Annotatora i włącz „Dostęp do lokalnych plików na tym komputerze” (nie „Działanie na witrynach z ograniczeniami”)."
+  },
+  "fileAccessCopy": {
+    "message": "Kopiuj about:addons"
+  },
+  "toastFileAccessCopied": {
+    "message": "Skopiowano. Wklej to w pasku adresu."
+  },
+  "pdfTitle": {
+    "message": "Plików PDF nie da się oznaczać"
+  },
+  "pdfText": {
+    "message": "Wbudowany czytnik PDF jest niedostępny dla rozszerzeń."
+  },
+  "pdfBadge": {
+    "message": "Annotator: plików PDF nie da się oznaczać"
+  },
+  "settingFileAccessAllowed": {
+    "message": "Dozwolone"
+  },
+  "siteLocalFiles": {
+    "message": "Wszystkie pliki lokalne"
+  },
+  "csvSource": {
+    "message": "Plik lub witryna"
+  },
+  "dataRelocate": {
+    "message": "Pliki zostały przeniesione?"
+  },
+  "dataRelocateHint": {
+    "message": "Wskaż notatkom nowy folder lub adres."
+  },
+  "dataRelocateAction": {
+    "message": "Zmień lokalizację…"
+  },
+  "relocateTitle": {
+    "message": "Zaktualizuj lokalizację notatek"
+  },
+  "relocateIntro": {
+    "message": "Folder, ścieżka sieciowa lub adres internetowy."
+  },
+  "relocateFrom": {
+    "message": "Dawna lokalizacja"
+  },
+  "relocateTo": {
+    "message": "Nowa lokalizacja"
+  },
+  "relocateHint": {
+    "message": "Notatki zostaną przeniesione do nowej lokalizacji."
+  },
+  "relocateInvalid": {
+    "message": "To nie wygląda na folder, plik ani adres internetowy."
+  },
+  "relocateNone": {
+    "message": "Nie znaleziono notatek w dawnej lokalizacji."
+  },
+  "relocateSame": {
+    "message": "Dawna i nowa lokalizacja są takie same."
+  },
+  "relocateCount": {
+    "message": "Strony do przeniesienia: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "relocateMerge": {
+    "message": "$V1$ z nich ma już tam notatki; zostaną połączone.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "relocateReminder": {
+    "message": "Same pliki pozostają bez zmian."
+  },
+  "relocateAction": {
+    "message": "Przenieś notatki"
+  },
+  "toastRelocated": {
+    "message": "Przeniesiono: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastRelocateFailed": {
+    "message": "Nie udało się przenieść notatek. Spróbuj ponownie."
+  },
+  "listShowMore": {
+    "message": "Pokaż więcej (zostało: $V1$)",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "listLoading": {
+    "message": "Wczytywanie…"
+  },
+  "actionSelectAllCount": {
+    "message": "Zaznacz wszystkie: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "settingsCategories": {
+    "message": "Kategorie"
+  },
+  "categoriesIntro": {
+    "message": "Nazwij kolory według tego, co zaznaczasz, np. „Wielkość próby”. Eksporty używają tych nazw."
+  },
+  "categoryName": {
+    "message": "Nazwa"
+  },
+  "categoryKey": {
+    "message": "Klawisz"
+  },
+  "categoryKeyHint": {
+    "message": "Litera lub cyfra (wymaga szybkich klawiszy)"
+  },
+  "categoryKeyInvalid": {
+    "message": "Klawisz musi być jedną literą lub cyfrą."
+  },
+  "categoryKeyTaken": {
+    "message": "„$V1$” jest już używany przez „$V2$”.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      },
+      "v2": {
+        "content": "$2"
+      }
+    }
+  },
+  "categoryColor": {
+    "message": "Kolor"
+  },
+  "categoryCustomColor": {
+    "message": "Własny"
+  },
+  "categoryMoveUp": {
+    "message": "Przesuń wyżej"
+  },
+  "categoryMoveDown": {
+    "message": "Przesuń niżej"
+  },
+  "categoryAdd": {
+    "message": "Dodaj kategorię"
+  },
+  "categoryReset": {
+    "message": "Przywróć wbudowane kolory"
+  },
+  "categoryNewName": {
+    "message": "Kategoria $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryChoose": {
+    "message": "Kategoria…"
+  },
+  "categoryDeleteTitle": {
+    "message": "Usunąć „$V1$”?",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryDeleteMove": {
+    "message": "W tej kategorii: $V1$. Przenieś je do:",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryDeleteMoveTo": {
+    "message": "Przenieś notatki do"
+  },
+  "categoryDeleteUnused": {
+    "message": "Żadna notatka nie używa tej kategorii."
+  },
+  "settingQuickKeys": {
+    "message": "Szybkie klawisze"
+  },
+  "settingQuickKeysHint": {
+    "message": "Zaznacz tekst i naciśnij klawisz kategorii, by go zakreślić."
+  },
+  "toolbarMore": {
+    "message": "Więcej kategorii"
+  },
+  "pickerTypeToFilter": {
+    "message": "Wpisz, by filtrować…"
+  },
+  "pickerNoMatch": {
+    "message": "Brak wyników"
+  },
+  "confirmDeleteManyTitle": {
+    "message": "Usunąć $COUNT$?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "confirmDeleteUndoText": {
+    "message": "Możesz to zaraz cofnąć."
+  },
+  "categoryResetTitle": {
+    "message": "Przywrócić wbudowane kolory?"
+  },
+  "categoryResetText": {
+    "message": "Nazwy, kolory i klawisze wbudowanych wrócą do domyślnych. Własne kategorie zostaną."
+  },
+  "categoryResetAction": {
+    "message": "Przywróć"
+  },
+  "settingSitePdf": {
+    "message": "To plik PDF: Annotator tu nie działa."
+  },
+  "csvWholePage": {
+    "message": "(cała strona)"
+  },
+  "exportIncludeSettings": {
+    "message": "Dołącz ustawienia Annotatora"
+  },
+  "exportIncludeSettingsHint": {
+    "message": "Wygląd, szybkie klawisze i reguły witryn."
+  },
+  "toastImportedSettings": {
+    "message": "Przywrócono ustawienia."
+  },
+  "navGuide": {
+    "message": "Jak to działa"
+  },
+  "guideTitle": {
+    "message": "Jak korzystać z Annotatora"
+  },
+  "guideIntro": {
+    "message": "Zakreślaj, notuj i odnajduj wszystko później. Wszystko zostaje na tym urządzeniu."
+  },
+  "guideTryTitle": {
+    "message": "Wypróbuj tutaj"
+  },
+  "guideTryOptional": {
+    "message": "Opcjonalnie"
+  },
+  "guideTryHint": {
+    "message": "Nic tutaj nie jest zapisywane."
+  },
+  "guideTryReset": {
+    "message": "Zacznij od nowa"
+  },
+  "guideDemo1": {
+    "message": "Dobre notatki zaczynają się od uważnego czytania. Zaznacz to zdanie, kliknij mały przycisk na jego końcu i wybierz kolor: tak powstaje zakreślenie."
+  },
+  "guideDemo2": {
+    "message": "Teraz spróbuj skrótu: zaznacz dowolny fragment tego akapitu i naciśnij ten pokazany obok. Przy otwartym pasku kolorów kategorię wybierają też cyfry 1–9."
+  },
+  "guideDemo3": {
+    "message": "Kliknij zakreślenie, żeby dopisać do niego notatkę albo zmienić kolor. Potem otwórz panel boczny, by zobaczyć na jednej liście wszystko, co zaznaczono na tej stronie."
+  },
+  "guideStepHighlightTitle": {
+    "message": "Zakreślaj"
+  },
+  "guideStepHighlightText": {
+    "message": "Zaznacz tekst i wybierz kolor przyciskiem na jego końcu albo użyj skrótu:"
+  },
+  "guideStepNoteTitle": {
+    "message": "Dopisuj notatki"
+  },
+  "guideStepNoteText": {
+    "message": "Kliknij zakreślenie, by dodać notatkę, zmienić kolor lub je usunąć. Zakreśl i od razu pisz:"
+  },
+  "guideStepKeysTitle": {
+    "message": "Wybieraj klawiszami"
+  },
+  "guideStepKeysText": {
+    "message": "W pasku kolorów: 1–9 wybiera kategorię, / szuka, N dodaje notatkę. Z szybkimi klawiszami klawisz kategorii od razu zakreśla."
+  },
+  "guideStepPanelTitle": {
+    "message": "Panel boczny"
+  },
+  "guideStepPanelText": {
+    "message": "Zakreślenia strony w kolejności czytania i notatka do całej strony."
+  },
+  "guideStepCategoriesTitle": {
+    "message": "Własne kategorie"
+  },
+  "guideStepCategoriesText": {
+    "message": "Ustawienia → Kategorie: nazwij kolory, dodaj kolejne, przypisz klawisze."
+  },
+  "guideStepAllTitle": {
+    "message": "Wszystko w jednym miejscu"
+  },
+  "guideStepAllText": {
+    "message": "Wyszukuj, filtruj i eksportuj notatki ze wszystkich stron."
+  },
+  "guideStepFilesTitle": {
+    "message": "Pliki z Twojego komputera"
+  },
+  "guideOpenDashboard": {
+    "message": "Przejdź do wszystkich notatek"
+  },
+  "noteCount_one": {
+    "message": "$COUNT$ notatka",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "noteCount_few": {
+    "message": "$COUNT$ notatki",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "noteCount_many": {
+    "message": "$COUNT$ notatek",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "noteCount_other": {
+    "message": "$COUNT$ notatki",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageCount_one": {
+    "message": "$COUNT$ strona",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageCount_few": {
+    "message": "$COUNT$ strony",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageCount_many": {
+    "message": "$COUNT$ stron",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageCount_other": {
+    "message": "$COUNT$ strony",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastOpenFileYourself": {
+    "message": "Firefox nie pozwala rozszerzeniom otwierać plików lokalnych. Adres skopiowano: wklej go w pasku adresu, a notatka się pokaże."
+  },
+  "categoryBulkOpen": {
+    "message": "Dodaj kilka"
+  },
+  "categoryBulkTitle": {
+    "message": "Dodaj kilka kategorii"
+  },
+  "categoryBulkIntro": {
+    "message": "Jedna nazwa w wierszu. Istniejące nazwy zostaną pominięte."
+  },
+  "categoryBulkPlaceholder": {
+    "message": "Wielkość próby\nInterwencja\nWynik"
+  },
+  "categoryBulkHint": {
+    "message": "Na razie nie ma czego dodać."
+  },
+  "categoryBulkCount": {
+    "message": "Do dodania: $V1$.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryBulkLimit": {
+    "message": "Ponad limit, pominięte: $V1$.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryBulkAction": {
+    "message": "Dodaj"
+  },
+  "categoryBulkAdded": {
+    "message": "Dodano: $V1$.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryCount_one": {
+    "message": "$COUNT$ kategoria",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryCount_few": {
+    "message": "$COUNT$ kategorie",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryCount_many": {
+    "message": "$COUNT$ kategorii",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryCount_other": {
+    "message": "$COUNT$ kategorii",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "categoryDrag": {
+    "message": "Przeciągnij lub użyj strzałek, by zmienić kolejność"
+  },
+  "toastSaveFailed": {
+    "message": "Nie udało się zapisać. Spróbuj ponownie."
+  },
+  "toastUndone": {
+    "message": "Cofnięto"
+  },
+  "toastUndoFailed": {
+    "message": "Nie udało się cofnąć"
+  },
+  "toastOpenFailed": {
+    "message": "Nie udało się otworzyć strony"
   }
 }

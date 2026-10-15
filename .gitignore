@@ -1,5 +1,4 @@
 node_modules/
 dist/
 artifacts/
-test/e2e/output/
 *.pem

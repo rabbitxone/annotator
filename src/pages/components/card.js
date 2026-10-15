@@ -1,9 +1,10 @@
-import { COLORS, colorById } from '../../shared/constants.js';
+import { colorById, getCategories } from '../../shared/constants.js';
 import { h } from '../../shared/dom.js';
 import { formatDate, relativeTime, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
-import { hostnameOf } from '../../shared/url.js';
-import { armOnce } from './confirm.js';
+import { highlightHits, renderMarkdown } from '../../shared/markdown.js';
+import { isFileUrl, pageName, siteLabel } from '../../shared/url.js';
+import { dropdown } from './dropdown.js';
 
 function hueOf(text) {
   let hash = 0;
@@ -12,7 +13,7 @@ function hueOf(text) {
 }
 
 export function siteAvatar(url, size = 32) {
-  const host = hostnameOf(url);
+  const host = siteLabel(url);
   return h(
     'span',
     {
@@ -20,22 +21,35 @@ export function siteAvatar(url, size = 32) {
       'aria-hidden': 'true',
       style: { '--hue': String(hueOf(host)), width: `${size}px`, height: `${size}px`, 'font-size': `${Math.round(size * 0.44)}px` },
     },
-    (host.match(/[\p{L}\p{N}]/u)?.[0] ?? '#').toUpperCase(),
+    isFileUrl(url) ? icon('folder', { size: Math.round(size * 0.5) }) : (host.match(/[\p{L}\p{N}]/u)?.[0] ?? '#').toUpperCase(),
   );
 }
 
+const SWATCH_LIMIT = 8;
+
 export function swatchPicker(selected, onPick) {
+  const categories = getCategories();
+  if (categories.length > SWATCH_LIMIT) {
+    return dropdown({
+      options: categories.map((c) => ({ value: c.id, label: c.name, swatch: c.swatch })),
+      value: selected ?? null,
+      placeholder: t('categoryChoose'),
+      ariaLabel: t('colorLabel'),
+      className: 'category-select',
+      onChange: onPick,
+    });
+  }
   const group = h(
     'div',
     { class: 'swatches', role: 'group', 'aria-label': t('colorLabel') },
-    COLORS.map((color) =>
+    categories.map((color) =>
       h(
         'button',
         {
           class: 'swatch-btn',
           type: 'button',
-          title: t(`color_${color.id}`),
-          'aria-label': t(`color_${color.id}`),
+          title: color.name,
+          'aria-label': color.name,
           'aria-pressed': String(color.id === selected),
           dataset: { color: color.id },
           style: { '--swatch': color.swatch },
@@ -56,10 +70,13 @@ export function annotationCard(annotation, page, options) {
     showSource = false,
     goLabel = t('actionGoTo'),
     goIcon = 'target',
-    orphan = false,
+    orphan = !!annotation.lostAt,
     selectable = false,
     selected = false,
+    query = '',
     onGo,
+    onCopy,
+    onReanchor,
     onSave,
     onDelete,
     onSelect,
@@ -76,15 +93,37 @@ export function annotationCard(annotation, page, options) {
   if (isSelected) card.dataset.selected = '';
 
   const fill = (...children) => card.replaceChildren(...children.filter(Boolean));
-  const quote = () => h('p', { class: 'card-quote' }, h('mark', null, annotation.quote?.exact ?? ''));
+  const withHits = (el) => {
+    highlightHits(el, query);
+    return el;
+  };
+  const quote = () => withHits(h('p', { class: 'card-quote' }, h('mark', null, annotation.quote?.exact ?? '')));
+
+  function copyButton() {
+    const button = h(
+      'button',
+      {
+        class: 'icon-btn',
+        type: 'button',
+        title: t('actionCopyQuote'),
+        'aria-label': t('actionCopyQuote'),
+        onclick: async () => {
+          if (!(await onCopy())) return;
+          button.replaceChildren(icon('tick'));
+          setTimeout(() => button.replaceChildren(icon('copy')), 1500);
+        },
+      },
+      icon('copy'),
+    );
+    return button;
+  }
 
   function renderView() {
     const deleteBtn = h(
       'button',
-      { class: 'icon-btn danger', type: 'button', title: t('actionDelete'), 'aria-label': t('actionDelete') },
+      { class: 'icon-btn danger', type: 'button', title: t('actionDelete'), 'aria-label': t('actionDelete'), onclick: () => onDelete?.() },
       icon('delete'),
     );
-    armOnce(deleteBtn, onDelete);
 
     const edited = annotation.updatedAt - annotation.createdAt > 1000;
     const when = edited ? annotation.updatedAt : annotation.createdAt;
@@ -95,7 +134,7 @@ export function annotationCard(annotation, page, options) {
         'div',
         { class: 'card-source', title: page.url },
         siteAvatar(page.url, 18),
-        h('span', null, page.title || hostnameOf(page.url)),
+        withHits(h('span', null, pageName(page))),
       ),
       selectable &&
       h('input', {
@@ -111,7 +150,7 @@ export function annotationCard(annotation, page, options) {
         },
       }),
       quote(),
-      annotation.note && h('p', { class: 'card-note' }, annotation.note),
+      annotation.note?.trim() && withHits(h('div', { class: 'card-note md' }, renderMarkdown(annotation.note))),
       h(
         'div',
         { class: 'card-foot' },
@@ -126,8 +165,16 @@ export function annotationCard(annotation, page, options) {
         h(
           'div',
           { class: 'card-actions' },
+          orphan &&
+          onReanchor &&
+          h(
+            'button',
+            { class: 'icon-btn', type: 'button', title: t('actionReanchorHint'), 'aria-label': t('actionReanchor'), onclick: onReanchor },
+            icon('pin'),
+          ),
           onGo &&
           h('button', { class: 'icon-btn', type: 'button', title: goLabel, 'aria-label': goLabel, onclick: onGo }, icon(goIcon)),
+          onCopy && copyButton(),
           h(
             'button',
             { class: 'icon-btn', type: 'button', title: t('actionEdit'), 'aria-label': t('actionEdit'), onclick: renderEdit },
@@ -180,6 +227,7 @@ export function annotationCard(annotation, page, options) {
         'div',
         { class: 'card-edit' },
         textarea,
+        h('p', { class: 'field-hint' }, t('markdownHint')),
         h(
           'div',
           { class: 'card-edit-row' },
@@ -192,7 +240,7 @@ export function annotationCard(annotation, page, options) {
             'div',
             { class: 'card-actions', style: { opacity: '1' } },
             h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => finish(false) }, t('actionCancel')),
-            h('button', { class: 'btn btn-primary btn-sm', type: 'button', onclick: () => finish(true) }, t('actionSave')),
+            h('button', { class: 'btn btn-primary btn-sm', type: 'button', title: t('actionSave'), 'data-tip-keys': 'mod+Enter', onclick: () => finish(true) }, t('actionSave')),
           ),
         ),
       ),

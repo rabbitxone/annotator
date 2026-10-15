@@ -17,11 +17,30 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
+.popup-loading {
+  padding: 24px 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.popup-header-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.popup-view .page-note {
+  flex-shrink: 0;
+}
+
+.popup-view .card {
+  flex-shrink: 0;
+}
+
 .popup-controls {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 12px 14px 4px;
+  padding: 12px 14px 6px;
 }
 
 .popup-controls .segmented .badge {
@@ -47,6 +66,8 @@ body {
   min-height: 0;
   padding: 8px 14px 14px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
   animation: fade-in 160ms ease-out;
 }
 
@@ -70,4 +91,34 @@ body {
   padding: 0 2px;
   color: var(--subtle);
   font-size: 11px;
+}
+
+.popup-header,
+.popup-controls {
+  flex-shrink: 0;
+  overflow: hidden;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+}
+
+.popup-footer-note {
+  align-items: center;
+}
+
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--accent-on-soft);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.link-btn:hover {
+  background: var(--accent-soft);
 }

@@ -10,15 +10,14 @@ const src = join(root, 'src');
 const args = new Set(process.argv.slice(2));
 const pkg = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 
-const E2E = args.has('--e2e');
-const TARGETS = E2E ? ['chrome'] : ['chrome', 'firefox'];
-const outName = (target) => (E2E ? `${target}-e2e` : target);
+const TARGETS = ['chrome', 'firefox'];
 
 const ENTRIES = {
   background: 'background/index.js',
   content: 'content/index.js',
   popup: 'pages/popup.js',
   dashboard: 'pages/dashboard.js',
+  guide: 'pages/guide.js',
 };
 
 function manifestFor(target) {
@@ -37,16 +36,24 @@ function manifestFor(target) {
       default_icon: { 16: 'icons/icon-16.png', 32: 'icons/icon-32.png', 48: 'icons/icon-48.png' },
     },
     content_scripts: [{ matches: ['<all_urls>'], js: ['content.js'], run_at: 'document_idle' }],
+    // Alt+D/E/F and menu letters are taken by browsers; on a Mac Option types characters (Option+Q is œ).
+    commands: {
+      highlight: { suggested_key: { default: 'Alt+Q', mac: 'MacCtrl+Q' }, description: '__MSG_cmd_highlight__' },
+      'highlight-note': { suggested_key: { default: 'Alt+W', mac: 'MacCtrl+W' }, description: '__MSG_cmd_highlight_note__' },
+      'toggle-panel': { suggested_key: { default: 'Alt+X', mac: 'MacCtrl+X' }, description: '__MSG_cmd_toggle_panel__' },
+    },
   };
 
   if (target === 'chrome') {
+    // Chrome caps storage.local at 10 MB without it; Firefox has no such cap and would prompt for it.
+    manifest.permissions.push('unlimitedStorage');
     manifest.background = { service_worker: 'background.js' };
   } else {
     manifest.background = { scripts: ['background.js'] };
     manifest.browser_specific_settings = {
       gecko: {
         id: '{9086e877-a103-44dc-b269-7f9cbdf60f1d}',
-        strict_min_version: '142.0',
+        strict_min_version: '153.0',
         data_collection_permissions: { required: ['none'] },
       },
     };
@@ -90,11 +97,13 @@ async function copyStatic(out) {
     await cp(join(src, `icons/icon-${size}.png`), join(out, `icons/icon-${size}.png`));
   }
   await cp(join(src, 'icons/icon.svg'), join(out, 'icons/icon.svg'));
+  await mkdir(join(out, 'licenses'), { recursive: true });
+  await cp(join(root, 'node_modules/@mozilla/readability/LICENSE.md'), join(out, 'licenses/readability-LICENSE.md'));
   await cp(join(src, 'icons/logo.svg'), join(out, 'icons/logo.svg'));
-  for (const page of ['popup.html', 'dashboard.html']) await cp(join(src, 'pages', page), join(out, page));
+  for (const page of ['popup.html', 'dashboard.html', 'guide.html']) await cp(join(src, 'pages', page), join(out, page));
   await mkdir(join(out, 'styles'), { recursive: true });
   await cp(join(src, 'shared/tokens.css'), join(out, 'styles/tokens.css'));
-  for (const sheet of ['app.css', 'popup.css', 'dashboard.css']) {
+  for (const sheet of ['app.css', 'popup.css', 'dashboard.css', 'guide.css']) {
     await cp(join(src, 'pages/styles', sheet), join(out, 'styles', sheet));
   }
 }
@@ -111,7 +120,6 @@ function esbuildOptions(target, out) {
     format: 'iife',
     target: target === 'chrome' ? ['chrome114'] : ['firefox128'],
     loader: { '.css': 'text' },
-    define: { __E2E__: String(E2E) },
     minify: false,
     legalComments: 'inline',
     logLevel: 'warning',
@@ -119,11 +127,11 @@ function esbuildOptions(target, out) {
 }
 
 async function buildTarget(target) {
-  const out = join(root, 'dist', outName(target));
+  const out = join(root, 'dist', target);
   await rm(out, { recursive: true, force: true });
   await mkdir(out, { recursive: true });
   await Promise.all([esbuild.build(esbuildOptions(target, out)), copyStatic(out), buildFonts(out), writeManifest(target, out)]);
-  console.log(`built dist/${outName(target)}`);
+  console.log(`built dist/${target}`);
   return out;
 }
 
@@ -156,7 +164,7 @@ if (args.has('--watch')) {
     clearTimeout(timer);
     timer = setTimeout(async () => {
       for (const target of TARGETS) {
-        const out = join(root, 'dist', outName(target));
+        const out = join(root, 'dist', target);
         await copyStatic(out);
         await writeManifest(target, out);
       }

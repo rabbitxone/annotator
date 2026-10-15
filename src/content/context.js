@@ -1,3 +1,5 @@
+import isProbablyReaderable from '@mozilla/readability/Readability-readerable.js';
+
 const WIDGET_SELECTOR = [
   'input',
   'textarea',
@@ -40,19 +42,33 @@ export function isSelectionAnnotatable(range) {
 export const APP_THRESHOLD = 3;
 
 export function scoreAppLikeness(signals) {
-  const { hasAppRole, bigCanvas, bigVideo, bigEditable, controls, textChars, isFeed, innerScroller, composer, shell } =
-    signals;
+  const {
+    hasAppRole,
+    bigCanvas,
+    bigVideo,
+    bigEditable,
+    controls,
+    textChars,
+    isFeed,
+    innerScroller,
+    composer,
+    shell,
+    readerable,
+    declaresArticle,
+  } = signals;
   let score = 0;
-  if (hasAppRole) score += 3; // the page says so itself
-  if (bigCanvas) score += 3; // maps, design tools, canvas-rendered documents, games
-  if (isFeed) score += 3; // role=feed / role=log, or a stream of role=article items
-  if (innerScroller) score += 3; // the page frame is fixed, content scrolls inside it (chat, mail)
-  if (bigVideo) score += 2; // video players
-  if (bigEditable) score += 2; // editors
-  if (composer) score += 2; // a message/post box in view
-  if (shell) score += 2; // fixed top bar + fixed side panel — an app frame, not a sticky header
+  if (readerable) score -= 4;
+  if (declaresArticle) score -= 2;
+  if (hasAppRole) score += 3;
+  if (bigCanvas) score += 3;
+  if (isFeed) score += 3;
+  if (innerScroller) score += 3;
+  if (bigVideo) score += 2;
+  if (bigEditable) score += 2;
+  if (composer) score += 2;
+  if (shell) score += 2;
   const per1kChars = controls / Math.max(1, textChars / 1000);
-  if (controls >= 50 && per1kChars > 8) score += 2; // mostly buttons, little prose
+  if (controls >= 50 && per1kChars > 8) score += 2;
   if (controls >= 200) score += 1;
   return score;
 }
@@ -105,6 +121,35 @@ function hasComposerInView(vw, vh) {
     });
 }
 
+const ARTICLE_TYPES = /^(Article|NewsArticle|BlogPosting|Report|ScholarlyArticle|TechArticle|AnalysisNewsArticle|OpinionNewsArticle|ReportageNewsArticle|LiveBlogPosting)$/;
+
+function typesIn(node, out = []) {
+  if (Array.isArray(node)) for (const item of node) typesIn(item, out);
+  else if (node && typeof node === 'object') {
+    for (const type of [node['@type']].flat()) if (typeof type === 'string') out.push(type);
+    if (node['@graph']) typesIn(node['@graph'], out);
+  }
+  return out;
+}
+
+export function declaresArticle(doc = document) {
+  if (doc.querySelector('meta[property="og:type"][content="article" i]')) return true;
+  for (const script of Array.from(doc.querySelectorAll('script[type="application/ld+json"]')).slice(0, 6)) {
+    try {
+      if (typesIn(JSON.parse(script.textContent)).some((type) => ARTICLE_TYPES.test(type))) return true;
+    } catch { }
+  }
+  return !!doc.querySelector('[itemtype*="schema.org/Article" i], [itemtype*="schema.org/NewsArticle" i], [itemtype*="schema.org/BlogPosting" i]');
+}
+
+function readerable() {
+  try {
+    return isProbablyReaderable(document);
+  } catch {
+    return false;
+  }
+}
+
 export function collectSignals() {
   const viewportArea = Math.max(1, window.innerWidth * window.innerHeight);
   const isBig = (el) => {
@@ -119,6 +164,8 @@ export function collectSignals() {
 
   return {
     ...layout,
+    readerable: readerable(),
+    declaresArticle: declaresArticle(),
     isFeed: !!document.querySelector('[role="feed"], [role="log"]') || document.querySelectorAll('[role="article"]').length >= 3,
     composer: hasComposerInView(vw, vh),
     hasAppRole: !!document.querySelector('[role="application"]'),

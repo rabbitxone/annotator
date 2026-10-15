@@ -32,6 +32,10 @@
             <span data-icon="settings"></span>
             <span class="nav-label" data-i18n="navSettings"></span>
           </a>
+          <a class="nav-item" href="guide.html">
+            <span data-icon="info"></span>
+            <span class="nav-label" data-i18n="navGuide"></span>
+          </a>
         </nav>
 
         <div class="sidebar-foot" id="sidebar-privacy"></div>
@@ -48,13 +52,21 @@
               <p class="muted main-subtitle" id="view-subtitle"></p>
             </div>
           </div>
-          <label class="search main-search" id="search-wrap">
-            <span data-icon="search"></span>
-            <span class="sr-only" data-i18n="searchLabel"></span>
-            <input id="search" class="input" type="search" autocomplete="off" data-i18n-placeholder="searchAllPlaceholder" />
-          </label>
+          <div class="main-tools">
+            <label class="search main-search" id="search-wrap">
+              <span data-icon="search"></span>
+              <span class="sr-only" data-i18n="searchLabel"></span>
+              <input id="search" class="input" type="search" autocomplete="off" data-i18n-placeholder="searchAllPlaceholder" />
+            </label>
+            <button class="btn btn-outline" type="button" id="export">
+              <span data-icon="download" data-size="14"></span>
+              <span data-i18n="actionExport"></span>
+            </button>
+          </div>
         </header>
 
+        <div id="notices"></div>
+        <div id="whats-new"></div>
         <div class="toolbar-row" id="filters"></div>
         <section id="content" class="content"></section>
       </main>
@@ -64,6 +76,17 @@
       <div class="bulk-box">
         <span id="bulk-count"></span>
         <div class="bulk-actions">
+          <div class="bulk-colors" id="bulk-colors" data-i18n-title="bulkRecolor"></div>
+          <span class="bulk-divider"></span>
+          <button class="btn btn-ghost btn-sm" type="button" id="bulk-copy" data-i18n-title="bulkCopyHint">
+            <span data-icon="copy" data-size="14"></span>
+            <span data-i18n="actionCopy"></span>
+          </button>
+          <button class="btn btn-ghost btn-sm" type="button" id="bulk-export">
+            <span data-icon="download" data-size="14"></span>
+            <span data-i18n="actionExport"></span>
+          </button>
+          <span class="bulk-divider"></span>
           <button class="btn btn-ghost btn-sm" type="button" id="bulk-clear" data-i18n="actionClearSelection"></button>
           <button class="btn btn-danger btn-sm" type="button" id="bulk-delete">
             <span data-icon="delete" data-size="14"></span>
