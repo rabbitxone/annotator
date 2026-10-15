@@ -489,13 +489,13 @@
     "message": "Markdown"
   },
   "exportMarkdownHint": {
-    "message": "A readable document for Obsidian, Notion or GitHub."
+    "message": "A readable document for notes apps and text editors."
   },
   "exportCsv": {
-    "message": "CSV (Excel)"
+    "message": "CSV"
   },
   "exportCsvHint": {
-    "message": "One row per highlight, for Excel or Google Sheets."
+    "message": "One row per highlight, for spreadsheets."
   },
   "exportReimportable": {
     "message": "Can be imported again"
@@ -519,7 +519,7 @@
     "message": "Semicolon ( ; )"
   },
   "exportSeparatorHint": {
-    "message": "Everything in one column in Excel? Pick the other one."
+    "message": "Everything in one column in your spreadsheet? Pick the other one."
   },
   "exportCsvFormulaHint": {
     "message": "Text starting with = + - @ gets an apostrophe so it isn't run as a formula."

@@ -489,13 +489,13 @@
     "message": "Markdown"
   },
   "exportMarkdownHint": {
-    "message": "Czytelny dokument do Obsidiana, Notiona czy GitHuba."
+    "message": "Czytelny dokument do aplikacji z notatkami i edytorów tekstu."
   },
   "exportCsv": {
-    "message": "CSV (Excel)"
+    "message": "CSV"
   },
   "exportCsvHint": {
-    "message": "Wiersz na zakreślenie, do Excela lub Arkuszy Google."
+    "message": "Wiersz na zakreślenie, do arkuszy kalkulacyjnych."
   },
   "exportReimportable": {
     "message": "Można zaimportować ponownie"
@@ -519,7 +519,7 @@
     "message": "Średnik ( ; )"
   },
   "exportSeparatorHint": {
-    "message": "Wszystko w jednej kolumnie w Excelu? Wybierz drugi."
+    "message": "Wszystko w jednej kolumnie w arkuszu? Wybierz drugi."
   },
   "exportCsvFormulaHint": {
     "message": "Tekst zaczynający się od = + - @ dostaje apostrof, by nie działał jak formuła."
