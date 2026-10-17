@@ -366,24 +366,24 @@ button:focus-visible {
   word-break: break-word;
 }
 
-textarea {
+.note-editor {
   display: block;
-  width: 100%;
   min-height: 76px;
   max-height: 240px;
+  overflow-y: auto;
   margin: 0;
   padding: 10px 12px 12px;
-  border: 0;
   outline: none;
-  resize: none;
-  background: transparent;
   color: var(--on-surface);
   font: inherit;
   line-height: 20px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  cursor: text;
 }
 
-textarea::placeholder {
-  color: var(--subtle);
+.md-help {
+  margin: 0 12px 10px;
 }
 
 .popover-foot {
@@ -393,6 +393,14 @@ textarea::placeholder {
   gap: 8px;
   padding: 8px 8px 8px 12px;
   border-top: 1px solid var(--border);
+}
+
+.foot-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  margin-left: -6px;
 }
 
 .meta {

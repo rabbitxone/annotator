@@ -2,6 +2,8 @@ import { h } from '../../shared/dom.js';
 import { t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 import { highlightHits, renderMarkdown } from '../../shared/markdown.js';
+import { markdownHelp } from '../../shared/markdown-help.js';
+import { createNoteEditor } from '../../shared/note-editor.js';
 
 export function pageNoteBox(note, { onSave, onEditingChange, query = '' }) {
   const box = h('section', { class: 'page-note' });
@@ -36,22 +38,23 @@ export function pageNoteBox(note, { onSave, onEditingChange, query = '' }) {
   function renderEdit() {
     onEditingChange?.(true);
     delete box.dataset.empty;
-    const textarea = h('textarea', {
-      class: 'input',
+    const editor = createNoteEditor({
       value: note || '',
-      rows: 3,
       placeholder: t('pageNotePlaceholder'),
-      'aria-label': t('pageNoteLabel'),
+      label: t('pageNoteLabel'),
+      openTip: t('mdOpenLink'),
+      openKeys: `mod+${t('mdClick')}`,
     });
+    editor.el.classList.add('input', 'note-field');
     const finish = (save) => {
-      if (save && textarea.value !== (note || '')) {
-        note = textarea.value;
+      if (save && editor.value !== (note || '')) {
+        note = editor.value;
         onSave(note);
       }
       onEditingChange?.(false);
       renderView();
     };
-    textarea.addEventListener('keydown', (e) => {
+    editor.el.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         e.preventDefault();
         finish(false);
@@ -60,13 +63,15 @@ export function pageNoteBox(note, { onSave, onEditingChange, query = '' }) {
         finish(true);
       }
     });
+    const md = markdownHelp();
     box.replaceChildren(
       h('div', { class: 'page-note-head' }, label()),
-      textarea,
+      editor.el,
+      md.help,
       h(
         'div',
         { class: 'card-edit-row' },
-        h('p', { class: 'field-hint' }, t('markdownHint')),
+        md.button,
         h(
           'div',
           { class: 'card-actions', style: { opacity: '1' } },
@@ -75,7 +80,8 @@ export function pageNoteBox(note, { onSave, onEditingChange, query = '' }) {
         ),
       ),
     );
-    textarea.focus();
+    editor.focus();
+    editor.setCaret(editor.value.length);
   }
 
   renderView();

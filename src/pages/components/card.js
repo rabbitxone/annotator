@@ -3,6 +3,8 @@ import { h } from '../../shared/dom.js';
 import { formatDate, relativeTime, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 import { highlightHits, renderMarkdown } from '../../shared/markdown.js';
+import { markdownHelp } from '../../shared/markdown-help.js';
+import { createNoteEditor } from '../../shared/note-editor.js';
 import { isFileUrl, pageName, siteLabel } from '../../shared/url.js';
 import { dropdown } from './dropdown.js';
 
@@ -189,19 +191,20 @@ export function annotationCard(annotation, page, options) {
   function renderEdit() {
     onEditingChange?.(true);
     let nextColor = annotation.color;
-    const textarea = h('textarea', {
-      class: 'input',
+    const editor = createNoteEditor({
       value: annotation.note || '',
       placeholder: t('notePlaceholder'),
-      'aria-label': t('noteLabel'),
-      rows: 3,
+      label: t('noteLabel'),
+      openTip: t('mdOpenLink'),
+      openKeys: `mod+${t('mdClick')}`,
     });
+    editor.el.classList.add('input', 'note-field');
 
     const finish = (save) => {
       if (save) {
-        annotation.note = textarea.value;
+        annotation.note = editor.value;
         annotation.color = nextColor;
-        onSave({ note: textarea.value, color: nextColor });
+        onSave({ note: editor.value, color: nextColor });
       } else {
         const original = colorById(annotation.color);
         card.style.setProperty('--swatch', original.swatch);
@@ -211,7 +214,9 @@ export function annotationCard(annotation, page, options) {
       renderView();
     };
 
-    textarea.addEventListener('keydown', (e) => {
+    const md = markdownHelp();
+
+    editor.el.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         e.preventDefault();
         finish(false);
@@ -226,8 +231,8 @@ export function annotationCard(annotation, page, options) {
       h(
         'div',
         { class: 'card-edit' },
-        textarea,
-        h('p', { class: 'field-hint' }, t('markdownHint')),
+        editor.el,
+        md.help,
         h(
           'div',
           { class: 'card-edit-row' },
@@ -239,14 +244,15 @@ export function annotationCard(annotation, page, options) {
           h(
             'div',
             { class: 'card-actions', style: { opacity: '1' } },
+            md.button,
             h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => finish(false) }, t('actionCancel')),
             h('button', { class: 'btn btn-primary btn-sm', type: 'button', title: t('actionSave'), 'data-tip-keys': 'mod+Enter', onclick: () => finish(true) }, t('actionSave')),
           ),
         ),
       ),
     );
-    textarea.focus();
-    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    editor.focus();
+    editor.setCaret(editor.value.length);
   }
 
   renderView();

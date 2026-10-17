@@ -307,9 +307,6 @@
   "pageNoteAdd": {
     "message": "Dodaj notatkę do całej strony"
   },
-  "markdownHint": {
-    "message": "Obsługuje **pogrubienie**, *kursywę*, `kod`, listy i linki."
-  },
   "toastCopied": {
     "message": "Skopiowano do schowka"
   },
@@ -418,7 +415,10 @@
     }
   },
   "whatsNewShort": {
-    "message": "Panel boczny, skróty klawiszowe, własne kategorie i kopie zapasowe."
+    "message": "Markdown na żywo w notatkach, panel boczny, skróty, własne kategorie i kopie zapasowe."
+  },
+  "whatsNewNotes": {
+    "message": "Notatki pokazują formatowanie Markdown podczas pisania, a skróty klawiszowe nie przeszkadzają już w pisaniu."
   },
   "whatsNewPanel": {
     "message": "Panel boczny na każdej stronie: zakreślenia, notatka do strony i notatki, których tekst się przesunął."
@@ -1086,5 +1086,40 @@
   },
   "toastOpenFailed": {
     "message": "Nie udało się otworzyć strony"
+  },
+  "mdSupported": {
+    "message": "Obsługiwany podstawowy Markdown"
+  },
+  "mdBold": {
+    "message": "Pogrubienie"
+  },
+  "mdItalic": {
+    "message": "Kursywa"
+  },
+  "mdCode": {
+    "message": "Kod"
+  },
+  "mdLink": {
+    "message": "Link"
+  },
+  "mdList": {
+    "message": "Lista"
+  },
+  "mdOpenLink": {
+    "message": "Otwórz link"
+  },
+  "mdClick": {
+    "message": "klik"
+  },
+  "mdEscape": {
+    "message": "Znak dosłownie"
+  },
+  "mdLinkOpen": {
+    "message": "Link ($KEYS$+klik otwiera)",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
   }
 }

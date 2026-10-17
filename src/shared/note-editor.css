@@ -1,0 +1,107 @@
+.note-editor[data-empty]::before {
+  content: attr(data-placeholder);
+  color: var(--subtle);
+  pointer-events: none;
+}
+
+.note-editor .md-mark {
+  display: none;
+  color: var(--subtle);
+}
+
+.note-editor .md-active > .md-mark {
+  display: inline;
+}
+
+.note-editor .md-strong {
+  font-weight: 700;
+}
+
+.note-editor .md-em {
+  font-style: italic;
+}
+
+.note-editor .md-code {
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--surface-sunken);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.88em;
+}
+
+.note-editor .md-bullet {
+  position: relative;
+  color: transparent;
+}
+
+.note-editor .md-bullet::before {
+  content: '•';
+  position: absolute;
+  inset: 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.note-editor .md-number {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.note-editor .md-link,
+.note-editor .md-url {
+  color: var(--accent-hover);
+}
+
+.note-editor.md-follow [data-href] {
+  cursor: pointer;
+}
+
+.note-editor.md-follow [data-href]:hover {
+  text-decoration: underline;
+}
+
+.md-help {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.md-help[hidden] {
+  display: none;
+}
+
+.md-help p {
+  margin: 0;
+}
+
+.md-help-title {
+  margin-bottom: 4px;
+  color: var(--on-surface);
+  font-weight: 600;
+}
+
+.md-help dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 12px;
+  margin: 0;
+}
+
+.md-help dt,
+.md-help dd {
+  margin: 0;
+}
+
+.md-help code {
+  color: var(--on-surface);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  white-space: pre;
+}
+
+.md-btn[aria-expanded='true'] {
+  color: var(--on-surface);
+}

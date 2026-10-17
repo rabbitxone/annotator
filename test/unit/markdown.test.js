@@ -38,3 +38,32 @@ test('groups lines into paragraphs and lists', () => {
     ],
   );
 });
+
+test('markdownSpans keeps markers and offsets', async () => {
+  const { markdownSpans } = await import('../../src/shared/markdown.js');
+  const nodes = markdownSpans('a **b _c_** d');
+  assert.equal(nodes[0].text, 'a ');
+  assert.equal(nodes[1].type, 'strong');
+  assert.deepEqual([nodes[1].start, nodes[1].end], [2, 11]);
+  assert.equal(nodes[1].children[1].type, 'em');
+  assert.deepEqual([nodes[1].children[1].start, nodes[1].children[1].end], [6, 9]);
+  assert.equal(nodes[2].text, ' d');
+});
+
+test('backslash escapes markdown characters', () => {
+  const plain = (tokens) => tokens.map((t) => (t.type === 'text' ? t.text : `<${t.type}>`)).join('');
+  assert.equal(plain(parseInline('\\*not em\\* and \\_x\\_ and \\\\')), '*not em* and _x_ and \\');
+  assert.equal(plain(parseInline('*a\\*')), '*a*');
+  assert.deepEqual(parseInline('`a\\*b`'), [{ type: 'code', text: 'a\\*b' }]);
+  const [block] = parseMarkdown('\\- not a list');
+  assert.equal(block.type, 'p');
+  assert.equal(plain(block.lines[0]), '- not a list');
+});
+
+test('markdownLineSpans marks list markers and keeps offsets', async () => {
+  const { markdownLineSpans } = await import('../../src/shared/markdown.js');
+  const nodes = markdownLineSpans('- a\n  2. *b*');
+  assert.deepEqual(nodes.map((n) => n.type), ['bullet', 'text', 'text', 'text', 'number', 'text', 'em']);
+  assert.equal(nodes.at(-1).start, 9);
+  assert.equal(nodes.at(-1).end, 12);
+});

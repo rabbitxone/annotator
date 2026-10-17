@@ -448,10 +448,16 @@ textarea.input {
   box-shadow: 0 0 0 1px rgba(1, 173, 53, 0.35);
 }
 
-.field-hint {
-  color: var(--subtle);
-  font-size: 11px;
-  line-height: 15px;
+.note-field {
+  height: auto;
+  min-height: 96px;
+  max-height: min(320px, 50vh);
+  overflow-y: auto;
+  padding: 8px 10px;
+  line-height: 20px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  cursor: text;
 }
 
 .page-note {

@@ -307,9 +307,6 @@
   "pageNoteAdd": {
     "message": "Add a note about the whole page"
   },
-  "markdownHint": {
-    "message": "Supports **bold**, *italics*, `code`, lists and links."
-  },
   "toastCopied": {
     "message": "Copied to clipboard"
   },
@@ -418,7 +415,10 @@
     }
   },
   "whatsNewShort": {
-    "message": "Side panel, keyboard shortcuts, your own categories and backups."
+    "message": "Live Markdown in notes, side panel, shortcuts, your own categories and backups."
+  },
+  "whatsNewNotes": {
+    "message": "Notes show Markdown formatting as you type, and keyboard shortcuts no longer interfere while you write."
   },
   "whatsNewPanel": {
     "message": "A side panel on every page with your highlights, a page note and notes whose text has moved."
@@ -1038,5 +1038,40 @@
   },
   "toastOpenFailed": {
     "message": "Couldn't open the page"
+  },
+  "mdSupported": {
+    "message": "Some Markdown supported"
+  },
+  "mdBold": {
+    "message": "Bold"
+  },
+  "mdItalic": {
+    "message": "Italic"
+  },
+  "mdCode": {
+    "message": "Code"
+  },
+  "mdLink": {
+    "message": "Link"
+  },
+  "mdList": {
+    "message": "List"
+  },
+  "mdOpenLink": {
+    "message": "Open link"
+  },
+  "mdClick": {
+    "message": "Click"
+  },
+  "mdEscape": {
+    "message": "Literal character"
+  },
+  "mdLinkOpen": {
+    "message": "Link ($KEYS$+click to open)",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
   }
 }

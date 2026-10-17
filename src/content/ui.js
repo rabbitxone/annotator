@@ -4,10 +4,13 @@ import { h } from '../shared/dom.js';
 import { relativeTime, t } from '../shared/i18n.js';
 import { icon } from '../shared/icons.js';
 import { keysNode } from '../shared/keys.js';
+import { markdownHelp } from '../shared/markdown-help.js';
 import { installTooltips } from '../shared/tooltip.js';
+import noteEditorCss from '../shared/note-editor.css';
 import tokensCss from '../shared/tokens.css';
 import uiCss from './ui.css';
 import { UI_HOST_TAG } from './anchoring.js';
+import { createNoteEditor } from '../shared/note-editor.js';
 
 const GAP = 8;
 const END_GAP = 4;
@@ -102,7 +105,7 @@ export function createUi(handlers) {
       'all: initial !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 0 !important; height: 0 !important; z-index: 2147483647 !important;',
     );
     shadow = host.attachShadow({ mode: 'closed' });
-    shadow.append(h('style', null, tokensCss + uiCss));
+    shadow.append(h('style', null, tokensCss + noteEditorCss + uiCss));
     installTooltips(shadow, { topLayer: false });
     for (const type of ['keydown', 'keyup', 'keypress']) {
       host.addEventListener(type, (e) => e.stopPropagation());
@@ -352,18 +355,13 @@ export function createUi(handlers) {
     let color = annotation.color;
     const original = annotation.note || '';
 
-    const textarea = h('textarea', {
+    const note = createNoteEditor({
       value: original,
       placeholder: t('notePlaceholder'),
-      'aria-label': t('noteLabel'),
-      spellcheck: 'true',
+      label: t('noteLabel'),
+      openTip: t('mdOpenLink'),
+      openKeys: `mod+${t('mdClick')}`,
     });
-    const autosize = () => {
-      textarea.style.height = 'auto';
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 240)}px`;
-    };
-    textarea.addEventListener('input', autosize);
-
     const swatches = h('div', { class: 'swatches', role: 'group', 'aria-label': t('colorLabel') });
     const categoryMenu = h('ul', { class: 'picker-list popover-categories', role: 'listbox', hidden: true });
 
@@ -465,6 +463,8 @@ export function createUi(handlers) {
       icon('copy', { size: 16 }),
     );
 
+    const md = markdownHelp({ onToggle: () => reposition() });
+
     const quote = h(
       'div',
       { class: 'quote', style: { '--swatch': colorById(color).swatch } },
@@ -501,14 +501,20 @@ export function createUi(handlers) {
       ),
       categoryMenu,
       quote,
-      textarea,
+      note.el,
+      md.help,
       h(
         'div',
         { class: 'popover-foot' },
         h(
-          'span',
-          { class: 'meta' },
-          t(edited ? 'metaEdited' : 'metaCreated', relativeTime(edited ? annotation.updatedAt : annotation.createdAt)),
+          'div',
+          { class: 'foot-info' },
+          md.button,
+          h(
+            'span',
+            { class: 'meta' },
+            t(edited ? 'metaEdited' : 'metaCreated', relativeTime(edited ? annotation.updatedAt : annotation.createdAt)),
+          ),
         ),
         h(
           'div',
@@ -574,11 +580,10 @@ export function createUi(handlers) {
       if (!overlay) return;
       dismiss(overlay);
       for (const child of box.children) if (child !== overlay) child.inert = false;
-      textarea.focus({ preventScroll: true });
+      note.focus({ preventScroll: true });
     }
 
     function handleKey(e) {
-      const origin = e.composedPath()[0];
       if (e.key === 'Escape') {
         if (confirmation()) stopAsking();
         else if (menuOpen) setMenu(false);
@@ -586,7 +591,8 @@ export function createUi(handlers) {
         return true;
       }
       if (confirmation() || e.repeat) return false;
-      if (origin instanceof Element && (origin.isContentEditable || origin.closest('input, textarea, select'))) return false;
+      const focused = shadow.activeElement;
+      if (focused && (focused.isContentEditable || focused.matches('input, textarea, select'))) return false;
       const key = pressedKey(e);
       const categories = getCategories();
       const category = categoryForPress(categories, key);
@@ -613,14 +619,13 @@ export function createUi(handlers) {
       handleKey,
       onClose: ({ save }) => {
         handlers.onPopoverClose(annotation.id);
-        if (save && textarea.value !== original) handlers.onNoteSave(annotation.id, textarea.value);
+        if (save && note.value !== original) handlers.onNoteSave(annotation.id, note.value);
       },
     });
-    autosize();
     reposition();
     if (focus) {
-      textarea.focus({ preventScroll: true });
-      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+      note.focus({ preventScroll: true });
+      note.setCaret(note.value.length);
     }
   }
 

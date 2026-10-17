@@ -54,12 +54,19 @@ const KEY_ICONS = {
   keyRight: [stroke('M5 12H19'), stroke('M13 6L19 12L13 18')],
 };
 
+const MARKDOWN = [
+  ['rect', { x: '1.75', y: '5.75', width: '20.5', height: '12.5', rx: '2.5', stroke: 'currentColor', strokeWidth: '1.5' }],
+  stroke('M5.5 15V9L8 12L10.5 9V15'),
+  stroke('M16 9V15M13.75 12.75L16 15L18.25 12.75'),
+];
+
 const dot = (cx, cy) => ['circle', { cx, cy, r: '1.6', fill: 'currentColor' }];
 const GRIP = [dot('9', '6'), dot('15', '6'), dot('9', '12'), dot('15', '12'), dot('9', '18'), dot('15', '18')];
 
 const ICONS = {
   ...KEY_ICONS,
   grip: GRIP,
+  markdown: MARKDOWN,
   alert: Alert02Icon,
   back: ArrowLeft01Icon,
   close: Cancel01Icon,

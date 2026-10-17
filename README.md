@@ -1,5 +1,5 @@
 # 📒 Annotator
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23435155.svg)](https://doi.org/10.5281/zenodo.23435155)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23435154.svg)](https://doi.org/10.5281/zenodo.23435154)
 
 The Annotator extension is the perfect tool for adding annotations and personal notes to websites. It's invaluable for conducting in-depth research for projects, essays, articles, and other tasks. This extension makes organizing your information significantly easier.
 
@@ -15,7 +15,7 @@ All data is stored locally on your device. It is never sent to the developer or 
 - **Side panel** – all highlights in reading order, a note for the whole page, and notes that lost their text.
 - **Keyboard shortcuts** – `Alt+Q` (`⌃Q` on a Mac) highlights, `Alt+W` (`⌃W`) highlights with a note, `Alt+X` (`⌃X`) toggles the side panel. In the color bar, `1`–`9` pick a category, `/` searches categories and `N` adds a note. Change them in the browser's extension shortcut settings.
 - **Categories** – rename, recolor, reorder and add colors (up to 60) in *Settings → Categories*, each with an optional key. With *Quick keys* on, select text and press a category's key (never inside text fields). Deleting a category moves its notes to another one.
-- **Formatting in notes** – `**bold**`, `*italics*`, `` `code` ``, lists and links.
+- **Formatting in notes** – `**bold**`, `*italics*`, `` `code` ``, lists and links, previewed live while you type (the markers show only next to the cursor).
 - **Lost notes** – when a page changes, select the new wording and click *Pin to selection*.
 - **Copy quote with link** – the quote, your note and a link that scrolls to the text, even without the extension.
 - **Export** – all notes, the current list or a selection:
@@ -55,7 +55,7 @@ npm test        # unit tests
 
 ## License
 
-Copyright 2025-2026 Filip Polak. Licensed under the [Apache License 2.0](LICENSE). Third-party components are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). To cite this software, see [CITATION.cff](CITATION.cff) or use DOI [10.5281/zenodo.23435155](https://doi.org/10.5281/zenodo.23435155).
+Copyright 2025-2026 Filip Polak. Licensed under the [Apache License 2.0](LICENSE). Third-party components are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). To cite this software, see [CITATION.cff](CITATION.cff) or use DOI [10.5281/zenodo.23435154](https://doi.org/10.5281/zenodo.23435154).
 
 ---
 

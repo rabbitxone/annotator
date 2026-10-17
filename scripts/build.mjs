@@ -104,6 +104,7 @@ async function copyStatic(out) {
   for (const page of ['popup.html', 'dashboard.html', 'guide.html']) await cp(join(src, 'pages', page), join(out, page));
   await mkdir(join(out, 'styles'), { recursive: true });
   await cp(join(src, 'shared/tokens.css'), join(out, 'styles/tokens.css'));
+  await cp(join(src, 'shared/note-editor.css'), join(out, 'styles/note-editor.css'));
   for (const sheet of ['app.css', 'popup.css', 'dashboard.css', 'guide.css']) {
     await cp(join(src, 'pages/styles', sheet), join(out, 'styles', sheet));
   }
