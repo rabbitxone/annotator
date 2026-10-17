@@ -1,4 +1,5 @@
 # 📒 Annotator
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23435155.svg)](https://doi.org/10.5281/zenodo.23435155)
 
 The Annotator extension is the perfect tool for adding annotations and personal notes to websites. It's invaluable for conducting in-depth research for projects, essays, articles, and other tasks. This extension makes organizing your information significantly easier.
 
@@ -54,7 +55,7 @@ npm test        # unit tests
 
 ## License
 
-Copyright 2025-2026 Filip Polak. Licensed under the [Apache License 2.0](LICENSE). Third-party components are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). To cite this software, see [CITATION.cff](CITATION.cff).
+Copyright 2025-2026 Filip Polak. Licensed under the [Apache License 2.0](LICENSE). Third-party components are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). To cite this software, see [CITATION.cff](CITATION.cff) or use DOI [10.5281/zenodo.23435155](https://doi.org/10.5281/zenodo.23435155).
 
 ---
 
