@@ -52,6 +52,10 @@ npm test        # unit tests
 <img width="2784" height="1740" alt="05-export" src="https://github.com/user-attachments/assets/a85fa7f5-9142-41b5-9e1c-ba0c6fb00b17" />
 <img width="2784" height="1740" alt="06-categories" src="https://github.com/user-attachments/assets/71b3961e-6f75-4c8f-aa7a-7ef03b35682d" />
 
+## License
+
+Copyright 2025-2026 Filip Polak. Licensed under the [Apache License 2.0](LICENSE). Third-party components are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). To cite this software, see [CITATION.cff](CITATION.cff).
+
 ---
 
 [See privacy policy](https://github.com/RabbitXOne/annotator/blob/main/PRIVACY.md)

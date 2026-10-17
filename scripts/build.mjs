@@ -99,6 +99,7 @@ async function copyStatic(out) {
   await cp(join(src, 'icons/icon.svg'), join(out, 'icons/icon.svg'));
   await mkdir(join(out, 'licenses'), { recursive: true });
   await cp(join(root, 'node_modules/@mozilla/readability/LICENSE.md'), join(out, 'licenses/readability-LICENSE.md'));
+  for (const file of ['LICENSE', 'NOTICE', 'THIRD_PARTY_NOTICES.md']) await cp(join(root, file), join(out, 'licenses', file));
   await cp(join(src, 'icons/logo.svg'), join(out, 'icons/logo.svg'));
   for (const page of ['popup.html', 'dashboard.html', 'guide.html']) await cp(join(src, 'pages', page), join(out, page));
   await mkdir(join(out, 'styles'), { recursive: true });

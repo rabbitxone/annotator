@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Annotator"
+abstract: "Privacy-focused browser extension for highlighting text and adding notes on web pages. All data is stored locally."
+type: software
+authors:
+  - family-names: Polak
+    given-names: Filip
+version: 3.0.1
+date-released: 2026-10-17
+license: Apache-2.0
+repository-code: "https://github.com/rabbitxone/annotator"
+keywords:
+  - browser extension
+  - annotation
+  - highlighting
+  - privacy
