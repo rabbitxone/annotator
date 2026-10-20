@@ -2,6 +2,9 @@
   "extName": {
     "message": "Annotator"
   },
+  "extStoreName": {
+    "message": "Annotator – Web Highlighter & Notes"
+  },
   "extDescription": {
     "message": "Highlight text and add private notes on any website. Everything stays on your device."
   },

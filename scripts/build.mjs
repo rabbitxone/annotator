@@ -23,7 +23,7 @@ const ENTRIES = {
 function manifestFor(target) {
   const manifest = {
     manifest_version: 3,
-    name: '__MSG_extName__',
+    name: '__MSG_extStoreName__',
     description: '__MSG_extDescription__',
     default_locale: 'en',
     version: pkg.version,

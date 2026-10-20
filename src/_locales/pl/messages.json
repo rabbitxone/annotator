@@ -2,6 +2,9 @@
   "extName": {
     "message": "Annotator"
   },
+  "extStoreName": {
+    "message": "Annotator – zakreślacz i notatki"
+  },
   "extDescription": {
     "message": "Zaznaczaj tekst i dodawaj prywatne notatki na dowolnej stronie. Wszystko zostaje na Twoim urządzeniu."
   },
