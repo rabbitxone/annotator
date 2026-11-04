@@ -55,7 +55,7 @@ npm test        # unit tests
 
 ## Support the project
 
-Annotator is free to use. If you find it useful, you can support its development via [GitHub Sponsors](https://github.com/sponsors/rabbitxone). Donations are voluntary, do not give access to additional features, and are non-refundable. If you were charged by mistake, contact me at browsers@rabbitone.com. You can cancel a recurring sponsorship at any time in your GitHub sponsorship settings.
+Annotator is free to use. If you find it useful, you can support its development via [GitHub Sponsors](https://github.com/sponsors/rabbitxone). Donations are voluntary, do not give access to additional features, and are non-refundable. If you were charged by mistake, contact me at browsers@rabbitxone.com. You can cancel a recurring sponsorship at any time in your GitHub sponsorship settings.
 
 ## Privacy
 See [PRIVACY.md](PRIVACY.md).
