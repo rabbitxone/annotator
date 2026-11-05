@@ -17,6 +17,7 @@ All data is stored locally on your device. It is never sent to the developer or 
 - **Categories** – rename, recolor, reorder and add colors (up to 60) in *Settings → Categories*, each with an optional key. With *Quick keys* on, select text and press a category's key (never inside text fields). Deleting a category moves its notes to another one.
 - **Formatting in notes** – `**bold**`, `*italics*`, `` `code` ``, lists and links, previewed live while you type (the markers show only next to the cursor).
 - **Lost notes** – when a page changes, select the new wording and click *Pin to selection*.
+- **Page icons** – lists show each site's icon, copied from the browser (Chrome's icon cache, or the tab's icon in Firefox) and stored locally. Turn them off in *Settings → Page icons*, which also deletes the saved icons.
 - **Copy quote with link** – the quote, your note and a link that scrolls to the text, even without the extension.
 - **Export** – all notes, the current list or a selection:
   - **JSON** – a full backup (notes, categories, settings) that can be imported on another device. Importing merges and never deletes.

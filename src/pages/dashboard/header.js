@@ -26,7 +26,7 @@ export function renderHeader() {
   $('search-wrap').hidden = settings;
   $('export').hidden = settings;
 
-  $('view-icon').replaceChildren(...(state.view === 'page' ? [siteAvatar(state.pageUrl, 40)] : []));
+  $('view-icon').replaceChildren(...(state.view === 'page' ? [siteAvatar(state.pageUrl, 40, currentPage())] : []));
   if (state.view === 'page') {
     title.textContent = pageName(currentPage() ?? { url: state.pageUrl });
     const address = displayAddress(state.pageUrl);

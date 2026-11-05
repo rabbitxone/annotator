@@ -6,8 +6,8 @@ type: software
 authors:
   - family-names: Polak
     given-names: Filip
-version: 3.1.1
-date-released: 2026-10-17
+version: 3.2.0
+date-released: 2026-11-05
 license: Apache-2.0
 doi: 10.5281/zenodo.23435154
 repository-code: "https://github.com/rabbitxone/annotator"

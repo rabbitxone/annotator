@@ -156,6 +156,12 @@
   "settingToolbarHint": {
     "message": "A button at the end of selected text."
   },
+  "settingPageIcons": {
+    "message": "Page icons"
+  },
+  "settingPageIconsHint": {
+    "message": "Shows each site's icon in your lists, saved on this device from the page you have open. Turning this off deletes the saved icons."
+  },
   "settingStyle": {
     "message": "Highlight style"
   },
@@ -424,22 +430,16 @@
     }
   },
   "whatsNewShort": {
-    "message": "Live Markdown in notes, side panel, shortcuts, your own categories and backups."
+    "message": "Page icons, a refreshed look and a fix for sites with strict security policies."
   },
-  "whatsNewNotes": {
-    "message": "Notes show Markdown formatting as you type, and keyboard shortcuts no longer interfere while you write."
+  "whatsNewIcons": {
+    "message": "Page icons: lists show each site's icon, copied from your browser and kept only on this device. You can turn them off in Settings."
   },
-  "whatsNewPanel": {
-    "message": "A side panel on every page with your highlights, a page note and notes whose text has moved."
+  "whatsNewLook": {
+    "message": "A refreshed look for the popup, dashboard and guide, and a gentler style for selected notes."
   },
-  "whatsNewShortcuts": {
-    "message": "Keyboard shortcuts, formatting in notes, and copying quotes with a link."
-  },
-  "whatsNewCategories": {
-    "message": "Your own categories: name the colors after what you mark, add more and give each a key."
-  },
-  "whatsNewBackup": {
-    "message": "Backups you can import on another device, and Markdown export."
+  "whatsNewStrictPages": {
+    "message": "Annotator's panel and highlights now show correctly on sites with strict security policies."
   },
   "whatsNewDismiss": {
     "message": "Got it"

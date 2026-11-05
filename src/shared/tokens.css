@@ -4,8 +4,8 @@
   --brand-ink: #0b7a31;
   --marker: rgba(1, 173, 53, 0.22);
   --marker-strong: rgba(1, 173, 53, 0.34);
-  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
-  --font-reading: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-reading: 'Fraunces', Georgia, serif;
   --font-body: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 

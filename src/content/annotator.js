@@ -5,6 +5,7 @@ import { copyText } from '../shared/clipboard.js';
 import { getCategories } from '../shared/constants.js';
 import { quoteSnippet, toMarkdown } from '../shared/exchange.js';
 import { exportLabels } from '../shared/export-labels.js';
+import { needsFavicon } from '../shared/favicon.js';
 import { normalizeUrl, siteKey } from '../shared/url.js';
 import { uuid } from '../shared/uuid.js';
 import { buildIndex, describeRange, resolve, UI_HOST_TAG } from './anchoring.js';
@@ -34,7 +35,7 @@ function alive() {
   }
 }
 
-// env.store, address(), allows(el) and alwaysOn let the guide's demo run the same code.
+// env.store, address(), allows(el), alwaysOn and favicons: false let the guide's demo run the same code.
 export function startAnnotator(env) {
   const {
     addAnnotation,
@@ -112,7 +113,10 @@ export function startAnnotator(env) {
       onPageNoteSave: (note) => {
         if (!pageUrl) return;
         pageNote = note;
-        return setPageNote(pageUrl, document.title, note);
+        return setPageNote(pageUrl, document.title, note).then((saved) => {
+          if (note.trim()) queueMicrotask(() => requestFavicon(saved));
+          return saved;
+        });
       },
       onCopyAll: () =>
         copyText(
@@ -123,6 +127,14 @@ export function startAnnotator(env) {
   });
 
   const currentPage = () => ({ url: pageUrl, title: document.title });
+
+  let faviconAskedFor = null;
+  function requestFavicon(page) {
+    if (env.favicons === false || settings?.pageIcons === false || !pageUrl || faviconAskedFor === pageUrl) return;
+    if (page && !needsFavicon(page)) return;
+    faviconAskedFor = pageUrl;
+    api.runtime.sendMessage({ type: 'save-favicon', url: pageUrl }).catch(() => { });
+  }
 
   function panelModel() {
     const head = (a) => anchors.get(a.id)?.[0];
@@ -266,6 +278,7 @@ export function startAnnotator(env) {
     if (pageUrl !== url) return;
     annotations = page?.annotations ?? [];
     pageNote = page?.note ?? '';
+    if (annotations.length || pageNote.trim()) requestFavicon(page);
     anchorPending();
     reportCount();
     refreshPanel();
@@ -329,6 +342,7 @@ export function startAnnotator(env) {
     ui.close();
     unsaved.add(created.id);
     addAnnotation(pageUrl, document.title, created)
+      .then((saved) => queueMicrotask(() => requestFavicon(saved)))
       .catch((err) => {
         logSaveError(err);
         removeLocal([created.id]);

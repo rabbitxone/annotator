@@ -43,7 +43,7 @@ function cleanPage(raw, now) {
 }
 
 function stripLocal(page) {
-  const { annotations, ...rest } = page;
+  const { annotations, favicon, ...rest } = page;
   return { ...rest, annotations: annotations.map(({ lostAt, ...annotation }) => annotation) };
 }
 
@@ -51,7 +51,7 @@ const SITE_RULES = new Set(['never', 'always']);
 export function sanitizeBackupSettings(raw) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
   const out = {};
-  for (const key of ['selectionToolbar', 'quickKeys']) if (typeof raw[key] === 'boolean') out[key] = raw[key];
+  for (const key of ['selectionToolbar', 'quickKeys', 'pageIcons']) if (typeof raw[key] === 'boolean') out[key] = raw[key];
   if (raw.highlightStyle === 'background' || raw.highlightStyle === 'underline') out.highlightStyle = raw.highlightStyle;
   if (isValidCategoryId(raw.defaultColor)) out.defaultColor = raw.defaultColor;
   if (raw.siteRules && typeof raw.siteRules === 'object' && !Array.isArray(raw.siteRules)) {

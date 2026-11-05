@@ -48,7 +48,7 @@ function manifestFor(target) {
 
   if (target === 'chrome') {
     // Chrome caps storage.local at 10 MB without it; Firefox has no such cap and would prompt for it.
-    manifest.permissions.push('unlimitedStorage');
+    manifest.permissions.push('unlimitedStorage', 'favicon');
     manifest.background = { service_worker: 'background.js' };
   } else {
     manifest.background = { scripts: ['background.js'] };
@@ -65,7 +65,7 @@ function manifestFor(target) {
 
 const FONTS = [
   { pkg: 'dm-sans', weights: [400, 500, 600, 700] },
-  { pkg: 'fraunces', weights: [400, '400-italic', 600] },
+  { pkg: 'fraunces', weights: [400, 600] },
 ];
 
 async function buildFonts(out) {

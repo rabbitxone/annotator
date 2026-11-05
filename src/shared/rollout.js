@@ -1,4 +1,4 @@
-export const WHATS_NEW_VERSION = '3.1';
+export const WHATS_NEW_VERSION = '3.2';
 
 export function compareVersions(a, b) {
   const pa = String(a).split('.').map((n) => parseInt(n, 10) || 0);

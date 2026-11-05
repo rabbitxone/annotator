@@ -165,6 +165,29 @@ export function setLost(url, ids, lost) {
   );
 }
 
+export function setFavicon(url, favicon) {
+  return mutatePage(
+    url,
+    (page) => {
+      if (isEmpty(page)) return null;
+      page.favicon = favicon;
+      return page;
+    },
+    { touch: false },
+  );
+}
+
+export async function clearFavicons() {
+  const all = await storage().get(null);
+  const writes = {};
+  for (const [key, page] of Object.entries(all)) {
+    if (!key.startsWith(PAGE_KEY_PREFIX) || !page?.favicon) continue;
+    const { favicon, ...rest } = page;
+    writes[key] = rest;
+  }
+  if (Object.keys(writes).length) await setInChunks(writes);
+}
+
 export function setPageNote(url, title, note) {
   return mutatePage(url, (page) => {
     if ((page.note ?? '') === note) return null;

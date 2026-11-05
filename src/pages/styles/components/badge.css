@@ -74,3 +74,13 @@
   font-size: 14px;
   text-transform: uppercase;
 }
+
+.avatar-favicon {
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+}
+
+.avatar-favicon img {
+  display: block;
+  object-fit: contain;
+}

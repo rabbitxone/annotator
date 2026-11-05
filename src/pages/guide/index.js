@@ -55,6 +55,7 @@ function startDemo() {
     address: () => DEMO_ADDRESS,
     allows: (el) => demo.contains(el),
     alwaysOn: true,
+    favicons: false,
   });
   api.commands?.onCommand?.addListener((command) => {
     if (document.visibilityState === 'visible' && document.hasFocus() && COMMANDS[command]) annotator.handle(COMMANDS[command]);

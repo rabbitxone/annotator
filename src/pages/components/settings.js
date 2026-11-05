@@ -2,7 +2,7 @@ import { api } from '../../shared/api.js';
 import { h } from '../../shared/dom.js';
 import { t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
-import { setSiteRule, updateSettings } from '../../shared/store.js';
+import { clearFavicons, setSiteRule, updateSettings } from '../../shared/store.js';
 import { fileAccessKeys } from '../../shared/file-access.js';
 import { shortcutNode } from '../../shared/keys.js';
 import { segmented } from './segmented.js';
@@ -82,6 +82,16 @@ export function settingsPanel(settings, { compact = false, site = null, siteName
         settings.highlightStyle,
         (highlightStyle) => save({ highlightStyle }),
       ),
+    ),
+    !compact &&
+    settingItem(
+      'globe',
+      t('settingPageIcons'),
+      t('settingPageIconsHint'),
+      toggle(settings.pageIcons !== false, t('settingPageIcons'), (pageIcons) => {
+        save({ pageIcons });
+        if (!pageIcons) clearFavicons().catch((err) => console.error('Annotator: removing page icons failed', err));
+      }),
     ),
     settingItem(
       'tag',

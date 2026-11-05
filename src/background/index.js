@@ -2,6 +2,7 @@ import { api } from '../shared/api.js';
 import { t } from '../shared/i18n.js';
 import { fileAccessAllowed, mayBeBlockedFile } from '../shared/file-access.js';
 import { rolloutOnInstall } from '../shared/rollout.js';
+import { faviconSupported, saveFavicon } from './favicon.js';
 import { ensureMigrated } from '../shared/store.js';
 import { isFileUrl, isPdfUrl, normalizeUrl, unwrapReaderUrl } from '../shared/url.js';
 
@@ -178,6 +179,10 @@ api.runtime.onMessage.addListener((message, sender, sendResponse) => {
         () => sendResponse(false),
       );
       return true;
+    case 'save-favicon':
+      if (!sender.tab || sender.frameId !== 0 || !faviconSupported()) return false;
+      saveFavicon(message, sender.tab).catch((err) => console.warn('Annotator: saving the page icon failed', err));
+      return false;
     case 'open-and-go':
       if (!fromExtensionPage(sender)) return false;
       openAndGo(message.url, message.id).then(

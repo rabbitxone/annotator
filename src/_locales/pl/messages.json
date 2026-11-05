@@ -156,6 +156,12 @@
   "settingToolbarHint": {
     "message": "Przycisk na końcu zaznaczonego tekstu."
   },
+  "settingPageIcons": {
+    "message": "Ikony stron"
+  },
+  "settingPageIconsHint": {
+    "message": "Pokazuje ikony witryn na listach. Są zapisywane na tym urządzeniu z otwartej strony, a wyłączenie usuwa zapisane ikony."
+  },
   "settingStyle": {
     "message": "Styl zaznaczenia"
   },
@@ -424,22 +430,16 @@
     }
   },
   "whatsNewShort": {
-    "message": "Markdown na żywo w notatkach, panel boczny, skróty, własne kategorie i kopie zapasowe."
+    "message": "Ikony stron, odświeżony wygląd i poprawka dla stron z restrykcyjnymi politykami bezpieczeństwa."
   },
-  "whatsNewNotes": {
-    "message": "Notatki pokazują formatowanie Markdown podczas pisania, a skróty klawiszowe nie przeszkadzają już w pisaniu."
+  "whatsNewIcons": {
+    "message": "Ikony stron: listy pokazują ikonę każdej witryny, skopiowaną z przeglądarki i zapisaną tylko na tym urządzeniu. Wyłączysz je w Ustawieniach."
   },
-  "whatsNewPanel": {
-    "message": "Panel boczny na każdej stronie: zakreślenia, notatka do strony i notatki, których tekst się przesunął."
+  "whatsNewLook": {
+    "message": "Odświeżony wygląd popupu, panelu i przewodnika oraz delikatniejszy styl zaznaczonych notatek."
   },
-  "whatsNewShortcuts": {
-    "message": "Skróty klawiszowe, formatowanie w notatkach i kopiowanie cytatów z linkiem."
-  },
-  "whatsNewCategories": {
-    "message": "Własne kategorie: nazwij kolory według tego, co zaznaczasz, dodaj kolejne i przypisz im klawisze."
-  },
-  "whatsNewBackup": {
-    "message": "Kopie zapasowe do przeniesienia na inne urządzenie i eksport do Markdown."
+  "whatsNewStrictPages": {
+    "message": "Panel i zakreślenia Annotatora wyświetlają się teraz poprawnie na stronach z restrykcyjnymi politykami bezpieczeństwa."
   },
   "whatsNewDismiss": {
     "message": "Rozumiem"

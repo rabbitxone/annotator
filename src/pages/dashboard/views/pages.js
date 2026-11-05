@@ -34,7 +34,7 @@ function pageRow(page) {
   return h(
     'a',
     { class: 'page-row', href: pageHref(page.url) },
-    siteAvatar(page.url, 36),
+    siteAvatar(page.url, 36, page),
     h(
       'div',
       { class: 'page-row-text' },
@@ -82,7 +82,7 @@ function byDomain(pages) {
       h(
         'section',
         { class: 'page-group' },
-        h('p', { class: 'page-group-title' }, siteAvatar(list[0].url, 20), h('span', null, host), h('span', { class: 'badge' }, formatNumber(list.length))),
+        h('p', { class: 'page-group-title' }, siteAvatar(list[0].url, 20, list.find((p) => p.favicon) ?? list[0]), h('span', null, host), h('span', { class: 'badge' }, formatNumber(list.length))),
         h('div', { class: 'page-list' }, list.map(pageRow)),
       ),
     ),

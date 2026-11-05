@@ -82,7 +82,7 @@ export function annotationCard(annotation, page, options) {
       h(
         'div',
         { class: 'card-source', title: page.url },
-        siteAvatar(page.url, 18),
+        siteAvatar(page.url, 18, page),
         withHits(h('span', null, pageName(page))),
       ),
       selectable &&
