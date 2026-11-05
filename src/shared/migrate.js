@@ -3,14 +3,24 @@ import { normalizeUrl } from './url.js';
 
 const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", apos: "'", nbsp: ' ' };
 
+function replaceUntilStable(str, regex, replacement) {
+  let prev;
+  do {
+    prev = str;
+    str = str.replace(regex, replacement);
+  } while (str !== prev);
+  return str;
+}
+
 export function htmlToText(html) {
   if (!html) return '';
   const BLOCK = '(?:div|p|li|h[1-6])';
-  return String(html)
-    .replace(new RegExp(`</${BLOCK}>\\s*<${BLOCK}[^>]*>`, 'gi'), '\n')
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(new RegExp(`</?${BLOCK}[^>]*>`, 'gi'), '\n')
-    .replace(/<[^>]*>/g, '')
+  let text = String(html);
+  text = replaceUntilStable(text, new RegExp(`</${BLOCK}>\\s*<${BLOCK}[^>]*>`, 'gi'), '\n');
+  text = replaceUntilStable(text, /<br\s*\/?>/gi, '\n');
+  text = replaceUntilStable(text, new RegExp(`</?${BLOCK}[^>]*>`, 'gi'), '\n');
+  text = replaceUntilStable(text, /<[^>]*>/g, '');
+  return text
     .replace(/&(amp|lt|gt|quot|#39|apos|nbsp);/g, (_, name) => ENTITIES[name])
     .replace(/\n{3,}/g, '\n\n')
     .trim();
