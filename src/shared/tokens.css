@@ -1,36 +1,55 @@
 :root,
 :host {
-  --surface: #f3f4f6;
-  --surface-raised: #ffffff;
-  --surface-sunken: #e5e7eb;
-  --on-surface: #111827;
-  --muted: #6b7280;
-  --subtle: #9ca3af;
-  --accent: #01ad35;
-  --accent-hover: #028a2b;
-  --accent-soft: #ecfdf5;
-  --accent-on-soft: #028a2b;
-  --on-accent: #ffffff;
-  --danger: #ef4444;
-  --danger-hover: #dc2626;
-  --danger-bg: #fef2f2;
-  --warning: #b45309;
-  --warning-bg: #fffbeb;
-  --border: #e5e7eb;
-  --border-hover: #d1d5db;
-  --ring: rgba(1, 173, 53, 0.3);
-  --shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.06);
-  --shadow-md: 0 4px 12px -2px rgba(17, 24, 39, 0.1), 0 2px 4px -2px rgba(17, 24, 39, 0.06);
-  --shadow-lg: 0 16px 40px -12px rgba(17, 24, 39, 0.28), 0 4px 12px -4px rgba(17, 24, 39, 0.1);
-
-  --font-display: 'Fraunces', Georgia, serif;
+  --brand: #01ad35;
+  --brand-ink: #0b7a31;
+  --marker: rgba(1, 173, 53, 0.22);
+  --marker-strong: rgba(1, 173, 53, 0.34);
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --font-reading: 'Fraunces', 'Iowan Old Style', Georgia, serif;
   --font-body: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --surface: #f6f4ef;
+  --surface-raised: #fffefb;
+  --surface-sunken: #ece9e1;
+  --surface-note: #f7f4ec;
+  --on-surface: #1c1d1a;
+  --muted: #66645c;
+  --subtle: #9c998e;
+  --border: #e6e2d8;
+  --border-hover: #d4cfc2;
+
+  --accent: var(--brand-ink);
+  --accent-hover: #086428;
+  --accent-soft: #e7f4ea;
+  --accent-on-soft: #0b6d2c;
+  --on-accent: #ffffff;
+  --ring: rgba(1, 173, 53, 0.28);
+
+  --danger: #d93a45;
+  --danger-hover: #bf2c37;
+  --danger-bg: #fcefee;
+  --on-danger: #ffffff;
+  --warning: #9a5a0c;
+  --warning-bg: #fbf3e2;
+
+  --inverse: #1f201c;
+  --on-inverse: #f6f4ef;
+  --inverse-accent: #7fe3a0;
+  --backdrop: rgba(28, 29, 26, 0.42);
+  --scrim: rgba(255, 254, 251, 0.74);
+  --swatch-edge: rgba(0, 0, 0, 0.12);
+
+  --shadow-sm: 0 1px 2px rgba(48, 40, 20, 0.06);
+  --shadow-md: 0 6px 16px -6px rgba(48, 40, 20, 0.14), 0 2px 4px -2px rgba(48, 40, 20, 0.06);
+  --shadow-lg: 0 20px 44px -14px rgba(48, 40, 20, 0.3), 0 4px 12px -4px rgba(48, 40, 20, 0.1);
 
   --radius-xs: 4px;
-  --radius-sm: 6px;
+  --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --transition: 200ms ease;
+  --transition: 180ms ease;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
   color-scheme: light;
 }

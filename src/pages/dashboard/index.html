@@ -6,9 +6,6 @@
     <title>Annotator</title>
     <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
     <link rel="stylesheet" href="fonts/fonts.css" />
-    <link rel="stylesheet" href="styles/tokens.css" />
-    <link rel="stylesheet" href="styles/note-editor.css" />
-    <link rel="stylesheet" href="styles/app.css" />
     <link rel="stylesheet" href="styles/dashboard.css" />
   </head>
   <body>
@@ -33,13 +30,17 @@
             <span data-icon="settings"></span>
             <span class="nav-label" data-i18n="navSettings"></span>
           </a>
+          <span class="nav-divider" role="presentation"></span>
           <a class="nav-item" href="guide.html">
             <span data-icon="info"></span>
             <span class="nav-label" data-i18n="navGuide"></span>
           </a>
         </nav>
 
-        <div class="sidebar-foot" id="sidebar-privacy"></div>
+        <div class="sidebar-foot">
+          <div id="sidebar-privacy"></div>
+          <div class="sidebar-meta" id="sidebar-meta"></div>
+        </div>
       </aside>
 
       <main class="main">
@@ -48,6 +49,7 @@
             <button id="back" class="icon-btn" type="button" hidden data-i18n-aria-label="actionBack" data-i18n-title="actionBack">
               <span data-icon="back" data-size="18"></span>
             </button>
+            <span class="page-icon" id="view-icon"></span>
             <div class="main-titles">
               <h1 class="display main-title" id="view-title"></h1>
               <p class="muted main-subtitle" id="view-subtitle"></p>
@@ -75,7 +77,7 @@
 
     <div class="bulk-bar" id="bulk-bar" hidden inert>
       <div class="bulk-box">
-        <span id="bulk-count"></span>
+        <span class="bulk-count" id="bulk-count"></span>
         <div class="bulk-actions">
           <div class="bulk-colors" id="bulk-colors" data-i18n-title="bulkRecolor"></div>
           <span class="bulk-divider"></span>

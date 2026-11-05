@@ -187,7 +187,7 @@
     "message": "Pages"
   },
   "navPagesSubtitle": {
-    "message": "Grouped by website."
+    "message": "Every page with your highlights."
   },
   "navSettings": {
     "message": "Settings"
@@ -229,6 +229,12 @@
   },
   "aboutPrivacy": {
     "message": "Privacy policy"
+  },
+  "aboutSupport": {
+    "message": "Support"
+  },
+  "aboutRate": {
+    "message": "Rate Annotator"
   },
   "handleLabel": {
     "message": "Highlight or add a note"

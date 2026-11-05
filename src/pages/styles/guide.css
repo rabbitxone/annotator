@@ -1,6 +1,8 @@
+@import './app.css';
+
 body {
   min-height: 100vh;
-  padding: 0 32px 48px;
+  padding: 0 32px 56px;
 }
 
 .guide-hero,
@@ -13,14 +15,18 @@ body {
 .guide-hero {
   display: grid;
   justify-items: start;
-  gap: 10px;
-  padding: 40px 0 28px;
+  gap: 12px;
+  padding: 44px 0 32px;
 }
 
 .guide-title {
-  margin-top: 14px;
-  font-size: 34px;
-  line-height: 40px;
+  margin-top: 18px;
+  font-size: 40px;
+  line-height: 48px;
+}
+
+.guide-title .swipe {
+  animation: swipe-in 700ms var(--ease-out) 150ms backwards;
 }
 
 .guide-intro {
@@ -32,7 +38,7 @@ body {
 
 .guide-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 430px);
   align-items: start;
   gap: 28px;
 }
@@ -43,16 +49,20 @@ body {
   margin: 0;
   padding: 0;
   list-style: none;
+  counter-reset: step;
 }
 
 .guide-step {
+  position: relative;
   display: flex;
-  gap: 14px;
+  gap: 16px;
   padding: 16px 18px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: 14px;
   background: var(--surface-raised);
-  animation: slide-up 260ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  box-shadow: var(--shadow-sm);
+  animation: slide-up 260ms var(--ease-out) backwards;
+  counter-increment: step;
 }
 
 .guide-step:nth-child(2) { animation-delay: 30ms; }
@@ -63,14 +73,34 @@ body {
 .guide-step:nth-child(n + 7) { animation-delay: 180ms; }
 
 .guide-step-icon {
+  position: relative;
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-sm);
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   background: var(--accent-soft);
   color: var(--accent-on-soft);
+}
+
+.guide-step-icon::after {
+  content: counter(step);
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: 2px solid var(--surface-raised);
+  border-radius: 999px;
+  background: var(--on-surface);
+  color: var(--surface-raised);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .guide-step-body {
@@ -80,9 +110,11 @@ body {
 }
 
 .guide-step-title {
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 22px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 24px;
+  letter-spacing: -0.01em;
 }
 
 .guide-step-text {
@@ -105,10 +137,10 @@ body {
   gap: 12px;
   padding: 18px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: 18px;
   background: var(--surface-raised);
   box-shadow: var(--shadow-md);
-  animation: slide-up 300ms cubic-bezier(0.16, 1, 0.3, 1) 80ms backwards;
+  animation: slide-up 300ms var(--ease-out) 80ms backwards;
 }
 
 .guide-demo-head {
@@ -120,17 +152,20 @@ body {
 
 .guide-demo-title {
   font-family: var(--font-display);
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 600;
 }
 
 .guide-demo-text {
   display: grid;
-  gap: 12px;
-  padding: 16px 18px;
+  gap: 26px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: var(--surface);
-  font-family: Georgia, 'Times New Roman', serif;
+  background:
+    repeating-linear-gradient(transparent 0 25px, var(--border) 25px 26px) content-box,
+    var(--surface-note);
+  font-family: var(--font-reading);
   font-size: 16px;
   line-height: 26px;
 }
@@ -160,6 +195,11 @@ body {
   flex-wrap: wrap;
   gap: 8px;
   padding-top: 28px;
+}
+
+.guide-foot .btn {
+  height: 38px;
+  padding: 0 16px;
 }
 
 @media (max-width: 860px) {

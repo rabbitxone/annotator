@@ -36,6 +36,8 @@ import {
   CommandIcon,
   OptionIcon,
   CornerDownLeftIcon,
+  FavouriteIcon,
+  StarIcon,
 } from '@hugeicons/core-free-icons';
 
 // Apple's key symbols are too thin as font glyphs.
@@ -101,6 +103,8 @@ const ICONS = {
   target: Target02Icon,
   underline: TextUnderlineIcon,
   tick: Tick02Icon,
+  heart: FavouriteIcon,
+  star: StarIcon,
 };
 
 const SVG_NS = 'http://www.w3.org/2000/svg';

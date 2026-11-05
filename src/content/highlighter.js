@@ -1,9 +1,10 @@
 import { getCategories, withAlpha } from '../shared/constants.js';
 import { collectTextNodes } from './anchoring.js';
+import { injectStyle } from '../shared/inject-style.js';
 import { canvasColor, toneFor } from './tone.js';
 
 export const MARK_TAG = 'annotator-mark';
-const STYLE_ID = 'annotator-highlight-style';
+let highlightSheet = null;
 
 const NO_WRAP_PARENTS = new Set(['TABLE', 'THEAD', 'TBODY', 'TFOOT', 'TR', 'UL', 'OL', 'DL', 'SELECT', 'COLGROUP']);
 
@@ -48,13 +49,9 @@ ${MARK_TAG} {
 }
 
 export function applyHighlightStyle(style) {
-  let el = document.getElementById(STYLE_ID);
-  if (!el) {
-    el = document.createElement('style');
-    el.id = STYLE_ID;
-    (document.head || document.documentElement).append(el);
-  }
-  el.textContent = highlightCss(style);
+  const css = highlightCss(style);
+  if (highlightSheet?.alive()) highlightSheet.update(css);
+  else highlightSheet = injectStyle(document, css);
 }
 
 export function wrapRange(rawStart, rawEnd, annotation, root = document.body) {

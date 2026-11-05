@@ -1,4 +1,5 @@
 import { h } from './dom.js';
+import { injectStyle } from './inject-style.js';
 import { shortcutNode } from './keys.js';
 import { reducedMotion } from './motion.js';
 import tooltipCss from './tooltip.css';
@@ -9,8 +10,7 @@ const EDGE = 8;
 
 // `data-tip-keys="mod+Enter"` shows keys next to the text; "Y|1" means either key.
 export function installTooltips(root = document, { topLayer = true } = {}) {
-  const host = root instanceof Document ? root.body : root;
-  host.append(h('style', null, tooltipCss));
+  injectStyle(root, tooltipCss);
 
   let tip = null;
   let target = null;

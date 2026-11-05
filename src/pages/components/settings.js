@@ -5,7 +5,8 @@ import { icon } from '../../shared/icons.js';
 import { setSiteRule, updateSettings } from '../../shared/store.js';
 import { fileAccessKeys } from '../../shared/file-access.js';
 import { shortcutNode } from '../../shared/keys.js';
-import { swatchPicker } from './card.js';
+import { segmented } from './segmented.js';
+import { liveSwatchPicker } from './swatch-picker.js';
 import { categoryEditor } from './category-editor.js';
 import { fileAccessButton } from './file-access.js';
 import { notice } from './notice.js';
@@ -32,34 +33,9 @@ function settingItem(iconName, label, sublabel, trailing, callout, { stacked = f
   );
 }
 
-function segmented(options, value, onChange) {
-  const group = h(
-    'div',
-    { class: 'segmented', role: 'group' },
-    options.map((opt) =>
-      h(
-        'button',
-        {
-          type: 'button',
-          'aria-pressed': String(opt.value === value),
-          title: opt.showLabel === false ? opt.label : null,
-          'aria-label': opt.showLabel === false ? opt.label : null,
-          dataset: { value: opt.value },
-          onclick: () => {
-            for (const btn of group.children) btn.setAttribute('aria-pressed', String(btn.dataset.value === opt.value));
-            onChange(opt.value);
-          },
-        },
-        opt.icon ? icon(opt.icon, { size: 15 }) : null,
-        opt.showLabel === false ? null : opt.label,
-      ),
-    ),
-  );
-  return group;
-}
-
 export function settingsPanel(settings, { compact = false, site = null, siteName = null, siteAppLike = false, siteUnavailable = null, fileAccess = null } = {}) {
   const save = (patch) => updateSettings(patch);
+  let current = settings.defaultColor;
 
   return h(
     'div',
@@ -108,10 +84,16 @@ export function settingsPanel(settings, { compact = false, site = null, siteName
       ),
     ),
     settingItem(
-      'note',
+      'tag',
       t('settingDefaultColor'),
       compact ? null : t('settingDefaultColorHint'),
-      swatchPicker(settings.defaultColor, (defaultColor) => save({ defaultColor })),
+      liveSwatchPicker(
+        (changed) => (current = changed?.defaultColor ?? current),
+        (defaultColor) => {
+          current = defaultColor;
+          save({ defaultColor });
+        },
+      ),
     ),
   );
 }

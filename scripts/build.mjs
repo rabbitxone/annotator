@@ -15,10 +15,12 @@ const TARGETS = ['chrome', 'firefox'];
 const ENTRIES = {
   background: 'background/index.js',
   content: 'content/index.js',
-  popup: 'pages/popup.js',
-  dashboard: 'pages/dashboard.js',
-  guide: 'pages/guide.js',
+  popup: 'pages/popup/index.js',
+  dashboard: 'pages/dashboard/index.js',
+  guide: 'pages/guide/index.js',
 };
+
+const STYLE_ENTRIES = ['popup', 'dashboard', 'guide'];
 
 function manifestFor(target) {
   const manifest = {
@@ -63,7 +65,7 @@ function manifestFor(target) {
 
 const FONTS = [
   { pkg: 'dm-sans', weights: [400, 500, 600, 700] },
-  { pkg: 'fraunces', weights: [600] },
+  { pkg: 'fraunces', weights: [400, '400-italic', 600] },
 ];
 
 async function buildFonts(out) {
@@ -74,10 +76,11 @@ async function buildFonts(out) {
     const base = join(root, 'node_modules/@fontsource', font.pkg);
     for (const weight of font.weights) {
       const source = await readFile(join(base, `${weight}.css`), 'utf8');
+      const [value, style = 'normal'] = String(weight).split('-');
       for (const block of source.split(/(?=\/\* )/)) {
-        const subset = block.match(/\/\* [\w-]+?-(latin(?:-ext)?)-\d+-normal \*\//)?.[1];
+        const subset = block.match(new RegExp(`/\\* [\\w-]+?-(latin(?:-ext)?)-${value}-${style} \\*/`))?.[1];
         if (!subset) continue;
-        const file = `${font.pkg}-${subset}-${weight}-normal.woff2`;
+        const file = `${font.pkg}-${subset}-${value}-${style}.woff2`;
         await cp(join(base, 'files', file), join(fontsDir, file));
         css += block
           .replace(/src: [^;]+;/, `src: url(./${file}) format('woff2');`)
@@ -101,13 +104,7 @@ async function copyStatic(out) {
   await cp(join(root, 'node_modules/@mozilla/readability/LICENSE.md'), join(out, 'licenses/readability-LICENSE.md'));
   for (const file of ['LICENSE', 'NOTICE', 'THIRD_PARTY_NOTICES.md']) await cp(join(root, file), join(out, 'licenses', file));
   await cp(join(src, 'icons/logo.svg'), join(out, 'icons/logo.svg'));
-  for (const page of ['popup.html', 'dashboard.html', 'guide.html']) await cp(join(src, 'pages', page), join(out, page));
-  await mkdir(join(out, 'styles'), { recursive: true });
-  await cp(join(src, 'shared/tokens.css'), join(out, 'styles/tokens.css'));
-  await cp(join(src, 'shared/note-editor.css'), join(out, 'styles/note-editor.css'));
-  for (const sheet of ['app.css', 'popup.css', 'dashboard.css', 'guide.css']) {
-    await cp(join(src, 'pages/styles', sheet), join(out, 'styles', sheet));
-  }
+  for (const page of STYLE_ENTRIES) await cp(join(src, 'pages', page, 'index.html'), join(out, `${page}.html`));
 }
 
 async function writeManifest(target, out) {
@@ -128,11 +125,28 @@ function esbuildOptions(target, out) {
   };
 }
 
+function styleOptions(target, out) {
+  return {
+    entryPoints: Object.fromEntries(STYLE_ENTRIES.map((page) => [page, join(src, 'pages/styles', `${page}.css`)])),
+    outdir: join(out, 'styles'),
+    bundle: true,
+    target: target === 'chrome' ? ['chrome114'] : ['firefox128'],
+    minify: false,
+    logLevel: 'warning',
+  };
+}
+
 async function buildTarget(target) {
   const out = join(root, 'dist', target);
   await rm(out, { recursive: true, force: true });
   await mkdir(out, { recursive: true });
-  await Promise.all([esbuild.build(esbuildOptions(target, out)), copyStatic(out), buildFonts(out), writeManifest(target, out)]);
+  await Promise.all([
+    esbuild.build(esbuildOptions(target, out)),
+    esbuild.build(styleOptions(target, out)),
+    copyStatic(out),
+    buildFonts(out),
+    writeManifest(target, out),
+  ]);
   console.log(`built dist/${target}`);
   return out;
 }
@@ -157,9 +171,11 @@ if (args.has('--watch')) {
   const contexts = [];
   for (const target of TARGETS) {
     const out = await buildTarget(target);
-    const ctx = await esbuild.context(esbuildOptions(target, out));
-    await ctx.watch();
-    contexts.push(ctx);
+    for (const options of [esbuildOptions(target, out), styleOptions(target, out)]) {
+      const ctx = await esbuild.context(options);
+      await ctx.watch();
+      contexts.push(ctx);
+    }
   }
   let timer = null;
   watchFs(src, { recursive: true }, () => {

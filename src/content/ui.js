@@ -5,6 +5,7 @@ import { relativeTime, t } from '../shared/i18n.js';
 import { icon } from '../shared/icons.js';
 import { keysNode } from '../shared/keys.js';
 import { markdownHelp } from '../shared/markdown-help.js';
+import { injectStyle } from '../shared/inject-style.js';
 import { installTooltips } from '../shared/tooltip.js';
 import noteEditorCss from '../shared/note-editor.css';
 import tokensCss from '../shared/tokens.css';
@@ -100,12 +101,11 @@ export function createUi(handlers) {
   function ensureHost() {
     if (host?.isConnected) return;
     host = document.createElement(UI_HOST_TAG);
-    host.setAttribute(
-      'style',
-      'all: initial !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 0 !important; height: 0 !important; z-index: 2147483647 !important;',
-    );
+    for (const [prop, value] of Object.entries({ all: 'initial', position: 'fixed', top: '0', left: '0', width: '0', height: '0', 'z-index': '2147483647' })) {
+      host.style.setProperty(prop, value, 'important');
+    }
     shadow = host.attachShadow({ mode: 'closed' });
-    shadow.append(h('style', null, tokensCss + noteEditorCss + uiCss));
+    injectStyle(shadow, tokensCss + noteEditorCss + uiCss);
     installTooltips(shadow, { topLayer: false });
     for (const type of ['keydown', 'keyup', 'keypress']) {
       host.addEventListener(type, (e) => e.stopPropagation());

@@ -1,0 +1,47 @@
+.swatches {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.swatch-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+  transition: background-color var(--transition);
+}
+
+.swatch-btn:hover {
+  background: var(--surface-sunken);
+}
+
+.swatch {
+  display: block;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--swatch);
+  box-shadow: inset 0 0 0 1px var(--swatch-edge);
+  transition: transform var(--transition);
+}
+
+.swatch-btn:hover .swatch {
+  transform: scale(1.12);
+}
+
+.swatch-btn[aria-pressed='true'] .swatch {
+  box-shadow:
+    0 0 0 2px var(--surface-raised),
+    0 0 0 4px var(--swatch);
+}
+
+.swatch-picker-live {
+  display: contents;
+}

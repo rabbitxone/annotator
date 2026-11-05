@@ -1,15 +1,15 @@
-import { api } from '../shared/api.js';
-import { applyCategories } from '../shared/apply-categories.js';
-import { h } from '../shared/dom.js';
-import { fileAccessAllowed, fileAccessKeys } from '../shared/file-access.js';
-import { applyI18n, t } from '../shared/i18n.js';
-import { hydrateIcons, icon } from '../shared/icons.js';
-import { keysNode, shortcutNode } from '../shared/keys.js';
-import * as store from '../shared/store.js';
-import { installTooltips } from '../shared/tooltip.js';
-import { startAnnotator } from '../content/annotator.js';
-import { fileAccessButton } from './components/file-access.js';
-import { openShortcutSettings } from './components/settings.js';
+import { api } from '../../shared/api.js';
+import { applyCategories } from '../../shared/apply-categories.js';
+import { h } from '../../shared/dom.js';
+import { fileAccessAllowed, fileAccessKeys } from '../../shared/file-access.js';
+import { applyI18n, t } from '../../shared/i18n.js';
+import { hydrateIcons, icon } from '../../shared/icons.js';
+import { keysNode, shortcutNode } from '../../shared/keys.js';
+import * as store from '../../shared/store.js';
+import { installTooltips } from '../../shared/tooltip.js';
+import { startAnnotator } from '../../content/annotator.js';
+import { fileAccessButton } from '../components/file-access.js';
+import { openShortcutSettings } from '../components/settings.js';
 
 const DEMO_ADDRESS = 'https://annotator.invalid/guide';
 
@@ -56,7 +56,6 @@ function startDemo() {
     allows: (el) => demo.contains(el),
     alwaysOn: true,
   });
-  // No content script runs on extension pages, so shortcuts are handled here
   api.commands?.onCommand?.addListener((command) => {
     if (document.visibilityState === 'visible' && document.hasFocus() && COMMANDS[command]) annotator.handle(COMMANDS[command]);
   });

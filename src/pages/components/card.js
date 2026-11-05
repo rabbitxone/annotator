@@ -1,71 +1,13 @@
-import { colorById, getCategories } from '../../shared/constants.js';
+import { colorById } from '../../shared/constants.js';
 import { h } from '../../shared/dom.js';
 import { formatDate, relativeTime, t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
 import { highlightHits, renderMarkdown } from '../../shared/markdown.js';
 import { markdownHelp } from '../../shared/markdown-help.js';
 import { createNoteEditor } from '../../shared/note-editor.js';
-import { isFileUrl, pageName, siteLabel } from '../../shared/url.js';
-import { dropdown } from './dropdown.js';
-
-function hueOf(text) {
-  let hash = 0;
-  for (const ch of text) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
-  return hash % 360;
-}
-
-export function siteAvatar(url, size = 32) {
-  const host = siteLabel(url);
-  return h(
-    'span',
-    {
-      class: 'avatar',
-      'aria-hidden': 'true',
-      style: { '--hue': String(hueOf(host)), width: `${size}px`, height: `${size}px`, 'font-size': `${Math.round(size * 0.44)}px` },
-    },
-    isFileUrl(url) ? icon('folder', { size: Math.round(size * 0.5) }) : (host.match(/[\p{L}\p{N}]/u)?.[0] ?? '#').toUpperCase(),
-  );
-}
-
-const SWATCH_LIMIT = 8;
-
-export function swatchPicker(selected, onPick) {
-  const categories = getCategories();
-  if (categories.length > SWATCH_LIMIT) {
-    return dropdown({
-      options: categories.map((c) => ({ value: c.id, label: c.name, swatch: c.swatch })),
-      value: selected ?? null,
-      placeholder: t('categoryChoose'),
-      ariaLabel: t('colorLabel'),
-      className: 'category-select',
-      onChange: onPick,
-    });
-  }
-  const group = h(
-    'div',
-    { class: 'swatches', role: 'group', 'aria-label': t('colorLabel') },
-    categories.map((color) =>
-      h(
-        'button',
-        {
-          class: 'swatch-btn',
-          type: 'button',
-          title: color.name,
-          'aria-label': color.name,
-          'aria-pressed': String(color.id === selected),
-          dataset: { color: color.id },
-          style: { '--swatch': color.swatch },
-          onclick: () => {
-            for (const btn of group.children) btn.setAttribute('aria-pressed', String(btn.dataset.color === color.id));
-            onPick(color.id);
-          },
-        },
-        h('span', { class: 'swatch' }),
-      ),
-    ),
-  );
-  return group;
-}
+import { pageName } from '../../shared/url.js';
+import { siteAvatar } from './site-avatar.js';
+import { swatchPicker } from './swatch-picker.js';
 
 export function annotationCard(annotation, page, options) {
   const {
@@ -88,12 +30,17 @@ export function annotationCard(annotation, page, options) {
   const color = colorById(annotation.color);
   const card = h('article', {
     class: 'card',
-    style: { '--swatch': color.swatch, '--fill': color.fill },
+    style: { '--swatch': color.swatch, '--fill': color.fill, '--fill-dark': color.fillDark },
     dataset: { id: annotation.id },
   });
   let isSelected = selected;
   if (isSelected) card.dataset.selected = '';
 
+  const tint = (c) => {
+    card.style.setProperty('--swatch', c.swatch);
+    card.style.setProperty('--fill', c.fill);
+    card.style.setProperty('--fill-dark', c.fillDark);
+  };
   const fill = (...children) => card.replaceChildren(...children.filter(Boolean));
   const withHits = (el) => {
     highlightHits(el, query);
@@ -206,9 +153,7 @@ export function annotationCard(annotation, page, options) {
         annotation.color = nextColor;
         onSave({ note: editor.value, color: nextColor });
       } else {
-        const original = colorById(annotation.color);
-        card.style.setProperty('--swatch', original.swatch);
-        card.style.setProperty('--fill', original.fill);
+        tint(colorById(annotation.color));
       }
       onEditingChange?.(false);
       renderView();
@@ -238,8 +183,7 @@ export function annotationCard(annotation, page, options) {
           { class: 'card-edit-row' },
           swatchPicker(nextColor, (id) => {
             nextColor = id;
-            card.style.setProperty('--swatch', colorById(id).swatch);
-            card.style.setProperty('--fill', colorById(id).fill);
+            tint(colorById(id));
           }),
           h(
             'div',

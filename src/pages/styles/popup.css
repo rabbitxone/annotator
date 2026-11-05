@@ -1,3 +1,5 @@
+@import './app.css';
+
 body {
   width: 380px;
   min-height: 260px;
@@ -9,18 +11,13 @@ body {
 
 .popup-header {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 12px 14px 12px 16px;
   background: var(--surface-raised);
   border-bottom: 1px solid var(--border);
-}
-
-.popup-loading {
-  padding: 24px 0;
-  color: var(--muted);
-  text-align: center;
 }
 
 .popup-header-actions {
@@ -28,34 +25,12 @@ body {
   gap: 6px;
 }
 
-.popup-view .page-note {
-  flex-shrink: 0;
-}
-
-.popup-view .card {
-  flex-shrink: 0;
-}
-
 .popup-controls {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 10px;
   padding: 12px 14px 6px;
-}
-
-.popup-controls .segmented .badge {
-  height: 18px;
-  min-width: 18px;
-  padding: 0 5px;
-  background: var(--surface-raised);
-  color: var(--muted);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-}
-
-.popup-controls .segmented button[aria-selected='true'] .badge {
-  background: var(--accent-soft);
-  color: var(--accent-on-soft);
 }
 
 .popup-view {
@@ -71,54 +46,39 @@ body {
   animation: fade-in 160ms ease-out;
 }
 
+.popup-view > * {
+  flex-shrink: 0;
+}
+
 .popup-view .empty {
   padding: 28px 16px 20px;
 }
 
-.section-label {
-  margin: 6px 2px 0;
+.popup-view .card-quote {
+  font-size: 15px;
+  line-height: 23px;
+}
+
+.popup-loading {
+  padding: 24px 0;
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  text-align: center;
 }
 
-.popup-footer-note {
+.popup-footer {
   display: flex;
-  justify-content: space-between;
-  margin-top: 4px;
-  padding: 0 2px;
-  color: var(--subtle);
-  font-size: 11px;
-}
-
-.popup-header,
-.popup-controls {
   flex-shrink: 0;
-  overflow: hidden;
-  scrollbar-width: thin;
-  scrollbar-gutter: stable;
-}
-
-.popup-footer-note {
   align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 38px;
+  padding: 4px 8px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-raised);
 }
 
-.link-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 4px;
-  border: 0;
-  border-radius: var(--radius-xs);
-  background: none;
-  color: var(--accent-on-soft);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.link-btn:hover {
-  background: var(--accent-soft);
+.popup-footer .about-links {
+  flex: 1;
+  flex-wrap: nowrap;
+  justify-content: space-between;
 }
