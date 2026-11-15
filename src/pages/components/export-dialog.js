@@ -1,5 +1,6 @@
 import { h } from '../../shared/dom.js';
 import { hasFormulaText } from '../../shared/exchange.js';
+import { exportLabels } from '../../shared/export-labels.js';
 import { buildDialog, closeDialog, showDialog } from './dialog.js';
 import { dropdown } from './dropdown.js';
 import { toggle } from './toggle.js';
@@ -54,7 +55,7 @@ export function exportDialog({ scopes, initial }) {
     const isEmpty = (scope) => scope.notes + scope.pageNotes === 0;
     const formulaText = new Map();
     const hasFormula = (scope) => {
-      if (!formulaText.has(scope.id)) formulaText.set(scope.id, hasFormulaText(scope.groups));
+      if (!formulaText.has(scope.id)) formulaText.set(scope.id, hasFormulaText(scope.groups, exportLabels()));
       return formulaText.get(scope.id);
     };
 

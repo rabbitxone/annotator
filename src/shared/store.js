@@ -292,12 +292,17 @@ export async function updateSettings(patch) {
   return next;
 }
 
+export const siteRuleOf = (settings, host) => {
+  const rules = settings?.siteRules;
+  return rules && Object.hasOwn(rules, host) ? rules[host] : undefined;
+};
+
 export async function setSiteRule(host, rule) {
   const { siteRules } = await getSettings();
-  const next = { ...siteRules };
-  if (rule === 'always' || rule === 'never') next[host] = rule;
-  else delete next[host];
-  return updateSettings({ siteRules: next });
+  const next = new Map(Object.entries(siteRules ?? {}));
+  if (rule === 'always' || rule === 'never') next.set(host, rule);
+  else next.delete(host);
+  return updateSettings({ siteRules: Object.fromEntries(next) });
 }
 
 export function onStoreChange(listener) {

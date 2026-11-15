@@ -51,6 +51,16 @@ function normalizeQuery(search) {
   return pairs.map(([name, value]) => `${formEncode(name)}=${formEncode(value)}`).join('&');
 }
 
+// file://host/share points at another machine; opening it can make the OS authenticate there (SMB/NTLM).
+export function isRemoteFileUrl(input) {
+  try {
+    const url = new URL(input);
+    return url.protocol === 'file:' && url.hostname !== '' && url.hostname !== 'localhost';
+  } catch {
+    return false;
+  }
+}
+
 export function normalizeUrl(input) {
   let url;
   try {
@@ -149,6 +159,7 @@ export function toAddress(input) {
   try {
     const url = new URL(candidate);
     if (!['http:', 'https:', 'file:'].includes(url.protocol)) return '';
+    if (isRemoteFileUrl(url.href)) return '';
     url.hash = '';
     return url.toString();
   } catch {

@@ -1,43 +1,69 @@
 import { isValidCategoryId, sanitizeStoredCategories } from './categories.js';
 import { colorById, getCategories } from './constants.js';
-import { normalizeUrl, pageName, siteLabel, sourceOf } from './url.js';
+import { isRemoteFileUrl, normalizeUrl, pageName, siteLabel, sourceOf } from './url.js';
 
 export const BACKUP_FORMAT = 'annotator-backup';
 export const BACKUP_VERSION = 1;
 
-const str = (value) => (typeof value === 'string' ? value : '');
+export const IMPORT_LIMITS = {
+  bytes: 50 * 1024 * 1024,
+  pages: 20000,
+  annotationsPerPage: 5000,
+  annotations: 200000,
+  id: 200,
+  title: 1000,
+  quote: 20000,
+  context: 1000,
+  note: 100000,
+};
+
+const str = (value, max = Infinity) => (typeof value === 'string' ? value.slice(0, max) : '');
 const MAX_TIME = 8.64e15;
-const num = (value, fallback) => (Number.isFinite(value) && Math.abs(value) <= MAX_TIME ? value : fallback);
+const FUTURE_SLACK = 24 * 60 * 60 * 1000;
+// Timestamps from a file may not lie in the future, or a record would win every later merge.
+const num = (value, fallback, now = Infinity) =>
+  Number.isFinite(value) && value >= 0 && Math.abs(value) <= MAX_TIME ? Math.min(value, now + FUTURE_SLACK) : fallback;
+const position = (value) => Number.isFinite(value) && value >= 0 && value <= Number.MAX_SAFE_INTEGER;
 
 function cleanAnnotation(raw, now) {
-  if (!raw || typeof raw !== 'object' || !raw.id || !str(raw.quote?.exact).trim()) return null;
-  const createdAt = num(raw.createdAt, now);
+  if (!raw || typeof raw !== 'object') return null;
+  const id = typeof raw.id === 'string' ? raw.id : typeof raw.id === 'number' ? String(raw.id) : '';
+  if (!id || id.length > IMPORT_LIMITS.id || !str(raw.quote?.exact).trim()) return null;
+  const createdAt = num(raw.createdAt, now, now);
   const annotation = {
-    id: String(raw.id),
+    id,
     color: isValidCategoryId(raw.color) ? raw.color : 'yellow',
-    note: str(raw.note),
-    quote: { exact: str(raw.quote.exact), prefix: str(raw.quote.prefix), suffix: str(raw.quote.suffix) },
+    note: str(raw.note, IMPORT_LIMITS.note),
+    quote: {
+      exact: str(raw.quote.exact, IMPORT_LIMITS.quote),
+      prefix: str(raw.quote.prefix, IMPORT_LIMITS.context),
+      suffix: str(raw.quote.suffix, IMPORT_LIMITS.context),
+    },
     createdAt,
-    updatedAt: num(raw.updatedAt, createdAt),
+    updatedAt: num(raw.updatedAt, createdAt, now),
   };
-  if (Number.isFinite(raw.position?.start) && Number.isFinite(raw.position?.end)) {
+  if (position(raw.position?.start) && position(raw.position?.end) && raw.position.start <= raw.position.end) {
     annotation.position = { start: raw.position.start, end: raw.position.end };
   }
   return annotation;
 }
 
 function cleanPage(raw, now) {
-  const url = raw && typeof raw === 'object' ? normalizeUrl(str(raw.url)) : null;
-  if (!url) return null;
+  const url = raw && typeof raw === 'object' ? normalizeUrl(str(raw.url, 8192)) : null;
+  if (!url || isRemoteFileUrl(url)) return null;
   const page = {
     url,
-    title: str(raw.title),
-    updatedAt: num(raw.updatedAt, now),
-    annotations: (Array.isArray(raw.annotations) ? raw.annotations : []).map((a) => cleanAnnotation(a, now)).filter(Boolean),
+    title: str(raw.title, IMPORT_LIMITS.title),
+    updatedAt: num(raw.updatedAt, now, now),
+    annotations: (Array.isArray(raw.annotations) ? raw.annotations : [])
+      .slice(0, IMPORT_LIMITS.annotationsPerPage)
+      .map((a) => cleanAnnotation(a, now))
+      .filter(Boolean),
   };
-  if (str(raw.note).trim()) {
-    page.note = raw.note;
-    page.noteUpdatedAt = num(raw.noteUpdatedAt, page.updatedAt);
+  const note = str(raw.note, IMPORT_LIMITS.note);
+  if (note.trim()) {
+    page.note = note;
+    page.noteUpdatedAt = num(raw.noteUpdatedAt, page.updatedAt, now);
   }
   return page.annotations.length > 0 || page.note ? page : null;
 }
@@ -85,6 +111,7 @@ export class BackupError extends Error {
 }
 
 export function parseBackup(text, now = Date.now()) {
+  if (typeof text !== 'string' || text.length > IMPORT_LIMITS.bytes) throw new BackupError('too-large');
   let data;
   try {
     data = JSON.parse(text);
@@ -94,9 +121,12 @@ export function parseBackup(text, now = Date.now()) {
   if (data?.format !== BACKUP_FORMAT || !Array.isArray(data.pages)) throw new BackupError('invalid-format');
 
   const byUrl = new Map();
-  for (const raw of data.pages) {
+  let total = 0;
+  for (const raw of data.pages.slice(0, IMPORT_LIMITS.pages)) {
     const page = cleanPage(raw, now);
     if (!page) continue;
+    total += page.annotations.length;
+    if (total > IMPORT_LIMITS.annotations) break;
     const known = byUrl.get(page.url);
     byUrl.set(page.url, known ? mergePage(known, page).page : page);
   }
@@ -108,10 +138,11 @@ export function mergePage(existing, incoming) {
   let added = 0;
   let updated = 0;
 
+  const positions = new Map(page.annotations.map((a, i) => [a.id, i]));
   for (const annotation of incoming.annotations) {
-    const index = page.annotations.findIndex((a) => a.id === annotation.id);
+    const index = positions.get(annotation.id) ?? -1;
     if (index === -1) {
-      page.annotations.push(structuredClone(annotation));
+      positions.set(annotation.id, page.annotations.push(structuredClone(annotation)) - 1);
       added++;
     } else if (annotation.updatedAt > page.annotations[index].updatedAt) {
       page.annotations[index] = structuredClone(annotation);
@@ -202,6 +233,12 @@ const blockquote = (text) =>
     .split('\n')
     .map((line) => (line ? `> ${line}` : '>'))
     .join('\n');
+// Notes are Markdown on purpose, but exported text may end up in tools that render raw HTML or javascript: links.
+const SAFE_LINK = /^(https?:|mailto:|#|\/|\.\.?\/)/i;
+export const safeNote = (text) =>
+  String(text)
+    .replace(/<(?=[A-Za-z!\/?])/g, '\\<')
+    .replace(/\]\(\s*([^)\s]*)/g, (m, href) => (SAFE_LINK.test(href) ? m : '\\](' + href));
 const indent = (text, by = '  ') => text.replace(/^(?=.)/gm, by);
 
 export const DEFAULT_LABELS = {
@@ -217,7 +254,7 @@ export const DEFAULT_LABELS = {
 
 function highlightItem(heading, annotation) {
   const parts = [`${heading}\n${blockquote(annotation.quote?.exact ?? '')}`];
-  if (annotation.note?.trim()) parts.push(annotation.note.trim());
+  if (annotation.note?.trim()) parts.push(safeNote(annotation.note.trim()));
   return `- ${indent(parts.join('\n\n')).slice(2)}`;
 }
 
@@ -227,7 +264,7 @@ const colorHeading = (annotation, L) => {
 };
 
 function pageNoteBlock(note, label) {
-  return `**📝 ${escapeMarkdown(label)}**\n\n${note.trim()}`;
+  return `**📝 ${escapeMarkdown(label)}**\n\n${safeNote(note.trim())}`;
 }
 
 export function toMarkdown(groups, labels = {}, { groupBy = 'page', now = Date.now() } = {}) {
@@ -236,7 +273,7 @@ export function toMarkdown(groups, labels = {}, { groupBy = 'page', now = Date.n
   const withTitle = !!L.title;
 
   if (withTitle) {
-    const count = {};
+    const count = Object.create(null);
     let notes = 0;
     for (const { annotations } of groups) {
       for (const a of annotations) {
@@ -272,7 +309,7 @@ export function toMarkdown(groups, labels = {}, { groupBy = 'page', now = Date.n
     if (noted.length) {
       out.push(
         `${level} 📝 ${escapeMarkdown(L.pageNotes)}`,
-        noted.map(({ page }) => `- **${mdLink(pageName(page), page.url)}**\n\n${indent(page.note.trim())}`).join('\n\n'),
+        noted.map(({ page }) => `- **${mdLink(pageName(page), page.url)}**\n\n${indent(safeNote(page.note.trim()))}`).join('\n\n'),
       );
     }
   } else {
@@ -293,14 +330,15 @@ export function toMarkdown(groups, labels = {}, { groupBy = 'page', now = Date.n
 
 export function quoteSnippet(annotation, page) {
   const parts = [blockquote(annotation.quote?.exact ?? '')];
-  if (annotation.note?.trim()) parts.push(annotation.note.trim());
+  if (annotation.note?.trim()) parts.push(safeNote(annotation.note.trim()));
   return `${parts.join('\n\n')}\n\n— ${mdLink(pageName(page), textFragmentUrl(page.url, annotation.quote?.exact))}\n`;
 }
 
 export const CSV_SEPARATORS = { comma: ',', semicolon: ';' };
 
-const FORMULA_START = /^[=+\-@\t\r]/;
-const PLAIN_NUMBER = /^[+-]?\d+([.,]\d+)?$/;
+// Spreadsheets also trim leading spaces and read full-width signs, so those count too.
+const FORMULA_START = /^[\s\u00a0\u200b\ufeff]*[=+\-@\uff1d\uff0b\uff0d\uff20\t\r]/;
+const PLAIN_NUMBER = /^\s*[+-]?\d+([.,]\d+)?\s*$/;
 
 const startsFormula = (text) => {
   const value = String(text ?? '');
@@ -313,12 +351,13 @@ export function csvCell(value, separator = ',') {
   return /["\r\n]/.test(text) || text.includes(separator) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
-export function hasFormulaText(groups) {
+export function hasFormulaText(groups, labels = {}) {
+  const L = { ...DEFAULT_LABELS, ...labels };
   return groups.some(
     ({ page, annotations, includePageNote = true }) =>
       startsFormula(pageName(page)) ||
       (includePageNote && startsFormula(page.note?.trim())) ||
-      annotations.some((a) => startsFormula(a.quote?.exact) || startsFormula(a.note) || startsFormula(colorById(a.color).name)),
+      annotations.some((a) => startsFormula(a.quote?.exact) || startsFormula(a.note) || startsFormula(L.colorName(colorById(a.color).id))),
   );
 }
 

@@ -1,7 +1,7 @@
 import { applyCategories, categoryNameFor } from '../../shared/apply-categories.js';
 import { mergeCategories, resolveCategories } from '../../shared/categories.js';
 import { getCategories } from '../../shared/constants.js';
-import { BackupError, parseBackup } from '../../shared/exchange.js';
+import { BackupError, IMPORT_LIMITS, parseBackup } from '../../shared/exchange.js';
 import { formatNumber, plural, t } from '../../shared/i18n.js';
 import { reverseMoves } from '../../shared/relocate.js';
 import { importPages, recategorize, relocatePages, updateSettings } from '../../shared/store.js';
@@ -30,6 +30,7 @@ export async function openRelocate() {
 
 export async function importBackup(file) {
   try {
+    if (file.size > IMPORT_LIMITS.bytes) throw new BackupError('too-large');
     const { pages, categories, settings } = parseBackup(await file.text());
     const merged = mergeCategories(state.settings.categories, categories, categoryNameFor);
     if (merged.added > 0) {

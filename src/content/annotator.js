@@ -6,6 +6,7 @@ import { getCategories } from '../shared/constants.js';
 import { quoteSnippet, toMarkdown } from '../shared/exchange.js';
 import { exportLabels } from '../shared/export-labels.js';
 import { needsFavicon } from '../shared/favicon.js';
+import { siteRuleOf } from '../shared/store.js';
 import { normalizeUrl, siteKey } from '../shared/url.js';
 import { uuid } from '../shared/uuid.js';
 import { buildIndex, describeRange, resolve, UI_HOST_TAG } from './anchoring.js';
@@ -423,7 +424,7 @@ export function startAnnotator(env) {
   }
 
   function siteRule() {
-    return settings?.siteRules?.[siteKey(location.href)];
+    return siteRuleOf(settings, siteKey(location.href));
   }
 
   function siteEnabled() {
