@@ -1113,5 +1113,19 @@
   },
   "toastImportTruncated": {
     "message": "Some data was skipped because the file exceeds the import limits."
+  },
+  "confirmOpenNetworkTitle": {
+    "message": "Open a file on another computer?"
+  },
+  "confirmOpenNetworkText": {
+    "message": "This note belongs to $V1$. Opening it makes your computer connect to that server, which can reveal your Windows sign-in details if you do not trust it.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "confirmOpenNetworkAction": {
+    "message": "Open anyway"
   }
 }

@@ -51,7 +51,8 @@ function normalizeQuery(search) {
   return pairs.map(([name, value]) => `${formEncode(name)}=${formEncode(value)}`).join('&');
 }
 
-// file://host/share points at another machine; opening it can make the OS authenticate there (SMB/NTLM).
+// file://host/share points at another machine; opening it can make the OS authenticate there (SMB/NTLM),
+// so such notes are kept but the person is asked before the address is opened.
 export function isRemoteFileUrl(input) {
   try {
     const url = new URL(input);
@@ -159,7 +160,6 @@ export function toAddress(input) {
   try {
     const url = new URL(candidate);
     if (!['http:', 'https:', 'file:'].includes(url.protocol)) return '';
-    if (isRemoteFileUrl(url.href)) return '';
     url.hash = '';
     return url.toString();
   } catch {

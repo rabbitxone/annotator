@@ -22,13 +22,15 @@ test('import ignores prototype keys', () => {
   assert.equal({}.never, undefined);
 });
 
-test('import rejects unsafe or remote page URLs', () => {
-  const urls = ['javascript:alert(1)', 'data:text/html,x', 'vbscript:x', 'chrome://settings', 'about:blank', 'moz-extension://x/', 'blob:https://a/b', 'file://evil.example.com/share/a.html'];
+test('import rejects unsafe page URLs and flags network paths', () => {
+  const urls = ['javascript:alert(1)', 'data:text/html,x', 'vbscript:x', 'chrome://settings', 'about:blank', 'moz-extension://x/', 'blob:https://a/b'];
   assert.equal(parseBackup(backup(urls.map((u) => page([ann('1')], u)))).pages.length, 0);
   assert.equal(parseBackup(backup([page([ann('1')], 'file:///home/a.html')])).pages.length, 1);
   assert.equal(isRemoteFileUrl('file://evil.example.com/a'), true);
   assert.equal(isRemoteFileUrl('file://localhost/a'), false);
-  assert.equal(toAddress('\\\\srv\\share\\a'), '');
+  // Network paths are kept (and flagged), not dropped: the person is asked before opening them.
+  assert.equal(parseBackup(backup([page([ann('1')], 'file://srv/share/a.html')])).pages.length, 1);
+  assert.equal(isRemoteFileUrl(toAddress('\\\\srv\\share\\a')), true);
   assert.equal(normalizeUrl('javascript:alert(1)'), null);
 });
 

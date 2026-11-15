@@ -55,8 +55,8 @@ test('all local files share one site rule, web pages keep their host', () => {
 test('typed locations become addresses', () => {
   assert.equal(toAddress('c:\\papers\\trial A'), 'file:///C:/papers/trial%20A');
   assert.equal(toAddress('/home/me/papers'), 'file:///home/me/papers');
-  assert.equal(toAddress('\\\\server\\share\\papers'), '');
-  assert.equal(toAddress('//server/share/papers'), '');
+  assert.equal(toAddress('\\\\server\\share\\papers'), 'file://server/share/papers');
+  assert.equal(toAddress('//server/share/papers'), 'file://server/share/papers');
   assert.equal(toAddress('example.org/blog'), 'https://example.org/blog');
   assert.equal(toAddress('http://old.example.org/'), 'http://old.example.org/');
   assert.equal(toAddress('javascript:alert(1)'), '');

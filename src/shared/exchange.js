@@ -1,6 +1,6 @@
 import { isValidCategoryId, sanitizeStoredCategories } from './categories.js';
 import { colorById, getCategories } from './constants.js';
-import { isRemoteFileUrl, normalizeUrl, pageName, siteLabel, sourceOf } from './url.js';
+import { normalizeUrl, pageName, siteLabel, sourceOf } from './url.js';
 
 export const BACKUP_FORMAT = 'annotator-backup';
 export const BACKUP_VERSION = 1;
@@ -58,7 +58,7 @@ function cleanAnnotation(raw, now) {
 function cleanPage(raw, now) {
   if (Array.isArray(raw?.annotations) && raw.annotations.length > IMPORT_LIMITS.annotationsPerPage) clipped++;
   const url = raw && typeof raw === 'object' ? normalizeUrl(str(raw.url, 8192)) : null;
-  if (!url || isRemoteFileUrl(url)) return null;
+  if (!url) return null;
   const page = {
     url,
     title: str(raw.title, IMPORT_LIMITS.title),

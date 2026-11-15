@@ -3,10 +3,20 @@ import { copyText } from '../../shared/clipboard.js';
 import { groupItems } from '../../shared/exchange.js';
 import { formatNumber, plural, t } from '../../shared/i18n.js';
 import { deleteMany, restoreAnnotations } from '../../shared/store.js';
+import { isRemoteFileUrl } from '../../shared/url.js';
 import { confirmDialog } from './dialog.js';
 import { toast } from './toast.js';
 
 export async function openNote(page, id) {
+  if (isRemoteFileUrl(page.url)) {
+    const go = await confirmDialog({
+      title: t('confirmOpenNetworkTitle'),
+      text: t('confirmOpenNetworkText', [page.url]),
+      confirmLabel: t('confirmOpenNetworkAction'),
+      danger: false,
+    });
+    if (!go) return false;
+  }
   const result = await api.runtime.sendMessage({ type: 'open-and-go', url: page.url, id }).catch(() => null);
   if (result?.ok) return true;
   if (!result?.manual) {

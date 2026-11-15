@@ -1161,5 +1161,19 @@
   },
   "toastImportTruncated": {
     "message": "Część danych pominięto, bo plik przekracza limity importu."
+  },
+  "confirmOpenNetworkTitle": {
+    "message": "Otworzyć plik na innym komputerze?"
+  },
+  "confirmOpenNetworkText": {
+    "message": "Ta notatka należy do $V1$. Otwarcie jej łączy Twój komputer z tym serwerem, co może ujawnić dane logowania do Windows, jeśli mu nie ufasz.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "confirmOpenNetworkAction": {
+    "message": "Otwórz mimo to"
   }
 }
