@@ -7,11 +7,10 @@ import { keysNode } from '../shared/keys.js';
 import { markdownHelp } from '../shared/markdown-help.js';
 import { injectStyle } from '../shared/inject-style.js';
 import { installTooltips } from '../shared/tooltip.js';
-import noteEditorCss from '../shared/note-editor.css';
 import tokensCss from '../shared/tokens.css';
 import uiCss from './ui.css';
 import { UI_HOST_TAG } from './anchoring.js';
-import { createNoteEditor } from '../shared/note-editor.js';
+import { createFrameEditor } from './frame-editor.js';
 
 const GAP = 8;
 const END_GAP = 4;
@@ -105,7 +104,7 @@ export function createUi(handlers) {
       host.style.setProperty(prop, value, 'important');
     }
     shadow = host.attachShadow({ mode: 'closed' });
-    injectStyle(shadow, tokensCss + noteEditorCss + uiCss);
+    injectStyle(shadow, tokensCss + uiCss);
     installTooltips(shadow, { topLayer: false });
     for (const type of ['keydown', 'keyup', 'keypress']) {
       host.addEventListener(type, (e) => e.stopPropagation());
@@ -355,8 +354,11 @@ export function createUi(handlers) {
     let color = annotation.color;
     const original = annotation.note || '';
 
-    const note = createNoteEditor({
+    const note = createFrameEditor({
       value: original,
+      onResize: () => reposition(),
+      onSubmit: () => !confirmation() && close({ save: true }),
+      onEscape: () => handleKey({ key: 'Escape' }),
       placeholder: t('notePlaceholder'),
       label: t('noteLabel'),
       openTip: t('mdOpenLink'),
@@ -580,7 +582,7 @@ export function createUi(handlers) {
       if (!overlay) return;
       dismiss(overlay);
       for (const child of box.children) if (child !== overlay) child.inert = false;
-      note.focus({ preventScroll: true });
+      note.focus();
     }
 
     function handleKey(e) {
@@ -624,8 +626,7 @@ export function createUi(handlers) {
     });
     reposition();
     if (focus) {
-      note.focus({ preventScroll: true });
-      note.setCaret(note.value.length);
+      note.focus({ caret: true });
     }
   }
 

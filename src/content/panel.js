@@ -3,6 +3,7 @@ import { h } from '../shared/dom.js';
 import { formatNumber, t } from '../shared/i18n.js';
 import { icon } from '../shared/icons.js';
 import { renderMarkdown } from '../shared/markdown.js';
+import { createFrameEditor } from './frame-editor.js';
 
 const NOTE_SAVE_DELAY = 800;
 
@@ -41,31 +42,21 @@ export function createPanel({ shadowRoot, handlers }) {
     );
   }
 
-  function autosize() {
-    refs.note.style.height = 'auto';
-    refs.note.style.height = `${Math.min(refs.note.scrollHeight, 200)}px`;
-  }
-
   function build() {
-    const note = h('textarea', {
-      class: 'panel-note',
-      rows: 2,
+    const note = createFrameEditor({
+      variant: 'panel',
+      value: model.pageNote,
       placeholder: t('pageNotePlaceholder'),
-      'aria-label': t('pageNoteLabel'),
-      spellcheck: 'true',
-    });
-    note.addEventListener('input', () => {
-      autosize();
-      clearTimeout(noteTimer);
-      noteTimer = setTimeout(saveNote, NOTE_SAVE_DELAY);
-    });
-    note.addEventListener('blur', saveNote);
-    note.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        saveNote();
-        note.blur();
-      }
+      label: t('pageNoteLabel'),
+      openTip: t('mdOpenLink'),
+      openKeys: `mod+${t('mdClick')}`,
+      onInput: () => {
+        clearTimeout(noteTimer);
+        noteTimer = setTimeout(saveNote, NOTE_SAVE_DELAY);
+      },
+      onBlur: saveNote,
+      onSubmit: saveNote,
+      onEscape: () => close(),
     });
 
     const copyAll = iconButton('copy', t('panelCopyAll'), async () => {
@@ -95,7 +86,7 @@ export function createPanel({ shadowRoot, handlers }) {
           'section',
           { class: 'panel-section' },
           h('p', { class: 'panel-label' }, icon('pageNote', { size: 14 }), t('pageNoteLabel'), refs.noteState),
-          note,
+          note.el,
         ),
         refs.list,
       ),
@@ -170,11 +161,10 @@ export function createPanel({ shadowRoot, handlers }) {
     const total = items.length + orphans.length;
     refs.count.textContent = total ? formatNumber(total) : '';
 
-    const editing = refs.note.getRootNode().activeElement === refs.note || refs.note.value !== savedNote;
+    const editing = refs.note.focused || refs.note.value !== savedNote;
     if (!editing && pageNote !== savedNote) {
       refs.note.value = pageNote;
       savedNote = pageNote;
-      autosize();
     }
 
     const hint = h('p', { class: 'panel-hint' }, t('panelOrphansHint'));
@@ -201,7 +191,6 @@ export function createPanel({ shadowRoot, handlers }) {
     savedNote = model.pageNote;
     refs.note.value = model.pageNote;
     shadowRoot().append(el);
-    autosize();
     render();
   }
 

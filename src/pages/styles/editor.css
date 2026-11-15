@@ -1,0 +1,60 @@
+@import '../../shared/tokens.css';
+@import '../../shared/note-editor.css';
+
+html {
+  color-scheme: light;
+}
+
+html,
+body {
+  margin: 0;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--on-surface);
+  overflow: hidden;
+}
+
+#wrap {
+  display: block;
+}
+
+.note-editor {
+  display: block;
+  box-sizing: border-box;
+  min-height: 76px;
+  max-height: 240px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 10px 12px 12px;
+  outline: none;
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 20px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  cursor: text;
+}
+
+body.panel .note-editor {
+  min-height: 44px;
+  max-height: 200px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface-note);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 19px;
+}
+
+body.panel .note-editor:hover {
+  border-color: var(--border-hover);
+}
+
+body.panel .note-editor:focus {
+  border-color: var(--accent);
+  background: var(--surface-raised);
+  box-shadow: inset 0 0 0 2px var(--ring);
+}
