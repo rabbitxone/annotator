@@ -1,18 +1,20 @@
 // Runs inside an iframe with the extension's origin. Page scripts cannot see events or text from in here;
 // the content script talks to this page over a MessagePort handed over with a secret token.
-import { createNoteEditor } from '../../shared/note-editor.js';
+import { createNoteEditor, MAX_NOTE_LENGTH } from '../../shared/note-editor.js';
+
+const text = (value, max = 500) => (typeof value === 'string' ? value.slice(0, max) : '');
 
 const token = location.hash.slice(1);
 let port = null;
 
 function start(opts) {
-  document.body.classList.toggle('panel', opts.variant === 'panel');
+  document.body.classList.toggle('panel', opts?.variant === 'panel');
   const editor = createNoteEditor({
-    value: opts.value,
-    placeholder: opts.placeholder,
-    label: opts.label,
-    openTip: opts.openTip,
-    openKeys: opts.openKeys,
+    value: text(opts.value, MAX_NOTE_LENGTH),
+    placeholder: text(opts.placeholder),
+    label: text(opts.label),
+    openTip: text(opts.openTip),
+    openKeys: text(opts.openKeys),
     onInput: () => port.postMessage({ type: 'input', value: editor.value }),
   });
   const wrap = document.getElementById('wrap');
@@ -41,7 +43,7 @@ function start(opts) {
   });
 
   port.onmessage = ({ data }) => {
-    if (data?.type === 'value' && typeof data.value === 'string') editor.value = data.value;
+    if (data?.type === 'value' && typeof data.value === 'string') editor.value = data.value.slice(0, MAX_NOTE_LENGTH);
     else if (data?.type === 'focus') {
       editor.focus({ preventScroll: true });
       if (data.caret) editor.setCaret(editor.value.length);
@@ -54,5 +56,5 @@ function start(opts) {
 window.addEventListener('message', (e) => {
   if (port || !token || e.source !== window.parent || e.data?.type !== 'init' || e.data.token !== token || !e.ports[0]) return;
   port = e.ports[0];
-  start(e.data.opts ?? {});
+  start(e.data.opts && typeof e.data.opts === 'object' ? e.data.opts : {});
 });

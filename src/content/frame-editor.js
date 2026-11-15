@@ -30,6 +30,13 @@ export function createFrameEditor({
   iframe.src = src;
 
   iframe.addEventListener('load', () => {
+    // A second load means the frame navigated away; never hand the text to whatever is there now.
+    if (port) {
+      port.close();
+      port = null;
+      iframe.remove();
+      return;
+    }
     const channel = new MessageChannel();
     port = channel.port1;
     port.onmessage = ({ data }) => {
@@ -39,7 +46,7 @@ export function createFrameEditor({
           break;
         case 'input':
           if (typeof data.value === 'string') {
-            text = data.value.slice(0, 100000);
+            text = data.value;
             onInput(text);
           }
           break;
@@ -57,7 +64,7 @@ export function createFrameEditor({
           onBlur();
           break;
         case 'submit':
-          if (typeof data.value === 'string') text = data.value.slice(0, 100000);
+          if (typeof data.value === 'string') text = data.value;
           onSubmit();
           break;
         case 'escape':

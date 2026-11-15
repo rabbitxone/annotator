@@ -33,8 +33,11 @@ async function toDataUrl(blob) {
   }
 }
 
-const read = async (url) => {
-  const response = await fetch(url, { credentials: 'omit', cache: 'force-cache' });
+// A redirect would let the page's own host send the request to a third party or the local network.
+export const FETCH_OPTIONS = { credentials: 'omit', cache: 'force-cache', redirect: 'error' };
+
+export const read = async (url, fetchImpl = fetch) => {
+  const response = await fetchImpl(url, FETCH_OPTIONS);
   return response.ok ? response.blob() : null;
 };
 

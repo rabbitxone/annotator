@@ -1135,7 +1135,7 @@
     "message": "Zastosować ustawienia z tego pliku?"
   },
   "importSettingsText": {
-    "message": "Kopia zmienia też te ustawienia: $V1$. Notatki zostaną zaimportowane w każdym przypadku.",
+    "message": "Kopia zmienia też te ustawienia:\n$V1$\nNotatki zostaną zaimportowane w każdym przypadku.",
     "placeholders": {
       "v1": {
         "content": "$1"
@@ -1144,5 +1144,22 @@
   },
   "importSettingsApply": {
     "message": "Zastosuj ustawienia"
+  },
+  "importValueOn": {
+    "message": "włączone"
+  },
+  "importValueOff": {
+    "message": "wyłączone"
+  },
+  "importSiteRules": {
+    "message": "Reguły witryn: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastImportTruncated": {
+    "message": "Część danych pominięto, bo plik przekracza limity importu."
   }
 }

@@ -513,7 +513,7 @@ export function startAnnotator(env) {
         return false;
     }
   }
-  api.runtime.onMessage.addListener((message, sender, sendResponse) => (sender?.id === api.runtime.id ? handle(message, sendResponse) : false));
+  api.runtime.onMessage.addListener((message, sender, sendResponse) => (sender?.id === api.runtime.id && !sender.tab ? handle(message, sendResponse) : false));
 
   onStoreChange(({ pages, settings: nextSettings }) => {
     if (nextSettings) {

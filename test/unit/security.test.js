@@ -170,3 +170,41 @@ test('background routes messages only from the right senders', () => {
   assert.equal(cleanCount(-3), 0);
   assert.equal(fromExtensionPage({ id: 'me', url: 'chrome-extension://me.evil/' }, d), false);
 });
+
+import { markdownLineSpans, markdownSpans } from '../../src/shared/markdown.js';
+
+test('markdown export neutralises reference-style link definitions', () => {
+  const note = '[x][1]\n\n[1]: javascript:alert(1)\n[2]: https://ok.example';
+  const groups = [{ page: { url: 'https://a.com/', title: 't' }, annotations: [{ id: '1', color: 'yellow', quote: { exact: 'q' }, note, createdAt: 1 }] }];
+  const md = toMarkdown(groups);
+  assert.ok(!/^\s*\[1\]:/m.test(md), md);
+  assert.ok(/\[2\]: https:\/\/ok\.example/.test(md));
+});
+
+test('very long URLs stay plain text instead of a truncated link', () => {
+  const url = 'https://a.com/' + 'x'.repeat(2500);
+  assert.deepEqual(parseInline(url).filter((t) => t.type === 'link'), []);
+  assert.deepEqual(markdownSpans(url).filter((t) => t.type === 'url'), []);
+  assert.equal(parseInline('https://a.com/ok')[0].type, 'link');
+});
+
+test('line spans survive notes with a huge number of spans', () => {
+  assert.doesNotThrow(() => markdownLineSpans('`a'.repeat(100000)));
+  assert.doesNotThrow(() => markdownLineSpans('*a* '.repeat(100000)));
+});
+
+test('import reports when data was clipped or skipped', () => {
+  assert.equal(parseBackup(backup([page([ann('1')])])).truncated, false);
+  assert.equal(parseBackup(backup([page([ann('1', { note: 'y'.repeat(IMPORT_LIMITS.note + 1) })])])).truncated, true);
+  const many = Array.from({ length: IMPORT_LIMITS.annotationsPerPage + 1 }, (_, i) => ann(`a${i}`));
+  assert.equal(parseBackup(backup([page(many)])).truncated, true);
+});
+
+test('favicon requests refuse redirects and send no credentials', async () => {
+  const { FETCH_OPTIONS, read } = await import('../../src/background/favicon.js');
+  assert.equal(FETCH_OPTIONS.redirect, 'error');
+  assert.equal(FETCH_OPTIONS.credentials, 'omit');
+  let seen;
+  await read('https://a.com/x.ico', async (url, options) => ((seen = options), { ok: false }));
+  assert.equal(seen.redirect, 'error');
+});

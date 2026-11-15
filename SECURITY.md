@@ -29,5 +29,7 @@ handling of untrusted page content.
   see, including the category; this also lets a page detect that the extension is installed.
 - **Clipboard fallback.** When the asynchronous Clipboard API is unavailable, copying falls back to `execCommand('copy')`,
   whose `copy` event is visible to page listeners.
+- **Focus.** A page can see the window lose focus when someone enters the note editor and may move focus to its own
+  invisible field. This is the same class of attack as overlays and cannot be prevented from a content script.
 - **Note editor.** The note editor runs in an extension-origin iframe so that scripts of the page cannot observe
   typing. `editor.html` is web-accessible, so a page can tell that the extension is present.

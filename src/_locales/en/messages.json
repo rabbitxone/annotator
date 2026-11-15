@@ -1087,7 +1087,7 @@
     "message": "Apply settings from this file?"
   },
   "importSettingsText": {
-    "message": "The backup also changes these settings: $V1$. Your notes are imported either way.",
+    "message": "The backup also changes these settings:\n$V1$\nYour notes are imported either way.",
     "placeholders": {
       "v1": {
         "content": "$1"
@@ -1096,5 +1096,22 @@
   },
   "importSettingsApply": {
     "message": "Apply settings"
+  },
+  "importValueOn": {
+    "message": "on"
+  },
+  "importValueOff": {
+    "message": "off"
+  },
+  "importSiteRules": {
+    "message": "Site rules: $V1$ sites",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastImportTruncated": {
+    "message": "Some data was skipped because the file exceeds the import limits."
   }
 }

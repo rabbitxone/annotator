@@ -17,7 +17,14 @@ export const IMPORT_LIMITS = {
   note: 100000,
 };
 
-const str = (value, max = Infinity) => (typeof value === 'string' ? value.slice(0, max) : '');
+// Counts values cut to fit IMPORT_LIMITS so an import can tell the person that data was skipped.
+let clipped = 0;
+const str = (value, max = Infinity) => {
+  if (typeof value !== 'string') return '';
+  if (value.length <= max) return value;
+  clipped++;
+  return value.slice(0, max);
+};
 const MAX_TIME = 8.64e15;
 const FUTURE_SLACK = 24 * 60 * 60 * 1000;
 // Timestamps from a file may not lie in the future, or a record would win every later merge.
@@ -49,6 +56,7 @@ function cleanAnnotation(raw, now) {
 }
 
 function cleanPage(raw, now) {
+  if (Array.isArray(raw?.annotations) && raw.annotations.length > IMPORT_LIMITS.annotationsPerPage) clipped++;
   const url = raw && typeof raw === 'object' ? normalizeUrl(str(raw.url, 8192)) : null;
   if (!url || isRemoteFileUrl(url)) return null;
   const page = {
@@ -120,17 +128,22 @@ export function parseBackup(text, now = Date.now()) {
   }
   if (data?.format !== BACKUP_FORMAT || !Array.isArray(data.pages)) throw new BackupError('invalid-format');
 
+  clipped = 0;
   const byUrl = new Map();
   let total = 0;
+  let truncated = data.pages.length > IMPORT_LIMITS.pages;
   for (const raw of data.pages.slice(0, IMPORT_LIMITS.pages)) {
     const page = cleanPage(raw, now);
     if (!page) continue;
     total += page.annotations.length;
-    if (total > IMPORT_LIMITS.annotations) break;
+    if (total > IMPORT_LIMITS.annotations) {
+      truncated = true;
+      break;
+    }
     const known = byUrl.get(page.url);
     byUrl.set(page.url, known ? mergePage(known, page).page : page);
   }
-  return { pages: [...byUrl.values()], categories: sanitizeStoredCategories(data.categories), settings: sanitizeBackupSettings(data.settings) };
+  return { pages: [...byUrl.values()], categories: sanitizeStoredCategories(data.categories), settings: sanitizeBackupSettings(data.settings), truncated: truncated || clipped > 0 };
 }
 
 export function mergePage(existing, incoming) {
@@ -238,7 +251,10 @@ const SAFE_LINK = /^(https?:|mailto:|#|\/|\.\.?\/)/i;
 export const safeNote = (text) =>
   String(text)
     .replace(/<(?=[A-Za-z!\/?])/g, '\\<')
-    .replace(/\]\(\s*([^)\s]*)/g, (m, href) => (SAFE_LINK.test(href) ? m : '\\](' + href));
+    .replace(/\]\(\s*([^)\s]*)/g, (m, href) => (SAFE_LINK.test(href) ? m : '\\](' + href))
+    .replace(/^([ \t]{0,3})\[([^\]\n]+)\]:[ \t]*<?([^\s>]*)/gm, (m, space, label, href) =>
+      SAFE_LINK.test(href) ? m : `${space}\\[${label}]${m.slice(space.length + label.length + 2)}`,
+    );
 const indent = (text, by = '  ') => text.replace(/^(?=.)/gm, by);
 
 export const DEFAULT_LABELS = {
