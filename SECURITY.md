@@ -15,6 +15,8 @@ Only the latest published version of the extension is supported.
 
 ## Scope notes
 
-Annotator makes no network requests and stores everything locally in the browser's extension storage, so the
+Annotator makes no network requests of its own and stores everything locally in the browser's extension storage. The only
+fetch is the optional *Page icons* feature in Firefox, which downloads a tab's icon solely from the page's own HTTPS host
+(never in private windows). The
 most relevant reports are about page access (content script), the handling of imported files, and the
 handling of untrusted page content.

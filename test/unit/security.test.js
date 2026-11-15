@@ -117,3 +117,56 @@ test('markdown export legend counts are numbers for reserved category ids', () =
   const md = toMarkdown(groups, { title: 'T' });
   assert.ok(!md.includes('function'));
 });
+
+import { faviconFetchUrl, isSafeFavicon } from '../../src/shared/favicon.js';
+import { cleanCount, fromExtensionPage, handleMessage } from '../../src/background/messages.js';
+
+test('favicon fetch is limited to data images and the page host', () => {
+  const page = 'https://example.com/a';
+  assert.equal(faviconFetchUrl('https://example.com/favicon.ico', page), 'https://example.com/favicon.ico');
+  for (const href of ['https://tracker.example/?u=1', 'http://example.com/x.ico', 'http://192.168.0.1/x.ico', 'https://example.com.evil.org/x.ico', 'javascript:alert(1)', 'data:text/html,x', 42, undefined]) {
+    assert.equal(faviconFetchUrl(href, page), null, String(href));
+  }
+  assert.ok(faviconFetchUrl('data:image/png;base64,AAAA', page));
+  assert.equal(faviconFetchUrl('https://example.com/x.ico', 'http://example.com/'), null);
+  assert.equal(isSafeFavicon('data:text/html,x'), false);
+  assert.equal(isSafeFavicon('data:image/png,' + 'a'.repeat(24001)), false);
+  assert.equal(isSafeFavicon('javascript:alert(1)'), false);
+  assert.equal(isSafeFavicon(null), false);
+});
+
+const deps = () => {
+  const calls = [];
+  return {
+    calls,
+    extensionId: 'me',
+    extensionUrl: 'chrome-extension://me/',
+    setBadge: (...a) => calls.push(['badge', ...a]),
+    setEnabled: (...a) => calls.push(['enabled', ...a]),
+    sendToTab: async (...a) => (calls.push(['tab', ...a]), 'ok'),
+    saveFavicon: async (...a) => (calls.push(['favicon', ...a]), true),
+    faviconSupported: () => true,
+    openAndGo: async (...a) => (calls.push(['open', ...a]), { ok: true }),
+  };
+};
+const ext = { id: 'me', url: 'chrome-extension://me/popup.html' };
+const content = { id: 'me', frameId: 0, tab: { id: 7 }, url: 'https://evil/' };
+
+test('background routes messages only from the right senders', () => {
+  let d = deps();
+  const send = () => {};
+  assert.equal(handleMessage({ type: 'tab-command', tabId: 7, message: { type: 'status' } }, content, send, d), false);
+  assert.equal(handleMessage({ type: 'open-and-go', url: 'https://a.com', id: 'x' }, { ...content, url: 'https://evil/' }, send, d), false);
+  assert.equal(handleMessage({ type: 'tab-command', tabId: 7, message: { type: 'evil' } }, ext, send, d), false);
+  assert.equal(handleMessage({ type: 'tab-command', tabId: 7, message: { type: 'status' } }, ext, send, d), true);
+  assert.equal(handleMessage({ type: 'save-favicon', url: 'https://a.com' }, { ...content, frameId: 1 }, send, d), false);
+  assert.equal(handleMessage({ type: 'save-favicon', url: 'https://a.com' }, { id: 'other', frameId: 0, tab: { id: 1 } }, send, d), false);
+  assert.deepEqual(d.calls.map((c) => c[0]), ['tab']);
+  d = deps();
+  handleMessage({ type: 'count', count: 'NaN' }, content, send, d);
+  handleMessage({ type: 'count', count: 5 }, content, send, d);
+  assert.deepEqual(d.calls, [['badge', 7, 0], ['badge', 7, 5]]);
+  assert.equal(cleanCount(1e12), 1_000_000);
+  assert.equal(cleanCount(-3), 0);
+  assert.equal(fromExtensionPage({ id: 'me', url: 'chrome-extension://me.evil/' }, d), false);
+});

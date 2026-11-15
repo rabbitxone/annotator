@@ -1082,5 +1082,19 @@
         "content": "$1"
       }
     }
+  },
+  "importSettingsTitle": {
+    "message": "Apply settings from this file?"
+  },
+  "importSettingsText": {
+    "message": "The backup also changes these settings: $V1$. Your notes are imported either way.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "importSettingsApply": {
+    "message": "Apply settings"
   }
 }

@@ -1130,5 +1130,19 @@
         "content": "$1"
       }
     }
+  },
+  "importSettingsTitle": {
+    "message": "Zastosować ustawienia z tego pliku?"
+  },
+  "importSettingsText": {
+    "message": "Kopia zmienia też te ustawienia: $V1$. Notatki zostaną zaimportowane w każdym przypadku.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "importSettingsApply": {
+    "message": "Zastosuj ustawienia"
   }
 }

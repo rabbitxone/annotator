@@ -7,6 +7,7 @@ import { reverseMoves } from '../../shared/relocate.js';
 import { importPages, recategorize, relocatePages, updateSettings } from '../../shared/store.js';
 import { announceCategoriesChanged } from '../components/swatch-picker.js';
 import { categoryDeleteDialog } from '../components/category-delete-dialog.js';
+import { confirmDialog } from '../components/dialog.js';
 import { relocateDialog } from '../components/relocate-dialog.js';
 import { toast } from '../components/toast.js';
 import { categoryCounts, state } from './state.js';
@@ -28,16 +29,21 @@ export async function openRelocate() {
   }
 }
 
+// A backup can switch on page icons, quick keys or site rules, so the person confirms before they are applied.
+const confirmSettings = (settings) =>
+  confirmDialog({ title: t('importSettingsTitle'), text: t('importSettingsText', [Object.keys(settings).join(', ')]), confirmLabel: t('importSettingsApply'), danger: false });
+
 export async function importBackup(file) {
   try {
     if (file.size > IMPORT_LIMITS.bytes) throw new BackupError('too-large');
-    const { pages, categories, settings } = parseBackup(await file.text());
+    let { pages, categories, settings } = parseBackup(await file.text());
     const merged = mergeCategories(state.settings.categories, categories, categoryNameFor);
     if (merged.added > 0) {
       state.settings = await updateSettings({ categories: merged.categories });
       applyCategories(state.settings);
     }
     const { added, updated } = await importPages(pages);
+    if (settings && !(await confirmSettings(settings))) settings = null;
     if (settings) {
       const { defaultColor, siteRules, ...rest } = settings;
       const known = getCategories().some((c) => c.id === defaultColor);

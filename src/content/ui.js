@@ -632,7 +632,7 @@ export function createUi(handlers) {
   document.addEventListener(
     'keydown',
     (e) => {
-      if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing) return;
+      if (!e.isTrusted || e.ctrlKey || e.metaKey || e.altKey || e.isComposing) return;
       if (current?.kind === 'popover' && !current.offscreen) {
         if (current.handleKey(e)) {
           e.preventDefault();
