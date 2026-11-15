@@ -27,7 +27,7 @@ await run(async () => {
           approval_notes: [
             'Build instructions (the attached source archive is the full repository at this version):',
             `1. Node.js ${node} (see .nvmrc) and npm.`,
-            '2. npm ci',
+            '2. npm ci --ignore-scripts',
             '3. npm run build',
             '4. The submitted extension is the content of dist/firefox (esbuild bundles of src/, no minification).',
           ].join('\n'),

@@ -110,7 +110,7 @@ function renderInline(tokens) {
       case 'em':
         return h('em', null, renderInline(token.children));
       case 'link':
-        return h('a', { href: token.href, target: '_blank', rel: 'noopener noreferrer' }, renderInline(token.children));
+        return h('a', { href: token.href, title: token.href, target: '_blank', rel: 'noopener noreferrer' }, renderInline(token.children));
       default:
         return token.text;
     }
