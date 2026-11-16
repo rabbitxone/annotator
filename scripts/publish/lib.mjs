@@ -53,8 +53,9 @@ export async function run(main) {
   try {
     await main();
   } catch (error) {
-    console.error(`::error::${String(error.message ?? error).split('\n')[0]}`);
-    console.error(error.message ?? error);
+    const plain = (value) => String(value).replace(/::/g, ': :');
+    console.error(`::error::${plain(String(error.message ?? error).split('\n')[0])}`);
+    console.error(plain(error.message ?? error));
     process.exit(1);
   }
 }

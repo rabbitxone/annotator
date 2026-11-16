@@ -1,5 +1,6 @@
 import { h } from '../../../shared/dom.js';
 import { t } from '../../../shared/i18n.js';
+import { LINKS } from '../../../shared/links.js';
 import { aboutLinks, versionLabel } from '../../components/about-links.js';
 import { categoriesPanel, dataPanel, privacyNote, settingsPanel, shortcutsPanel } from '../../components/settings.js';
 import { deleteCategory, importBackup, openRelocate, saveCategories } from '../data.js';
@@ -13,7 +14,18 @@ function about() {
   return h(
     'div',
     { class: 'about' },
-    h('div', null, h('p', { class: 'about-title' }, versionLabel()), h('p', { class: 'setting-sublabel' }, t('aboutText'))),
+    h(
+      'div',
+      null,
+      h(
+        'p',
+        { class: 'about-title' },
+        h('strong', null, versionLabel()),
+        ' by ',
+        h('a', { class: 'about-author', href: LINKS.author, target: '_blank', rel: 'noopener' }, 'Filip Polak'),
+      ),
+      h('p', { class: 'setting-sublabel' }, t('aboutText')),
+    ),
     aboutLinks({ guide: false }),
   );
 }

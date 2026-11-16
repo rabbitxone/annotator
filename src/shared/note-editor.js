@@ -8,6 +8,8 @@ const PLAINTEXT = (() => {
   return probe.contentEditable === 'plaintext-only';
 })();
 
+export const MAX_NOTE_LENGTH = 100000;
+
 export function createNoteEditor({ value = '', placeholder = '', label = '', openTip = '', openKeys = '', onInput = () => {} } = {}) {
   let text = value;
   let undo = [];
@@ -86,6 +88,7 @@ export function createNoteEditor({ value = '', placeholder = '', label = '', ope
     if (pad) fragment.append(h('span', { class: 'md-pad' }, pad));
     el.replaceChildren(fragment);
     el.toggleAttribute('data-empty', !text);
+    el.classList.toggle('at-limit', text.length >= MAX_NOTE_LENGTH);
     reveal(range);
   }
 
@@ -117,6 +120,7 @@ export function createNoteEditor({ value = '', placeholder = '', label = '', ope
 
   function replace(insert, typing = false) {
     const range = readSelection() ?? { start: text.length, end: text.length };
+    insert = insert.slice(0, Math.max(0, MAX_NOTE_LENGTH - (text.length - (range.end - range.start))));
     const caret = range.start + insert.length;
     commit(text.slice(0, range.start) + insert + text.slice(range.end), { start: caret, end: caret }, typing);
   }

@@ -430,16 +430,10 @@
     }
   },
   "whatsNewShort": {
-    "message": "Ikony stron, odświeżony wygląd i poprawka dla stron z restrykcyjnymi politykami bezpieczeństwa."
+    "message": "Poprawki bezpieczeństwa."
   },
-  "whatsNewIcons": {
-    "message": "Ikony stron: listy pokazują ikonę każdej witryny, skopiowaną z przeglądarki i zapisaną tylko na tym urządzeniu. Wyłączysz je w Ustawieniach."
-  },
-  "whatsNewLook": {
-    "message": "Odświeżony wygląd popupu, panelu i przewodnika oraz delikatniejszy styl zaznaczonych notatek."
-  },
-  "whatsNewStrictPages": {
-    "message": "Panel i zakreślenia Annotatora wyświetlają się teraz poprawnie na stronach z restrykcyjnymi politykami bezpieczeństwa."
+  "whatsNewSecurity": {
+    "message": "Poprawki bezpieczeństwa: bezpieczniejsza edycja notatek, import i eksport oraz obsługa linków i ikon stron."
   },
   "whatsNewDismiss": {
     "message": "Rozumiem"
@@ -1130,5 +1124,50 @@
         "content": "$1"
       }
     }
+  },
+  "importSettingsTitle": {
+    "message": "Zastosować ustawienia z tego pliku?"
+  },
+  "importSettingsText": {
+    "message": "Kopia zmienia też te ustawienia:\n$V1$\nNotatki zostaną zaimportowane w każdym przypadku.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "importSettingsApply": {
+    "message": "Zastosuj ustawienia"
+  },
+  "importValueOn": {
+    "message": "włączone"
+  },
+  "importValueOff": {
+    "message": "wyłączone"
+  },
+  "importSiteRules": {
+    "message": "Reguły witryn: $V1$",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastImportTruncated": {
+    "message": "Część danych pominięto, bo plik przekracza limity importu."
+  },
+  "confirmOpenNetworkTitle": {
+    "message": "Otworzyć plik na innym komputerze?"
+  },
+  "confirmOpenNetworkText": {
+    "message": "Ta notatka należy do $V1$. Otwarcie jej łączy Twój komputer z tym serwerem, co może ujawnić dane logowania do Windows, jeśli mu nie ufasz.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "confirmOpenNetworkAction": {
+    "message": "Otwórz mimo to"
   }
 }

@@ -6,6 +6,7 @@ import { getCategories } from '../shared/constants.js';
 import { quoteSnippet, toMarkdown } from '../shared/exchange.js';
 import { exportLabels } from '../shared/export-labels.js';
 import { needsFavicon } from '../shared/favicon.js';
+import { siteRuleOf } from '../shared/store.js';
 import { normalizeUrl, siteKey } from '../shared/url.js';
 import { uuid } from '../shared/uuid.js';
 import { buildIndex, describeRange, resolve, UI_HOST_TAG } from './anchoring.js';
@@ -113,7 +114,7 @@ export function startAnnotator(env) {
       onPageNoteSave: (note) => {
         if (!pageUrl) return;
         pageNote = note;
-        return setPageNote(pageUrl, document.title, note).then((saved) => {
+        return setPageNote(pageUrl, pageTitle(), note).then((saved) => {
           if (note.trim()) queueMicrotask(() => requestFavicon(saved));
           return saved;
         });
@@ -126,7 +127,8 @@ export function startAnnotator(env) {
     },
   });
 
-  const currentPage = () => ({ url: pageUrl, title: document.title });
+  const pageTitle = () => document.title.slice(0, 1000);
+  const currentPage = () => ({ url: pageUrl, title: pageTitle() });
 
   let faviconAskedFor = null;
   function requestFavicon(page) {
@@ -319,7 +321,7 @@ export function startAnnotator(env) {
     withoutObserver(() => {
       const index = buildIndex();
       const described = describeRange(index, range);
-      if (!described) return;
+      if (!described || described.selector.quote.exact.length > 20000) return;
       const now = Date.now();
       const annotation = {
         id: uuid(),
@@ -341,7 +343,7 @@ export function startAnnotator(env) {
     window.getSelection()?.removeAllRanges();
     ui.close();
     unsaved.add(created.id);
-    addAnnotation(pageUrl, document.title, created)
+    addAnnotation(pageUrl, pageTitle(), created)
       .then((saved) => queueMicrotask(() => requestFavicon(saved)))
       .catch((err) => {
         logSaveError(err);
@@ -406,7 +408,7 @@ export function startAnnotator(env) {
   }
 
   document.addEventListener('click', (e) => {
-    if (!checkAlive() || ui.isInside(e)) return;
+    if (!e.isTrusted || !checkAlive() || ui.isInside(e)) return;
     const mark = e.target instanceof Element ? e.target.closest(MARK_TAG) : null;
     if (!mark) return;
     if (mark.closest('a[href]')) return;
@@ -423,7 +425,7 @@ export function startAnnotator(env) {
   }
 
   function siteRule() {
-    return settings?.siteRules?.[siteKey(location.href)];
+    return siteRuleOf(settings, siteKey(location.href));
   }
 
   function siteEnabled() {
@@ -473,7 +475,7 @@ export function startAnnotator(env) {
   document.addEventListener(
     'keydown',
     (e) => {
-      if (e.defaultPrevented || !settings?.quickKeys || !pageUrl || !checkAlive()) return;
+      if (!e.isTrusted || e.defaultPrevented || !settings?.quickKeys || !pageUrl || !checkAlive()) return;
       if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing || e.repeat || ui.isInside(e)) return;
       const category = categoryForKey(getCategories(), pressedKey(e));
       if (!category) return;
@@ -511,7 +513,7 @@ export function startAnnotator(env) {
         return false;
     }
   }
-  api.runtime.onMessage.addListener((message, _sender, sendResponse) => handle(message, sendResponse));
+  api.runtime.onMessage.addListener((message, sender, sendResponse) => (sender?.id === api.runtime.id && !sender.tab ? handle(message, sendResponse) : false));
 
   onStoreChange(({ pages, settings: nextSettings }) => {
     if (nextSettings) {

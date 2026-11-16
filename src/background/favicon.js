@@ -1,10 +1,9 @@
 import { api } from '../shared/api.js';
-import { FAVICON_SIZE, isSafeFavicon, needsFavicon } from '../shared/favicon.js';
+import { FAVICON_SIZE, faviconFetchUrl, isSafeFavicon, needsFavicon } from '../shared/favicon.js';
 import { getPage, getSettings, setFavicon } from '../shared/store.js';
 import { normalizeUrl, unwrapReaderUrl } from '../shared/url.js';
 
 const MAX_BYTES = 256 * 1024;
-const MAX_SVG_BYTES = 16 * 1024;
 const RETRY_DELAYS = [0, 2000, 6000];
 const inFlight = new Set();
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -30,13 +29,14 @@ async function toDataUrl(blob) {
   try {
     return await rasterize(blob);
   } catch {
-    if (!/svg/i.test(blob.type) || blob.size > MAX_SVG_BYTES) return null;
-    return `data:image/svg+xml;base64,${toBase64(await blob.arrayBuffer())}`;
+    return null;
   }
 }
 
-const read = async (url) => {
-  const response = await fetch(url, { credentials: 'omit', cache: 'force-cache' });
+export const FETCH_OPTIONS = { credentials: 'omit', cache: 'force-cache', redirect: 'error' };
+
+export const read = async (url, fetchImpl = fetch) => {
+  const response = await fetchImpl(url, FETCH_OPTIONS);
   return response.ok ? response.blob() : null;
 };
 
@@ -55,14 +55,13 @@ async function iconFor(pageUrl, tab) {
     return src && !(await isGeneric(src)) ? src : null;
   }
 
-  const href = tab.favIconUrl;
-  if (typeof href !== 'string' || !/^(data|https?):/.test(href)) return null;
-  return read(href).then(toDataUrl);
+  const href = faviconFetchUrl(tab.favIconUrl, tab.url);
+  return href ? read(href).then(toDataUrl) : null;
 }
 
 export async function saveFavicon({ url }, tab) {
   const pageUrl = normalizeUrl(url);
-  if (!pageUrl || !tab?.url || normalizeUrl(unwrapReaderUrl(tab.url)) !== pageUrl || inFlight.has(pageUrl)) return false;
+  if (!pageUrl || !tab?.url || tab.incognito || normalizeUrl(unwrapReaderUrl(tab.url)) !== pageUrl || inFlight.has(pageUrl)) return false;
   inFlight.add(pageUrl);
   try {
     if ((await getSettings()).pageIcons === false || !needsFavicon(await getPage(pageUrl))) return false;

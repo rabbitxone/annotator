@@ -4,6 +4,7 @@ const REPO = 'https://github.com/rabbitxone/annotator';
 
 export const LINKS = {
   repo: REPO,
+  author: 'https://github.com/rabbitxone',
   privacy: `${REPO}/blob/main/PRIVACY.md`,
   support: 'https://ko-fi.com/fpolak14',
   sponsors: 'https://github.com/sponsors/rabbitxone',

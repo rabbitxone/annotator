@@ -10,7 +10,8 @@ export const PALETTE = [
 ];
 
 const ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,39}$/;
-export const isValidCategoryId = (id) => typeof id === 'string' && ID_PATTERN.test(id);
+const RESERVED_IDS = new Set(['constructor', 'prototype', 'proto', 'hasownproperty', 'tostring', 'valueof']);
+export const isValidCategoryId = (id) => typeof id === 'string' && ID_PATTERN.test(id) && !RESERVED_IDS.has(id);
 
 export function normalizeHex(value) {
   const text = String(value ?? '').trim().replace(/^#/, '');

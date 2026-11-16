@@ -51,6 +51,15 @@ function normalizeQuery(search) {
   return pairs.map(([name, value]) => `${formEncode(name)}=${formEncode(value)}`).join('&');
 }
 
+export function isRemoteFileUrl(input) {
+  try {
+    const url = new URL(input);
+    return url.protocol === 'file:' && url.hostname !== '' && url.hostname !== 'localhost';
+  } catch {
+    return false;
+  }
+}
+
 export function normalizeUrl(input) {
   let url;
   try {

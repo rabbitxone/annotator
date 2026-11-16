@@ -430,16 +430,10 @@
     }
   },
   "whatsNewShort": {
-    "message": "Page icons, a refreshed look and a fix for sites with strict security policies."
+    "message": "Security fixes."
   },
-  "whatsNewIcons": {
-    "message": "Page icons: lists show each site's icon, copied from your browser and kept only on this device. You can turn them off in Settings."
-  },
-  "whatsNewLook": {
-    "message": "A refreshed look for the popup, dashboard and guide, and a gentler style for selected notes."
-  },
-  "whatsNewStrictPages": {
-    "message": "Annotator's panel and highlights now show correctly on sites with strict security policies."
+  "whatsNewSecurity": {
+    "message": "Security fixes: safer note editing, import and export, and handling of links and page icons."
   },
   "whatsNewDismiss": {
     "message": "Got it"
@@ -1082,5 +1076,50 @@
         "content": "$1"
       }
     }
+  },
+  "importSettingsTitle": {
+    "message": "Apply settings from this file?"
+  },
+  "importSettingsText": {
+    "message": "The backup also changes these settings:\n$V1$\nYour notes are imported either way.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "importSettingsApply": {
+    "message": "Apply settings"
+  },
+  "importValueOn": {
+    "message": "on"
+  },
+  "importValueOff": {
+    "message": "off"
+  },
+  "importSiteRules": {
+    "message": "Site rules: $V1$ sites",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastImportTruncated": {
+    "message": "Some data was skipped because the file exceeds the import limits."
+  },
+  "confirmOpenNetworkTitle": {
+    "message": "Open a file on another computer?"
+  },
+  "confirmOpenNetworkText": {
+    "message": "This note belongs to $V1$. Opening it makes your computer connect to that server, which can reveal your Windows sign-in details if you do not trust it.",
+    "placeholders": {
+      "v1": {
+        "content": "$1"
+      }
+    }
+  },
+  "confirmOpenNetworkAction": {
+    "message": "Open anyway"
   }
 }

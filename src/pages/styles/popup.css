@@ -42,7 +42,6 @@ body {
   padding: 8px 14px 14px;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-gutter: stable;
   animation: fade-in 160ms ease-out;
 }
 

@@ -3,6 +3,7 @@ import { t } from '../shared/i18n.js';
 import { fileAccessAllowed, mayBeBlockedFile } from '../shared/file-access.js';
 import { rolloutOnInstall } from '../shared/rollout.js';
 import { faviconSupported, saveFavicon } from './favicon.js';
+import { handleMessage } from './messages.js';
 import { ensureMigrated } from '../shared/store.js';
 import { isFileUrl, isPdfUrl, normalizeUrl, unwrapReaderUrl } from '../shared/url.js';
 
@@ -158,39 +159,24 @@ function setBadge(tabId, count) {
   api.action.setBadgeTextColor?.({ tabId, color: '#FFFFFF' })?.catch?.(() => { });
 }
 
-const fromExtensionPage = (sender) => sender.id === api.runtime.id && !!sender.url?.startsWith(api.runtime.getURL(''));
+const deps = {
+  get extensionId() {
+    return api.runtime.id;
+  },
+  get extensionUrl() {
+    return api.runtime.getURL('');
+  },
+  setBadge,
+  setEnabled(tab, enabled) {
+    if (enabled) disabledTabs.delete(tab.id);
+    else disabledTabs.add(tab.id);
+    if (tab.active) syncMenuFor(tab.id);
+  },
+  sendToTab,
+  saveFavicon,
+  faviconSupported,
+  openAndGo,
+};
 
-api.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  switch (message?.type) {
-    case 'count':
-      if (sender.tab?.id != null) setBadge(sender.tab.id, Number(message.count) || 0);
-      return false;
-    case 'enabled':
-      if (sender.tab?.id != null) {
-        if (message.enabled) disabledTabs.delete(sender.tab.id);
-        else disabledTabs.add(sender.tab.id);
-        if (sender.tab.active) syncMenuFor(sender.tab.id);
-      }
-      return false;
-    case 'tab-command':
-      if (!fromExtensionPage(sender) || !Number.isInteger(message.tabId)) return false;
-      sendToTab(message.tabId, message.message).then(
-        (response) => sendResponse(response ?? true),
-        () => sendResponse(false),
-      );
-      return true;
-    case 'save-favicon':
-      if (!sender.tab || sender.frameId !== 0 || !faviconSupported()) return false;
-      saveFavicon(message, sender.tab).catch((err) => console.warn('Annotator: saving the page icon failed', err));
-      return false;
-    case 'open-and-go':
-      if (!fromExtensionPage(sender)) return false;
-      openAndGo(message.url, message.id).then(
-        (result) => sendResponse(result),
-        () => sendResponse({ ok: false }),
-      );
-      return true;
-    default:
-      return false;
-  }
-});
+api.runtime.onMessage.addListener((message, sender, sendResponse) => handleMessage(message, sender, sendResponse, deps));
+

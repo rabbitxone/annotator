@@ -1,12 +1,13 @@
 import { applyCategories, categoryNameFor } from '../../shared/apply-categories.js';
 import { mergeCategories, resolveCategories } from '../../shared/categories.js';
 import { getCategories } from '../../shared/constants.js';
-import { BackupError, parseBackup } from '../../shared/exchange.js';
+import { BackupError, IMPORT_LIMITS, parseBackup } from '../../shared/exchange.js';
 import { formatNumber, plural, t } from '../../shared/i18n.js';
 import { reverseMoves } from '../../shared/relocate.js';
 import { importPages, recategorize, relocatePages, updateSettings } from '../../shared/store.js';
 import { announceCategoriesChanged } from '../components/swatch-picker.js';
 import { categoryDeleteDialog } from '../components/category-delete-dialog.js';
+import { confirmDialog } from '../components/dialog.js';
 import { relocateDialog } from '../components/relocate-dialog.js';
 import { toast } from '../components/toast.js';
 import { categoryCounts, state } from './state.js';
@@ -28,15 +29,39 @@ export async function openRelocate() {
   }
 }
 
+const SETTING_LABELS = {
+  selectionToolbar: 'settingToolbar',
+  quickKeys: 'settingQuickKeys',
+  pageIcons: 'settingPageIcons',
+  highlightStyle: 'settingStyle',
+  defaultColor: 'settingDefaultColor',
+};
+
+function describeSettings(settings) {
+  const state = (on) => t(on ? 'importValueOn' : 'importValueOff');
+  return Object.entries(settings)
+    .map(([key, value]) => {
+      if (key === 'siteRules') return t('importSiteRules', [formatNumber(Object.keys(value).length)]);
+      const label = SETTING_LABELS[key] ? t(SETTING_LABELS[key]) : key;
+      return `${label}: ${typeof value === 'boolean' ? state(value) : String(value)}`;
+    })
+    .join('\n');
+}
+
+const confirmSettings = (settings) =>
+  confirmDialog({ title: t('importSettingsTitle'), text: t('importSettingsText', [describeSettings(settings)]), confirmLabel: t('importSettingsApply'), danger: false });
+
 export async function importBackup(file) {
   try {
-    const { pages, categories, settings } = parseBackup(await file.text());
+    if (file.size > IMPORT_LIMITS.bytes) throw new BackupError('too-large');
+    let { pages, categories, settings, truncated } = parseBackup(await file.text());
     const merged = mergeCategories(state.settings.categories, categories, categoryNameFor);
     if (merged.added > 0) {
       state.settings = await updateSettings({ categories: merged.categories });
       applyCategories(state.settings);
     }
     const { added, updated } = await importPages(pages);
+    if (settings && !(await confirmSettings(settings))) settings = null;
     if (settings) {
       const { defaultColor, siteRules, ...rest } = settings;
       const known = getCategories().some((c) => c.id === defaultColor);
@@ -49,7 +74,7 @@ export async function importBackup(file) {
     }
     if (merged.added > 0 || settings) announceCategoriesChanged(state.settings);
     const summary = added || updated ? t('toastImported', [formatNumber(added), formatNumber(updated)]) : settings ? '' : t('toastImportedNothing');
-    toast([summary, settings && t('toastImportedSettings')].filter(Boolean).join(' '));
+    toast([summary, settings && t('toastImportedSettings'), truncated && t('toastImportTruncated')].filter(Boolean).join(' '));
   } catch (err) {
     if (!(err instanceof BackupError)) console.error('Annotator: import failed', err);
     toast(t(err instanceof BackupError ? 'toastImportInvalid' : 'toastImportFailed'));

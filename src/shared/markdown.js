@@ -1,16 +1,17 @@
 import { h } from './dom.js';
 
+const MAX_URL = 2000;
 const SAFE_HREF = /^(https?:|mailto:)/i;
 
 const INLINE = new RegExp(
   [
     '\\\\(?<esc>[\\\\`*_[\\]()#+\\-.!>~|])',
-    '`(?<code>[^`\\n]+)`',
-    '\\[(?<label>[^\\]\\n]+)\\]\\((?<href>[^)\\s]+)\\)',
-    '\\*\\*(?<strong>[^*\\n]+?)(?<!\\\\)\\*\\*',
-    '(?<![\\w*])\\*(?<em>[^*\\s][^*\\n]*?)(?<!\\\\)\\*(?![\\w*])',
-    '(?<![\\w_])_(?<em2>[^_\\s][^_\\n]*?)(?<!\\\\)_(?![\\w_])',
-    '(?<url>https?:\\/\\/[^\\s<>]*[^\\s<>.,:;"\'!?)\\]])',
+    '`(?<code>[^`\\n]{1,500})`',
+    '\\[(?<label>[^\\]\\n]{1,500})\\]\\((?<href>[^)\\s]{1,2000})\\)',
+    '\\*\\*(?<strong>[^*\\n]{1,500}?)(?<!\\\\)\\*\\*',
+    '(?<![\\w*])\\*(?<em>[^*\\s][^*\\n]{0,499}?)(?<!\\\\)\\*(?![\\w*])',
+    '(?<![\\w_])_(?<em2>[^_\\s][^_\\n]{0,499}?)(?<!\\\\)_(?![\\w_])',
+    '(?<url>https?:\\/\\/[^\\s<>]{0,2000}[^\\s<>.,:;"\'!?)\\]])',
   ].join('|'),
   'g',
 );
@@ -27,6 +28,7 @@ export function parseInline(text) {
     else if (g.label != null) tokens.push({ type: 'text', text: m[0] });
     else if (g.strong != null) tokens.push({ type: 'strong', children: parseInline(g.strong) });
     else if (g.em != null || g.em2 != null) tokens.push({ type: 'em', children: parseInline(g.em ?? g.em2) });
+    else if (g.url != null && g.url.length > MAX_URL) tokens.push({ type: 'text', text: g.url });
     else if (g.url != null) tokens.push({ type: 'link', href: g.url, children: [{ type: 'text', text: g.url }] });
     last = m.index + m[0].length;
   }
@@ -49,6 +51,7 @@ export function markdownSpans(text, base = 0) {
     else if (g.label != null) continue;
     else if (g.strong != null) node = { type: 'strong', open: '**', close: '**', children: markdownSpans(g.strong, start + 2) };
     else if (g.em != null || g.em2 != null) node = { type: 'em', open: m[0][0], close: m[0][0], children: markdownSpans(g.em ?? g.em2, start + 1) };
+    else if (g.url.length > MAX_URL) continue;
     else node = { type: 'url', href: g.url, children: [{ type: 'text', text: g.url }] };
     plain(m.index);
     nodes.push({ ...node, start, end });
@@ -71,7 +74,7 @@ export function markdownLineSpans(text) {
       nodes.push({ type: /\d/.test(list[2]) ? 'number' : 'bullet', children: [{ type: 'text', text: list[2] }] });
     }
     const skip = list?.[0].length ?? 0;
-    nodes.push(...markdownSpans(line.slice(skip), offset + skip));
+    for (const span of markdownSpans(line.slice(skip), offset + skip)) nodes.push(span);
     offset += line.length + 1;
   }
   return nodes;
@@ -110,7 +113,7 @@ function renderInline(tokens) {
       case 'em':
         return h('em', null, renderInline(token.children));
       case 'link':
-        return h('a', { href: token.href, target: '_blank', rel: 'noopener noreferrer' }, renderInline(token.children));
+        return h('a', { href: token.href, title: token.href, target: '_blank', rel: 'noopener noreferrer' }, renderInline(token.children));
       default:
         return token.text;
     }

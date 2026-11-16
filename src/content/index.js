@@ -19,7 +19,8 @@ if (window.top === window && !globalThis.__annotatorAlive?.()) {
 
 // Chrome injects into its PDF viewer, but the text is out of reach.
 function answerForPdf() {
-  api.runtime.onMessage.addListener((_message, _sender, sendResponse) => {
+  api.runtime.onMessage.addListener((_message, sender, sendResponse) => {
+    if (sender?.id !== api.runtime.id) return false;
     sendResponse({ pdf: true, url: normalizeUrl(location.href) });
     return false;
   });

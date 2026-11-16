@@ -2,7 +2,7 @@ import { api } from '../../shared/api.js';
 import { h } from '../../shared/dom.js';
 import { t } from '../../shared/i18n.js';
 import { icon } from '../../shared/icons.js';
-import { clearFavicons, setSiteRule, updateSettings } from '../../shared/store.js';
+import { clearFavicons, setSiteRule, siteRuleOf, updateSettings } from '../../shared/store.js';
 import { fileAccessKeys } from '../../shared/file-access.js';
 import { shortcutNode } from '../../shared/keys.js';
 import { segmented } from './segmented.js';
@@ -54,8 +54,8 @@ export function settingsPanel(settings, { compact = false, site = null, siteName
       siteUnavailable
         ? toggle(false, t('settingSite'), () => { }, { disabled: true })
         : siteAppLike
-          ? toggle(settings.siteRules?.[site] !== 'always', t('settingSite'), (on) => setSiteRule(site, on ? 'auto' : 'always'))
-          : toggle(settings.siteRules?.[site] === 'never', t('settingSite'), (on) => setSiteRule(site, on ? 'never' : 'auto')),
+          ? toggle(siteRuleOf(settings, site) !== 'always', t('settingSite'), (on) => setSiteRule(site, on ? 'auto' : 'always'))
+          : toggle(siteRuleOf(settings, site) === 'never', t('settingSite'), (on) => setSiteRule(site, on ? 'never' : 'auto')),
       siteUnavailable ?? (siteAppLike ? t('settingSiteAppHint') : null),
     ),
     fileAccess !== null &&

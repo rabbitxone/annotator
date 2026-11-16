@@ -1,5 +1,6 @@
 @import '../../shared/tokens.css';
 @import '../../shared/note-editor.css';
+@import '../../shared/markdown-help.css';
 @import './base.css';
 @import './components/brand.css';
 @import './components/button.css';

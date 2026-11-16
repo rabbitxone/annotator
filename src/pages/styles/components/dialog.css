@@ -300,3 +300,7 @@
     filter: blur(6px);
   }
 }
+
+.dialog-confirm .dialog-text {
+  white-space: pre-line;
+}

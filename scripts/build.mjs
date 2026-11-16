@@ -18,9 +18,10 @@ const ENTRIES = {
   popup: 'pages/popup/index.js',
   dashboard: 'pages/dashboard/index.js',
   guide: 'pages/guide/index.js',
+  editor: 'pages/editor/index.js',
 };
 
-const STYLE_ENTRIES = ['popup', 'dashboard', 'guide'];
+const STYLE_ENTRIES = ['popup', 'dashboard', 'guide', 'editor'];
 
 function manifestFor(target) {
   const manifest = {
@@ -32,6 +33,10 @@ function manifestFor(target) {
     icons: { 16: 'icons/icon-16.png', 32: 'icons/icon-32.png', 48: 'icons/icon-48.png', 128: 'icons/icon-128.png' },
     permissions: ['contextMenus', 'storage', 'activeTab', 'scripting'],
     host_permissions: ['<all_urls>'],
+    web_accessible_resources: [{ resources: ['editor.html'], matches: ['<all_urls>'] }],
+    content_security_policy: {
+      extension_pages: "script-src 'self'; object-src 'none'; base-uri 'none'",
+    },
     action: {
       default_popup: 'popup.html',
       default_title: '__MSG_extName__',

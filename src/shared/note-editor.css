@@ -60,48 +60,6 @@
   text-decoration: underline;
 }
 
-.md-help {
-  padding: 8px 10px;
-  border-radius: var(--radius-sm);
-  background: var(--surface-sunken);
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 18px;
-}
-
-.md-help[hidden] {
-  display: none;
-}
-
-.md-help p {
-  margin: 0;
-}
-
-.md-help-title {
-  margin-bottom: 4px;
-  color: var(--on-surface);
-  font-weight: 600;
-}
-
-.md-help dl {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 2px 12px;
-  margin: 0;
-}
-
-.md-help dt,
-.md-help dd {
-  margin: 0;
-}
-
-.md-help code {
-  color: var(--on-surface);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
-  white-space: pre;
-}
-
-.md-btn[aria-expanded='true'] {
-  color: var(--on-surface);
+.note-editor.at-limit {
+  box-shadow: inset 0 -2px 0 var(--danger);
 }
